@@ -1,5 +1,6 @@
 package com.example.worklog.entity;
 
+import com.example.worklog.entity.base.BaseTimeEntity;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.TaskState;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.util.List;
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Task {
+public class Task extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
