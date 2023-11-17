@@ -11,13 +11,15 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Bookmark extends BaseTimeEntity {
+public class SavedMemo extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Boolean isBookmarked;
+    private Boolean isSaved;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+
     @ManyToOne(fetch = FetchType.LAZY)
-    private Task task;
+    private Memo memo;
 }

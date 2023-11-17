@@ -1,8 +1,6 @@
 package com.example.worklog.entity;
 
 import com.example.worklog.entity.base.BaseTimeEntity;
-import com.example.worklog.entity.enums.Category;
-import com.example.worklog.entity.enums.TaskState;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,20 +16,18 @@ import java.util.List;
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Task extends BaseTimeEntity {
+public class Memo extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String content;
     private LocalDate date;
-    private Category category;
-    private TaskState state;
     private Boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "bookmark")
+    @OneToMany(mappedBy = "memo")
     @Builder.Default
-    private List<Bookmark> bookmarks = new ArrayList<>();
+    private List<SavedMemo> savedMemos = new ArrayList<>();
 }
