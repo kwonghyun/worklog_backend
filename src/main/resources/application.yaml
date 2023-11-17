@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  servlet:
+    context-path:
+    encoding:
+      charset: UTF-8
+
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:sqlite:db.sqlite
+    driver-class-name: org.sqlite.JDBC
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+      database-platform: org.hibernate.dialect.SQLiteDialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  accessExpirationTime: ${JWT_EXPIRATION}
+
+version: 1.0.0
