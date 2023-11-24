@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source:  /
-    destination: /home/ubuntu/worklog_backend
+    destination: /home/ubuntu/github_actions
     overwrite: yes
 
 permissions:
