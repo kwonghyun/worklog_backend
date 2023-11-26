@@ -1,19 +1,19 @@
 #!/bin/bash
 
-ROOT_PATH="/home/ubuntu/worklog_backend"
-JAR="$ROOT_PATH/application.jar"
-
-APP_LOG="$ROOT_PATH/application.log"
-ERROR_LOG="$ROOT_PATH/error.log"
-START_LOG="$ROOT_PATH/start.log"
+BUILD_JAR="/home/ubuntu/worklog_backend/build/libs/*.jar"
+JAR_NAME=$(basename $BUILD_JAR)
 
 NOW=$(date +%c)
+START_LOG="/home/ubuntu/worklog_backend/start.log"
+ERROR_LOG="/home/ubuntu/worklog_backend/err.log"
 
-echo "[$NOW] $JAR 복사" >> $START_LOG
-cp $ROOT_PATH/build/libs/worklog_backend-1.0.0.jar $JAR
+echo "[$NOW] > build 파일명: $JAR_NAME" >>
 
-echo "[$NOW] > $JAR 실행" >> $START_LOG
-nohup java -jar $JAR > $APP_LOG 2> $ERROR_LOG &
+echo "[$NOW] > build 파일 복사" >> START_LOG
+DEPLOY_PATH=/home/ubuntu/worklog_backend/
+cp $BUILD_JAR $DEPLOY_PATH
 
-SERVICE_PID=$(pgrep -f $JAR)
+DEPLOY_JAR=$DEPLOY_PATH$JAR_NAME
+nohup java -jar $DEPLOY_JAR >> START_LOG 2>ERROR_LOG &
+SERVICE_PID=$(pgrep -f $JAR_NAME)
 echo "[$NOW] > 서비스 PID: $SERVICE_PID" >> $START_LOG

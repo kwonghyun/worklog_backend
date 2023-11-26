@@ -1,9 +1,9 @@
 #!/bin/bash
 
-ROOT_PATH="/home/ubuntu/worklog_backend"
-JAR="$ROOT_PATH/application.jar"
-STOP_LOG="$ROOT_PATH/stop.log"
-SERVICE_PID=$(pgrep -f $JAR) # 실행중인 Spring 서버의 PID
+BUILD_JAR="/home/ubuntu/worklog_backend/build/libs/*.jar"
+JAR_NAME=$(basename $BUILD_JAR)
+STOP_LOG="/home/ubuntu/worklog_backend/stop.log"
+SERVICE_PID=$(pgrep -f $JAR_NAME) # 실행중인 Spring 서버의 PID
 
 if [ -z "$SERVICE_PID" ]; then
   echo "서비스 NouFound" >> $STOP_LOG
