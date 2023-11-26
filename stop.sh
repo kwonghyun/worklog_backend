@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_JAR="/home/ubuntu/worklog_backend/build/libs/worklog-0.0.1-SNAPSHOT.jar"
+#BUILD_JAR="/home/ubuntu/worklog_backend/build/libs/worklog-0.0.1-SNAPSHOT.jar"
 
 STOP_LOG="/home/ubuntu/worklog_backend/stop.log"
 SERVICE_PID=$(pgrep -f worklog-0.0.1-SNAPSHOT.jar) # 실행중인 Spring 서버의 PID
