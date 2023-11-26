@@ -26,4 +26,4 @@ jwt:
   secret: ${JWT_SECRET}
   accessExpirationTime: ${JWT_EXPIRATION}
 
-version: 1.0.2
+version: 1.0.3
