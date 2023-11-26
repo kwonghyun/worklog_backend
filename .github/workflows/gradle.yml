@@ -13,7 +13,6 @@ on:
   pull_request:
     branches: [ "main" ]
 env:
-  RESOURCE_PATH: $HOME/worklog_backend/src/main/resources/application.yaml
   AWS_REGION: ap-northeast-2
   AWS_S3_BUCKET: worklogcicdbucket
   AWS_CODE_DEPLOY_APPLICATION: worklog-cicd
@@ -37,7 +36,7 @@ jobs:
     - name: yml 환경변수 설정
       uses: microsoft/variable-substitution@v1
       with:
-        files: ${{ env.RESOURCE_PATH }}
+        files: ./src/main/resources/application.yaml
       env:
         spring.datasource.url: ${{ secrets.DB_URL }}
         spring.datasource.username: ${{ secrets.DB_USERNAME }}
