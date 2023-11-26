@@ -6,17 +6,14 @@ server:
       charset: UTF-8
 
 spring:
-  profiles:
-    active: dev
   datasource:
-    url: jdbc:sqlite:db.sqlite
-    driver-class-name: org.sqlite.JDBC
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: create
-      database-platform: org.hibernate.dialect.SQLiteDialect
+      database-platform: org.hibernate.dialect.MySQL57Dialect
     properties:
       hibernate:
         show_sql: true
