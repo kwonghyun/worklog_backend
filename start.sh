@@ -6,5 +6,6 @@ JAR_FILE="/home/ubuntu/spring.jar"
 START_LOG="/home/ubuntu/worklog_backend/start.log"
 #ERROR_LOG="/home/ubuntu/worklog_backend/err.log"
 cp $BUILD_JAR $JAR_FILE
+cd /home/ubuntu
 nohup java -jar spring.jar >> START_LOG
 
