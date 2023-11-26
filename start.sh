@@ -7,7 +7,7 @@ NOW=$(date +%c)
 START_LOG="/home/ubuntu/worklog_backend/start.log"
 ERROR_LOG="/home/ubuntu/worklog_backend/err.log"
 
-echo "[$NOW] > build 파일명: $JAR_NAME" >>
+echo "[$NOW] > build 파일명: $JAR_NAME" >> START_LOG
 
 echo "[$NOW] > build 파일 복사" >> START_LOG
 DEPLOY_PATH=/home/ubuntu/worklog_backend/
