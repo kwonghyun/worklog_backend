@@ -5,23 +5,6 @@ server:
     encoding:
       charset: UTF-8
 
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create
-      database-platform: org.hibernate.dialect.MySQL57Dialect
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-
 jwt:
   secret: ${JWT_SECRET}
   accessExpirationTime: ${JWT_EXPIRATION}
