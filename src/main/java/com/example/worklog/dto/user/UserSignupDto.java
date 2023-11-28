@@ -19,6 +19,6 @@ public class UserSignupDto {
     @NotBlank(message = "비밀번호를 다시 한번 입력해주세요.")
     private String passwordCheck;
     @NotBlank
-    @Size(max = 12, message = "닉네임은 한글자 이상 열두글자 이하로 작성해주세요.")
+    @Size(max = 15, message = "로그인할 아이디를 영문 15자 이하로 작성해주세요.")
     private String username;
 }
