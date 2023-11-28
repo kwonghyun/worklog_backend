@@ -6,8 +6,11 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ErrorDto {
-    private final int status;
-    private final String code;
-    private final String message;
+    private int status;
+    private String code;
+    private String message;
 
+    public static ErrorDto fromErrorCode(ErrorCode e) {
+        return new ErrorDto(e.getStatus(), e.getCode(), e.getMessage());
+    }
 }

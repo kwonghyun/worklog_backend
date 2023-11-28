@@ -32,13 +32,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     protected ResponseEntity handleCustomException(CustomException ex) {
-        return new ResponseEntity(new ErrorDto(ex.getErrorCode().getStatus(),ex.getErrorCode().getCode(),
-                ex.getErrorCode().getMessage()), HttpStatus.valueOf(ex.getErrorCode().getStatus()));
+        return new ResponseEntity(ErrorDto.fromErrorCode(ex.getErrorCode()), HttpStatus.valueOf(ex.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity handleServerException(Exception ex) {
-        return new ResponseEntity(new ErrorDto(INTERNAL_SERVER_ERROR.getStatus(), INTERNAL_SERVER_ERROR.getCode(),
-                INTERNAL_SERVER_ERROR.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity(ErrorDto.fromErrorCode(INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
