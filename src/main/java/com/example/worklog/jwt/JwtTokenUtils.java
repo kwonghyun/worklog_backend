@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -32,7 +35,8 @@ public class JwtTokenUtils {
 
     public String generateToken(UserDetails userDetails) {
         log.info("\"{}\" jwt 발급", userDetails.getUsername());
-
+        String authorities = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         Claims jwtClaims = Jwts.claims()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
@@ -40,6 +44,7 @@ public class JwtTokenUtils {
 
         return Jwts.builder()
                 .setClaims(jwtClaims)
+                .claim("authorities", authorities)
                 .signWith(signingKey)
                 .compact();
     }
@@ -71,13 +76,13 @@ public class JwtTokenUtils {
     }
 
     // 문자열로 저장된 authorities를 다시 Collection으로 변환
-//    public Collection<? extends GrantedAuthority> getAuthFromClaims(Claims claims){
-//
-//    String authoritiesString = (String) claims.get("authorities"); // authorities 정보 가져오기
-//
-//    return Arrays.stream(authoritiesString.split(","))
-//            .map(SimpleGrantedAuthority::new)
-//            .collect(Collectors.toList());
-//    }
+    public Collection<? extends GrantedAuthority> getAuthFromClaims(Claims claims){
+
+    String authoritiesString = (String) claims.get("authorities"); // authorities 정보 가져오기
+
+    return Arrays.stream(authoritiesString.split(","))
+            .map(SimpleGrantedAuthority::new)
+            .collect(Collectors.toList());
+    }
 
 }

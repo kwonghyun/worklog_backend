@@ -50,7 +50,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                         CustomUserDetails.builder()
                                 .username(claims.getSubject())
                                 .build(),
-                        token
+                        token,
+                        jwtTokenUtils.getAuthFromClaims(claims)
                 );
                 context.setAuthentication(authenticationToken);
                 SecurityContextHolder.setContext(context);
