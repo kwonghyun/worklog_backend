@@ -31,10 +31,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
+    public ResponseEntity<ResponseDto> login(@RequestBody UserLoginDto dto /*, HttpServletResponse response */) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResponseDto.getData(userService.login(dto, response)));
+                .body(ResponseDto.getData(userService.login(dto /*, response*/)));
     }
 
     // 비밀번호 수정
