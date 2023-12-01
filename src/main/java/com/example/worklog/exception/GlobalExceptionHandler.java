@@ -16,18 +16,23 @@ import static com.example.worklog.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Valid 예외 메시지 출력
+    // Validation 예외 메시지 출력
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected Map<String, String> handleValidationException(
+    protected Map<String, Object> handleValidationException(
             MethodArgumentNotValidException exception
     ) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("code", 400);
+
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : exception
                 .getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        return errors;
+        body.put("message", errors);
+        return body;
     }
 
     @ExceptionHandler(CustomException.class)
