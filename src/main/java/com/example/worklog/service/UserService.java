@@ -54,7 +54,7 @@ public class UserService {
     }
 
     // 로그인
-    public JwtDto login(UserLoginDto dto, HttpServletResponse response) {
+    public JwtDto login(UserLoginDto dto /*, HttpServletResponse response */) {
         UserDetails userDetails = manager.loadUserByUsername(dto.getUsername());
         log.info("\"{}\" 로그인", dto.getUsername());
 
@@ -67,8 +67,8 @@ public class UserService {
         String jwtToken = jwtTokenUtils.generateToken(userDetails);
 
         // 응답 헤더에 jwt 전달
-        response.setHeader("Authorization", "Bearer " + jwtToken);
-        log.info("Header: {}", response.getHeader("Authorization"));
+//        response.setHeader("Authorization", "Bearer " + jwtToken);
+//        log.info("Header: {}", response.getHeader("Authorization"));
         return JwtDto.builder().token(jwtToken).build();
     }
 
