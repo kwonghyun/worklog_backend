@@ -41,6 +41,16 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .body(ResponseDto.getData(userService.login(dto, request /*, response*/)));
     }
+    @PostMapping("/logout")
+    public ResponseEntity<SuccessDto> logout(
+            HttpServletRequest request
+
+    ) {
+        userService.logout(request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(SuccessDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
+    }
     @PostMapping("/reissue")
     public ResponseEntity<ResponseDto> reissue(
             HttpServletRequest request /*,

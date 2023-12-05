@@ -31,7 +31,10 @@ public enum SuccessCode {
 
     // savedWork
     SAVED_MEMO_CREATED(201, "CREATED", "메모가 북마크되었습니다."),
-    SAVED_MEMO_CANCEL_SUCCESS(200, "OK", "메모가 북마크 해제되었습니다.");
+    SAVED_MEMO_CANCEL_SUCCESS(200, "OK", "메모가 북마크 해제되었습니다."),
+
+    // token
+    LOGOUT_SUCCESS(200, "OK", "로그아웃이 완료되었습니다.");
 
     private final int status;
     private final String code;

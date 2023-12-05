@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface RefreshTokenRedisRepository extends CrudRepository<RefreshToken, String> {
     Optional<RefreshToken> findByRefreshToken(String refreshToken);
+    boolean existsById(String username);
+    void deleteById(String username);
 }

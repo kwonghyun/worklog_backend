@@ -85,6 +85,20 @@ public class UserService {
 //        log.info("Header: {}", response.getHeader("Authorization"));
 //        return JwtDto.builder().accessToken(jwtToken).build();
     }
+    public void logout(HttpServletRequest request /*, HttpServletResponse response */) {
+        // 1. 레디스에 해당 토큰 있는 지 확인
+        String accessToken = request.getHeader("Authentication").split(" ")[1];
+
+        // 3. 리프레시 토큰에서 username 찾기
+        String username = jwtTokenUtils.parseClaims(accessToken).getSubject();
+        log.info("access token에서 추출한 username : {}", username);
+        if (refreshTokenRedisRepository.existsById(username)) {
+            refreshTokenRedisRepository.deleteById(username);
+            log.info("레디스에서 리프레시 토큰 삭제 완료");
+        } else {
+            new CustomException(ErrorCode.WRONG_REFRESH_TOKEN);
+        }
+    }
 
     public JwtDto reissue(HttpServletRequest request /*, HttpServletResponse response */) {
         // 1. 레디스에 해당 토큰 있는 지 확인
@@ -99,10 +113,10 @@ public class UserService {
         // 3. 리프레시 토큰에서 username 찾기
         String username = jwtTokenUtils.parseClaims(refreshToken.getRefreshToken()).getSubject();
         log.info("refresh token에서 추출한 username : {}", username);
-        // 4.
+        // 4. userdetails 불러오기
         UserDetails userDetails = manager.loadUserByUsername(username);
 
-        log.info("login: 비밀번호 확인완료");
+        log.info("reissue: refresh token 재발급 완료");
         JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
         refreshToken.setRefreshToken(jwtDto.getRefreshToken());
         refreshTokenRedisRepository.save(refreshToken);
