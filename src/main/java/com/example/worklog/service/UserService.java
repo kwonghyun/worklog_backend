@@ -87,7 +87,7 @@ public class UserService {
     }
     public void logout(HttpServletRequest request /*, HttpServletResponse response */) {
         // 1. 레디스에 해당 토큰 있는 지 확인
-        String accessToken = request.getHeader("Authentication").split(" ")[1];
+        String accessToken = request.getHeader("Authorization").split(" ")[1];
 
         // 3. 리프레시 토큰에서 username 찾기
         String username = jwtTokenUtils.parseClaims(accessToken).getSubject();
