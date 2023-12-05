@@ -10,3 +10,7 @@ jwt:
   accessExpirationTime: ${JWT_EXPIRATION}
 
 version: 1.0.3
+spring:
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}

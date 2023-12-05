@@ -15,8 +15,6 @@ spring:
         show_sql: true
         format_sql: true
 
-  redis:
-    host: ${LOCAL_REDIS_HOST}
-    port: ${LOCAL_REDIS_PORT}
+
 
 
