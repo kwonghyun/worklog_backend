@@ -32,17 +32,22 @@ public enum ErrorCode {
     // 403 FORBIDDEN 권한이 없는 경우
     USER_NO_AUTH(403, "ERR_FORBIDDEN", "해당 기능에 대해 권한이 없습니다."),
 
+
     // 404 NOT_FOUND 잘못된 리소스 접근
     WRONG_PASSWORD(404, "ERR_NOT_FOUND", "비밀번호가 일치하지 않습니다."),
     USER_NOT_FOUND(404, "ERROR_NOT_FOUND", "존재하지 않는 회원입니다."),
     UNMATCHED_PASSWORD(404, "ERR_NOT_FOUND", "비밀번호 확인이 일치하지 않습니다."),
+
 
     // 500 내부 서버 에러
     INTERNAL_SERVER_ERROR(500, "ERR_INTERNAL_SERVER","서버 에러입니다. 서버 팀으로 문의바랍니다."),
 
     // JWT 관련 에러
     TOKEN_NO_AUTH(403, "TOKEN_NO_AUTH", "권한 정보가 없는 토큰입니다."),
-    TOKEN_INVALID(401, "TOKEN_INVALID", "유효하지 않은 토큰입니다.");
+    IP_NOT_MATCHED(403, "ERR_FORBIDDEN", "IP주소가 일치하지 않습니다."),
+    TOKEN_INVALID(401, "TOKEN_INVALID", "유효하지 않은 토큰입니다."),
+    TOKEN_EXPIRED(401, "TOKEN_EXPIRED", "토큰 유효기간이 만료되었습니다."),
+    WRONG_REFRESH_TOKEN(404, "REFRESH_TOKEN_NOT_FOUND", "일치하는 리프레시 토큰이 없습니다.");
 
     private final int status;
     private final String code;
