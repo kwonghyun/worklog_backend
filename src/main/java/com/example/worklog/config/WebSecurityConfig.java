@@ -39,7 +39,7 @@ public class WebSecurityConfig {
                                 )
                         .permitAll()
                         .requestMatchers(
-                                "/users/login", "/users",
+                                "/users/login", "users/reissue", "/users",
                                 "/users/email/check",
                                 "/users/username/check"
                         )

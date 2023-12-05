@@ -8,6 +8,7 @@ import com.example.worklog.dto.user.UserUpdatePwDto;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.exception.SuccessDto;
 import com.example.worklog.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +32,23 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto> login(@RequestBody UserLoginDto dto /*, HttpServletResponse response */) {
+    public ResponseEntity<ResponseDto> login(
+            @RequestBody UserLoginDto dto,
+            HttpServletRequest request /*,
+             HttpServletResponse response */
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResponseDto.getData(userService.login(dto /*, response*/)));
+                .body(ResponseDto.getData(userService.login(dto, request /*, response*/)));
+    }
+    @PostMapping("/reissue")
+    public ResponseEntity<ResponseDto> reissue(
+            HttpServletRequest request /*,
+             HttpServletResponse response */
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.getData(userService.reissue(request /*, response*/)));
     }
 
     // 비밀번호 수정

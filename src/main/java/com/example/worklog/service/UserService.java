@@ -8,8 +8,11 @@ import com.example.worklog.entity.User;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.jwt.JwtTokenUtils;
+import com.example.worklog.jwt.RefreshToken;
+import com.example.worklog.repository.RefreshTokenRedisRepository;
 import com.example.worklog.repository.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
+import com.example.worklog.utils.IpUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +24,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+
+    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsManager manager;
@@ -54,7 +59,7 @@ public class UserService {
     }
 
     // 로그인
-    public JwtDto login(UserLoginDto dto /*, HttpServletResponse response */) {
+    public JwtDto login(UserLoginDto dto, HttpServletRequest request /*, HttpServletResponse response */) {
         UserDetails userDetails = manager.loadUserByUsername(dto.getUsername());
         log.info("\"{}\" 로그인", dto.getUsername());
 
@@ -64,12 +69,44 @@ public class UserService {
         }
 
         log.info("login: 비밀번호 확인완료");
-        String jwtToken = jwtTokenUtils.generateToken(userDetails);
+        JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
+        refreshTokenRedisRepository.save(
+                RefreshToken.builder()
+                        .id(dto.getUsername())
+                        .ip(IpUtil.getClientIp(request))
+                        .refreshToken(jwtDto.getRefreshToken())
+                        .build()
+        );
+        return jwtDto;
+
 
         // 응답 헤더에 jwt 전달
 //        response.setHeader("Authorization", "Bearer " + jwtToken);
 //        log.info("Header: {}", response.getHeader("Authorization"));
-        return JwtDto.builder().token(jwtToken).build();
+//        return JwtDto.builder().accessToken(jwtToken).build();
+    }
+
+    public JwtDto reissue(HttpServletRequest request /*, HttpServletResponse response */) {
+        // 1. 레디스에 해당 토큰 있는 지 확인
+        RefreshToken refreshToken = refreshTokenRedisRepository.findByRefreshToken(request.getHeader("Refresh"))
+                .orElseThrow(() -> new CustomException(ErrorCode.WRONG_REFRESH_TOKEN));
+        jwtTokenUtils.validate(refreshToken.getRefreshToken());
+        // 2. 리프레시 토큰을 발급한 IP와 동일한 IP에서 온 요청인지 확인
+        if (!IpUtil.getClientIp(request).equals(refreshToken.getIp())) {
+            throw new CustomException(ErrorCode.IP_NOT_MATCHED);
+        }
+
+        // 3. 리프레시 토큰에서 username 찾기
+        String username = jwtTokenUtils.parseClaims(refreshToken.getRefreshToken()).getSubject();
+        log.info("refresh token에서 추출한 username : {}", username);
+        // 4.
+        UserDetails userDetails = manager.loadUserByUsername(username);
+
+        log.info("login: 비밀번호 확인완료");
+        JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
+        refreshToken.setRefreshToken(jwtDto.getRefreshToken());
+        refreshTokenRedisRepository.save(refreshToken);
+        return jwtDto;
     }
 
     public Boolean checkEmailDuplicated(String email) {
@@ -113,4 +150,3 @@ public class UserService {
         log.info("비밀번호 수정 완료");
     }
 }
-// 테스트

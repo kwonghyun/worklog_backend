@@ -1,6 +1,9 @@
 package com.example.worklog.jwt;
 
 
+import com.example.worklog.dto.auth.JwtDto;
+import com.example.worklog.exception.CustomException;
+import com.example.worklog.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,7 @@ public class JwtTokenUtils {
     private final Key signingKey;
     private final JwtParser jwtParser;
     private final int accessExpirationTime;
+    private final int refreshExpirationTime;
 
     public JwtTokenUtils(
             @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.accessExpirationTime}") int accessExpirationTime)
@@ -31,22 +35,37 @@ public class JwtTokenUtils {
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.jwtParser = Jwts.parserBuilder().setSigningKey(this.signingKey).build();
         this.accessExpirationTime = accessExpirationTime;
+        this.refreshExpirationTime = 36000;
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public JwtDto generateToken(UserDetails userDetails) {
         log.info("\"{}\" jwt 발급", userDetails.getUsername());
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        Claims jwtClaims = Jwts.claims()
+
+        Claims accessTokenClaims = Jwts.claims()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusSeconds(accessExpirationTime)));
-
-        return Jwts.builder()
-                .setClaims(jwtClaims)
+        String accessToken = Jwts.builder()
+                .setClaims(accessTokenClaims)
                 .claim("authorities", authorities)
                 .signWith(signingKey)
                 .compact();
+
+        Claims refreshTokenClaims = Jwts.claims()
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(Date.from(Instant.now()))
+                .setExpiration(Date.from(Instant.now().plusSeconds(refreshExpirationTime)));
+        String refreshToken = Jwts.builder()
+                .setClaims(refreshTokenClaims)
+                .signWith(signingKey)
+                .compact();
+
+        return JwtDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public boolean validate(String token) {
@@ -58,6 +77,7 @@ public class JwtTokenUtils {
             log.info("JWT 서명이 잘못되었습니다.");
         } catch (ExpiredJwtException e) {
             log.info("JWT 토큰이 만료되었습니다.");
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 토큰입니다.");
         } catch (IllegalArgumentException e) {
