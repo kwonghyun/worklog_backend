@@ -35,13 +35,13 @@ public class WebSecurityConfig {
                                 // common
                                 "/index.html",
                                 "/", "/error"
-
                                 )
                         .permitAll()
                         .requestMatchers(
-                                "/users/login", "users/reissue", "/users",
+                                "/users/login",  "/users",
                                 "/users/email/check",
-                                "/users/username/check"
+                                "/users/username/check",
+                                "/users/reissue"
                         )
                         .anonymous()
                         .anyRequest().authenticated()

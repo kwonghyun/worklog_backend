@@ -54,7 +54,6 @@ public class JwtTokenUtils {
                 .compact();
 
         Claims refreshTokenClaims = Jwts.claims()
-                .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusSeconds(refreshExpirationTime)));
         String refreshToken = Jwts.builder()

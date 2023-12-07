@@ -67,8 +67,8 @@ public class UserService {
             log.info("login: 비밀번호 불일치");
             throw new CustomException(ErrorCode.WRONG_PASSWORD);
         }
-
         log.info("login: 비밀번호 확인완료");
+
         JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
         refreshTokenRedisRepository.save(
                 RefreshToken.builder()
@@ -102,7 +102,8 @@ public class UserService {
 
     public JwtDto reissue(HttpServletRequest request /*, HttpServletResponse response */) {
         // 1. 레디스에 해당 토큰 있는 지 확인
-        RefreshToken refreshToken = refreshTokenRedisRepository.findByRefreshToken(request.getHeader("Refresh"))
+        RefreshToken refreshToken = refreshTokenRedisRepository
+                .findByRefreshToken(request.getHeader("Authorization").split(" ")[1])
                 .orElseThrow(() -> new CustomException(ErrorCode.WRONG_REFRESH_TOKEN));
         jwtTokenUtils.validate(refreshToken.getRefreshToken());
         // 2. 리프레시 토큰을 발급한 IP와 동일한 IP에서 온 요청인지 확인
@@ -111,7 +112,7 @@ public class UserService {
         }
 
         // 3. 리프레시 토큰에서 username 찾기
-        String username = jwtTokenUtils.parseClaims(refreshToken.getRefreshToken()).getSubject();
+        String username = refreshToken.getId();
         log.info("refresh token에서 추출한 username : {}", username);
         // 4. userdetails 불러오기
         UserDetails userDetails = manager.loadUserByUsername(username);

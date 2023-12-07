@@ -6,10 +6,13 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,14 +20,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
-
-    public JwtTokenFilter(JwtTokenUtils jwtTokenUtils) {
-        this.jwtTokenUtils = jwtTokenUtils;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -37,26 +38,40 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         log.info("authHeader 확인: " + authHeader);
         // Header 검증
         // 비어있지 않고, "Bearer "로 시작하는 경우
+        log.info("url : {}", request.getServletPath());
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.split(" ")[1];
 
             log.info("token 검증 시작: {}", token);
             if (jwtTokenUtils.validate(token)) {
-                log.info("사용자 인증정보 생성 시작");
-                SecurityContext context = SecurityContextHolder.createEmptyContext();
-                Claims claims = jwtTokenUtils.parseClaims(token);
 
-                AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        CustomUserDetails.builder()
-                                .username(claims.getSubject())
-                                .build(),
-                        token,
-                        jwtTokenUtils.getAuthFromClaims(claims)
-                );
-                context.setAuthentication(authenticationToken);
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                Authentication authentication;
+
+                if (request.getServletPath().equals("/users/reissue")) {
+                    log.info("엑세스 토큰 재발급을 위한 익명 인증 객체 생성");
+                    authentication =
+                            new AnonymousAuthenticationToken(
+                                    "key",
+                                    "anonymousUser",
+                                    AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+                            );
+
+                } else {
+                    log.info("사용자 인증정보 생성 시작");
+                    Claims claims = jwtTokenUtils.parseClaims(token);
+                    authentication = new UsernamePasswordAuthenticationToken(
+                            CustomUserDetails.builder()
+                                    .username(claims.getSubject())
+                                    .build(),
+                            token,
+                            jwtTokenUtils.getAuthFromClaims(claims)
+                    );
+
+                }
+                context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);
                 log.info("{} 인증완료", context.getAuthentication().getName());
-
             } else {
                 log.warn("jwt 검증 실패");
             }
