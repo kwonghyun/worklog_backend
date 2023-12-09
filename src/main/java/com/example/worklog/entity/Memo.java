@@ -30,4 +30,16 @@ public class Memo extends BaseTimeEntity {
     @OneToMany(mappedBy = "memo")
     @Builder.Default
     private List<SavedMemo> savedMemos = new ArrayList<>();
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

@@ -31,11 +31,11 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     private List<SavedWork> savedWorks = new ArrayList<>();
 
-    public void delete() {
-        this.isDeleted = true;
-    }
-
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

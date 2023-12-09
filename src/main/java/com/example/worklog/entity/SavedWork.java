@@ -20,4 +20,8 @@ public class SavedWork extends BaseTimeEntity {
     private User user;
     @ManyToOne(fetch = FetchType.LAZY)
     private Work work;
+
+    public void updateIsSaved() {
+        this.isSaved = !isSaved;
+    }
 }

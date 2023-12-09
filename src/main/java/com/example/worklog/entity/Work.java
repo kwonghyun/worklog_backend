@@ -34,4 +34,24 @@ public class Work extends BaseTimeEntity {
     @OneToMany(mappedBy = "work")
     @Builder.Default
     private List<SavedWork> savedWorks = new ArrayList<>();
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
+    public void updateState(WorkState state) {
+        this.state = state;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
 }

@@ -22,4 +22,8 @@ public class SavedMemo extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Memo memo;
+
+    public void updateIsSaved() {
+        this.isSaved = !isSaved;
+    }
 }
