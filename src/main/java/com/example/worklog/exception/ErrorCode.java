@@ -41,6 +41,18 @@ public enum ErrorCode {
     // 500 내부 서버 에러
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","No message available."),
 
+    // Memo
+    MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 메모입니다."),
+
+    // SavedMemo
+    SAVED_MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 메모입니다."),
+
+    // Work
+    WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 업무입니다."),
+
+    // SavedWork
+    SAVED_WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 업무입니다."),
+
     // JWT 관련 에러
     TOKEN_NO_AUTH(403, "FORBIDDEN", "권한 정보가 없는 토큰입니다."),
     IP_NOT_MATCHED(403, "FORBIDDEN", "리프레시 토큰의 IP주소가 일치하지 않습니다."),
