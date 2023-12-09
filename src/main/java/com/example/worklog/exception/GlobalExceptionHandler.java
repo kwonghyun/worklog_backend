@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.example.worklog.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
@@ -27,10 +25,10 @@ public class GlobalExceptionHandler {
         body.put("status", HttpStatus.BAD_REQUEST);
         body.put("code", 400);
 
-        Map<String, String> errors = new HashMap<>();
+        List<String> errors = new ArrayList<>();
         for (FieldError error : exception
                 .getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
+            errors.add(error.getDefaultMessage());
         }
         body.put("message", errors);
         return body;
