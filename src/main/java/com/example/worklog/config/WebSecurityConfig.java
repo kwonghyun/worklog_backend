@@ -1,6 +1,7 @@
 package com.example.worklog.config;
 
-import com.example.worklog.jwt.JwtTokenFilter;
+import com.example.worklog.jwt.AuthCreationFilter;
+import com.example.worklog.jwt.JwtValidationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,8 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig {
-    private final JwtTokenFilter jwtTokenFilter;
+    private final AuthCreationFilter authCreationFilter;
+    private final JwtValidationFilter jwtValidationFilter;
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -67,8 +69,10 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtTokenFilter, AuthorizationFilter.class)
+                .addFilterBefore(authCreationFilter, AuthorizationFilter.class)
+                .addFilterBefore(jwtValidationFilter, AuthCreationFilter.class)
         ;
+
         return http.build();
     }
 

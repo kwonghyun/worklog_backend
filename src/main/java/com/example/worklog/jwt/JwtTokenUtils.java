@@ -2,17 +2,21 @@ package com.example.worklog.jwt;
 
 
 import com.example.worklog.dto.auth.JwtDto;
-import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
@@ -67,26 +71,6 @@ public class JwtTokenUtils {
                 .build();
     }
 
-    public boolean validate(String token) {
-        log.info("jwt validate check");
-        try {
-            jwtParser.parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("JWT 서명이 잘못되었습니다.");
-        } catch (ExpiredJwtException e) {
-            log.info("JWT 토큰이 만료되었습니다.");
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 토큰입니다.");
-        } catch (IllegalArgumentException e) {
-            log.info("잘못된 토큰입니다.");
-        }
-
-        return false;
-    }
-
-
     public Claims parseClaims(String token) {
         log.info("jwt parsing : {}", jwtParser.parseClaimsJws(token).getBody());
         return jwtParser
@@ -102,6 +86,28 @@ public class JwtTokenUtils {
     return Arrays.stream(authoritiesString.split(","))
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
+    }
+
+    private void setErrorResponse(
+            HttpServletResponse response,
+            ErrorCode errorCode
+    ){
+        ObjectMapper objectMapper = new ObjectMapper();
+        response.setStatus(errorCode.getStatus());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage());
+        try{
+            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Data
+    public static class ErrorResponse{
+        private final Integer status;
+        private final String code;
+        private final String message;
     }
 
 }

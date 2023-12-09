@@ -105,7 +105,7 @@ public class UserService {
         RefreshToken refreshToken = refreshTokenRedisRepository
                 .findByRefreshToken(request.getHeader("Authorization").split(" ")[1])
                 .orElseThrow(() -> new CustomException(ErrorCode.WRONG_REFRESH_TOKEN));
-        jwtTokenUtils.validate(refreshToken.getRefreshToken());
+
         // 2. 리프레시 토큰을 발급한 IP와 동일한 IP에서 온 요청인지 확인
         if (!IpUtil.getClientIp(request).equals(refreshToken.getIp())) {
             throw new CustomException(ErrorCode.IP_NOT_MATCHED);
