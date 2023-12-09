@@ -57,7 +57,7 @@ public enum ErrorCode {
     TOKEN_NO_AUTH(403, "FORBIDDEN", "권한 정보가 없는 토큰입니다."),
     IP_NOT_MATCHED(403, "FORBIDDEN", "리프레시 토큰의 IP주소가 일치하지 않습니다."),
     TOKEN_INVALID(403, "FORBIDDEN", "유효하지 않은 토큰입니다."),
-    TOKEN_EXPIRED(403, "FORBIDDEN", "토큰 유효기간이 만료되었습니다."),
+    TOKEN_EXPIRED(401, "UNAUTHORIZED", "토큰 유효기간이 만료되었습니다."),
     WRONG_REFRESH_TOKEN(404, "NOT_FOUND", "일치하는 리프레시 토큰이 없습니다.");
 
     private final int status;
