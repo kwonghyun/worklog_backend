@@ -41,7 +41,7 @@ public class UserService {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new CustomException(ErrorCode.ALREADY_EXISTED_EMAIL);
         }
-        log.info("회원가입: nickname 중복 확인 {}", dto.getUsername());
+        log.info("회원가입: username 중복 확인 {}", dto.getUsername());
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new CustomException(ErrorCode.ALREADY_EXISTED_USERNAME);
         }
