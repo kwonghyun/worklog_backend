@@ -1,46 +1,35 @@
 package com.example.worklog.exception;
 
+import com.example.worklog.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.*;
 
 import static com.example.worklog.exception.ErrorCode.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Validation 예외 메시지 출력
+    // Validation 예외 응답
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected Map<String, Object> handleValidationException(
+    protected ResponseDto handleValidationException(
             MethodArgumentNotValidException exception
     ) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST);
-        body.put("code", 400);
-
-        List<String> errors = new ArrayList<>();
-        for (FieldError error : exception
-                .getBindingResult().getFieldErrors()) {
-            errors.add(error.getDefaultMessage());
-        }
-        body.put("message", errors);
-        return body;
+        return ResponseDto.fromValidationException(exception);
     }
 
+    // 커스텀 예외 응답
     @ExceptionHandler(CustomException.class)
     protected ResponseEntity handleCustomException(CustomException ex) {
-        return new ResponseEntity(ErrorDto.fromErrorCode(ex.getErrorCode()), HttpStatus.valueOf(ex.getErrorCode().getStatus()));
+        return new ResponseEntity(ResponseDto.fromErrorCode(ex.getErrorCode()), HttpStatus.valueOf(ex.getErrorCode().getStatus()));
     }
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity handleServerException(Exception ex) {
-        return new ResponseEntity(ErrorDto.fromErrorCode(INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity(ResponseDto.fromErrorCode(INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

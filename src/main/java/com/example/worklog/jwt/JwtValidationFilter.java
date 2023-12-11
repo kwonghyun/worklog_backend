@@ -1,7 +1,7 @@
 package com.example.worklog.jwt;
 
 import com.example.worklog.exception.ErrorCode;
-import com.example.worklog.exception.ErrorDto;
+import com.example.worklog.dto.ResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
@@ -65,7 +65,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         response.setCharacterEncoding("UTF-8");
         log.info("필터 에러 커스텀");
         try {
-            objectMapper.writeValue(response.getWriter(), ErrorDto.fromErrorCode(error));
+            objectMapper.writeValue(response.getWriter(), ResponseDto.fromErrorCode(error));
         } catch (Exception e) {
             log.error(e.getMessage());
         }

@@ -29,29 +29,31 @@ public enum ErrorCode {
     ERROR_NO_KEYWORD(400,"BAD_REQUEST","검색어를 입력해주세요."),
 
     // 403 FORBIDDEN 권한이 없는 경우
-    USER_NO_AUTH(403, "FORBIDDEN", "해당 기능에 대해 권한이 없습니다."),
-
+    USER_NO_AUTH(403, "FORBIDDEN", "해당 자원에 대해 권한이 없습니다."),
 
     // 404 NOT_FOUND 잘못된 리소스 접근
     WRONG_PASSWORD(404, "NOT_FOUND", "비밀번호가 일치하지 않습니다."),
     USER_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 회원입니다."),
     UNMATCHED_PASSWORD(404, "NOT_FOUND", "비밀번호 확인이 일치하지 않습니다."),
 
-
     // 500 내부 서버 에러
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","No message available."),
 
     // Memo
     MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 메모입니다."),
+    MEMO_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 메모입니다."),
 
     // SavedMemo
     SAVED_MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 메모입니다."),
+    SAVED_MEMO_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 저장된 메모입니다."),
 
     // Work
     WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 업무입니다."),
+    WORK_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 업무입니다."),
 
     // SavedWork
     SAVED_WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 업무입니다."),
+    SAVED_WORK_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 저장된 업무입니다."),
 
     // JWT 관련 에러
     TOKEN_NO_AUTH(403, "FORBIDDEN", "권한 정보가 없는 토큰입니다."),
