@@ -45,7 +45,7 @@ public class ResponseDto<T> {
 
         return new ResponseDto(
                 e.getStatusCode().value(),
-                e.getStatusCode().toString(),
+                e.getStatusCode().toString().substring(4).replace(" ", "_").toUpperCase(),
                 errors
         );
     }
