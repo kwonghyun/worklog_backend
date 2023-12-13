@@ -1,7 +1,6 @@
 package com.example.worklog.service;
 
 import com.example.worklog.dto.memo.MemoPostDto;
-import com.example.worklog.dto.memo.MemoPutDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.exception.CustomException;
@@ -24,28 +23,25 @@ public class MemoService {
                 Memo.builder()
                         .content(dto.getContent())
                         .date(dto.getDate())
+                        .isDeleted(false)
                         .user(user)
                         .build()
         );
     }
 
-    public void updateMemo(MemoPutDto dto, Long memoId, String username) {
-        if (!dto.getId().equals(memoId)) {
-            throw new CustomException(ErrorCode.ERROR_BAD_REQUEST);
-        }
+    public void updateMemoContent(String content, Long memoId, String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Memo memo = memoRepository.findById(dto.getId())
+        Memo memo = memoRepository.findById(memoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMO_NOT_FOUND));
 
         if (!memo.getUser().equals(user)) {
             throw new CustomException(ErrorCode.MEMO_USER_NOT_MATCHED);
         }
 
-        memo.updateContent(dto.getContent());
-        memo.updateDate(dto.getDate());
+        memo.updateContent(content);
 
         memoRepository.save(memo);
     }

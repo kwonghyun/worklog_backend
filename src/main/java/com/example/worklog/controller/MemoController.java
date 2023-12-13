@@ -2,7 +2,6 @@ package com.example.worklog.controller;
 
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.memo.MemoPostDto;
-import com.example.worklog.dto.memo.MemoPutDto;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.MemoService;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +29,14 @@ public class MemoController {
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_CREATED));
     }
 
-    @PutMapping("/{memoId}")
+    @PatchMapping("/{memoId}")
     public ResponseEntity<ResponseDto> updateMemo(
             @PathVariable("memoId") Long memoId,
-            @RequestBody MemoPutDto dto,
+            @RequestBody String content,
             Authentication auth
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemo(dto, memoId, auth.getName());
+        memoService.updateMemoContent(content, memoId, auth.getName());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
