@@ -39,10 +39,6 @@ public class Work extends BaseTimeEntity {
         this.content = content;
     }
 
-    public void updateDate(LocalDate date) {
-        this.date = date;
-    }
-
     public void updateCategory(Category category) {
         this.category = category;
     }

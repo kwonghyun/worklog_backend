@@ -35,10 +35,6 @@ public class Memo extends BaseTimeEntity {
         this.content = content;
     }
 
-    public void updateDate(LocalDate date) {
-        this.date = date;
-    }
-
     public void delete() {
         this.isDeleted = true;
     }
