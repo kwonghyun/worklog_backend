@@ -1,7 +1,7 @@
 package com.example.worklog.controller;
 
 
-import com.example.worklog.dto.GetResponseDto;
+import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.user.UserLoginDto;
 import com.example.worklog.dto.user.UserSignupDto;
@@ -31,14 +31,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<GetResponseDto> login(
+    public ResponseEntity<ResourceResponseDto> login(
             @RequestBody UserLoginDto dto,
             HttpServletRequest request /*,
              HttpServletResponse response */
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(GetResponseDto.getData(userService.login(dto, request /*, response*/)));
+                .body(ResourceResponseDto.fromData(userService.login(dto, request /*, response*/)));
     }
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto> logout(
@@ -51,12 +51,12 @@ public class UserController {
                 .body(ResponseDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
     }
     @PostMapping("/reissue")
-    public ResponseEntity<GetResponseDto> reissue(
+    public ResponseEntity<ResourceResponseDto> reissue(
             HttpServletRequest request
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(GetResponseDto.getData(userService.reissue(request)));
+                .body(ResourceResponseDto.fromData(userService.reissue(request)));
     }
 
     // 비밀번호 수정
@@ -83,17 +83,17 @@ public class UserController {
 
     // email 중복확인
     @GetMapping("/email/check")
-    public ResponseEntity<GetResponseDto> checkEmailDuplicated(@RequestParam String email) {
+    public ResponseEntity<ResourceResponseDto> checkEmailDuplicated(@RequestParam String email) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(GetResponseDto.getData(userService.checkEmailDuplicated(email)));
+                .body(ResourceResponseDto.fromData(userService.checkEmailDuplicated(email)));
     }
 
     // username 중복확인
     @GetMapping("/username/check")
-    public ResponseEntity<GetResponseDto> checkUsernameDuplicated(@RequestParam String username) {
+    public ResponseEntity<ResourceResponseDto> checkUsernameDuplicated(@RequestParam String username) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(GetResponseDto.getData(userService.checkUsernameDuplicated(username)));
+                .body(ResourceResponseDto.fromData(userService.checkUsernameDuplicated(username)));
     }
 }
