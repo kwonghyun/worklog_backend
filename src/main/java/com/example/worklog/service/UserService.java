@@ -85,11 +85,11 @@ public class UserService {
 //        log.info("Header: {}", response.getHeader("Authorization"));
 //        return JwtDto.builder().accessToken(jwtToken).build();
     }
-    public void logout(HttpServletRequest request /*, HttpServletResponse response */) {
+    public void logout(HttpServletRequest request) {
         // 1. 레디스에 해당 토큰 있는 지 확인
         String accessToken = request.getHeader("Authorization").split(" ")[1];
 
-        // 3. 리프레시 토큰에서 username 찾기
+        // 2. 리프레시 토큰을 username으로 찾아 삭제
         String username = jwtTokenUtils.parseClaims(accessToken).getSubject();
         log.info("access token에서 추출한 username : {}", username);
         if (refreshTokenRedisRepository.existsById(username)) {

@@ -21,15 +21,15 @@ import java.io.IOException;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-
 public class JwtValidationFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
     private final ObjectMapper objectMapper;
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
         // request Header에서 jwt 찾기
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         log.info("authHeader 확인: " + authHeader);
