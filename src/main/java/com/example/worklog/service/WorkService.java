@@ -14,6 +14,8 @@ import com.example.worklog.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class WorkService {
@@ -27,7 +29,7 @@ public class WorkService {
         workRepository.save(
                 Work.builder()
                         .content(dto.getContent())
-                        .date(dto.getDate())
+                        .date(LocalDate.parse(dto.getDate()))
                         .category(dto.getCategory())
                         .state(WorkState.IN_PROGRESS)
                         .isDeleted(false)

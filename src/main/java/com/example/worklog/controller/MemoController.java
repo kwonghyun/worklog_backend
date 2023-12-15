@@ -1,9 +1,11 @@
 package com.example.worklog.controller;
 
 import com.example.worklog.dto.ResponseDto;
+import com.example.worklog.dto.memo.MemoContentPatchDto;
 import com.example.worklog.dto.memo.MemoPostDto;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.MemoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ public class MemoController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> createMemo(
-            @RequestBody MemoPostDto dto,
+            @Valid @RequestBody MemoPostDto dto,
             Authentication auth
             ){
         memoService.createMemo(dto, auth.getName());
@@ -32,11 +34,11 @@ public class MemoController {
     @PatchMapping("/{memoId}")
     public ResponseEntity<ResponseDto> updateMemo(
             @PathVariable("memoId") Long memoId,
-            @RequestBody String content,
+            @Valid @RequestBody MemoContentPatchDto dto,
             Authentication auth
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoContent(content, memoId, auth.getName());
+        memoService.updateMemoContent(dto, memoId, auth.getName());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));

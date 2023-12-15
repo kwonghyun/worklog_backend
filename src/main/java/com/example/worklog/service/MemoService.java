@@ -1,5 +1,6 @@
 package com.example.worklog.service;
 
+import com.example.worklog.dto.memo.MemoContentPatchDto;
 import com.example.worklog.dto.memo.MemoPostDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
@@ -9,6 +10,8 @@ import com.example.worklog.repository.MemoRepository;
 import com.example.worklog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +25,14 @@ public class MemoService {
         memoRepository.save(
                 Memo.builder()
                         .content(dto.getContent())
-                        .date(dto.getDate())
+                        .date(LocalDate.parse(dto.getDate()))
                         .isDeleted(false)
                         .user(user)
                         .build()
         );
     }
 
-    public void updateMemoContent(String content, Long memoId, String username) {
+    public void updateMemoContent(MemoContentPatchDto dto, Long memoId, String username) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -41,7 +44,7 @@ public class MemoService {
             throw new CustomException(ErrorCode.MEMO_USER_NOT_MATCHED);
         }
 
-        memo.updateContent(content);
+        memo.updateContent(dto.getContent());
 
         memoRepository.save(memo);
     }
