@@ -4,11 +4,14 @@ import com.example.worklog.entity.base.BaseTimeEntity;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,17 +20,32 @@ import java.util.List;
 @Entity
 @Getter
 @SuperBuilder
+@SQLDelete(sql = "UPDATE work SET is_deleted = TRUE WHERE id = ?")
+@Where(clause = "is_deleted = FALSE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Work extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String content;
-    private LocalDate date;
-    private Category category;
-    private WorkState state;
-    private Boolean isDeleted;
 
+    @NotNull
+    private LocalDate date;
+
+    @NotNull
+    private Category category;
+
+    @NotNull
+    private WorkState state;
+
+//    @Nullable
+//    private Integer order;
+
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
@@ -47,7 +65,7 @@ public class Work extends BaseTimeEntity {
         this.state = state;
     }
 
-    public void delete() {
-        this.isDeleted = true;
-    }
+//    public void updateOrder(Integer order) {
+//        this.order = order;
+//    }
 }
