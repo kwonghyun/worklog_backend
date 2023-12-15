@@ -23,8 +23,7 @@ public class WorkService {
     private final UserRepository userRepository;
     private final WorkRepository workRepository;
     public void createWork(WorkPostDto dto, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = getValidatedUserByUsername(username);
 
         workRepository.save(
                 Work.builder()
@@ -32,7 +31,6 @@ public class WorkService {
                         .date(LocalDate.parse(dto.getDate()))
                         .category(dto.getCategory())
                         .state(WorkState.IN_PROGRESS)
-                        .isDeleted(false)
                         .user(user)
                         .build()
         );
@@ -40,15 +38,8 @@ public class WorkService {
 
     public void updateWorkContent(WorkContentPatchDto dto, Long workId, String username) {
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-
-        if (!work.getUser().equals(user)) {
-            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
-        }
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
 
         work.updateContent(dto.getContent());
 
@@ -56,15 +47,8 @@ public class WorkService {
     }
 
     public void updateWorkState(WorkStatePatchDto dto, Long workId, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-
-        if (!work.getUser().equals(user)) {
-            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
-        }
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
 
         work.updateState(dto.getState());
 
@@ -72,15 +56,8 @@ public class WorkService {
     }
 
     public void updateWorkCategory(WorkCategoryPatchDto dto, Long workId, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-
-        if (!work.getUser().equals(user)) {
-            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
-        }
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
 
         work.updateCategory(dto.getCategory());
 
@@ -88,18 +65,26 @@ public class WorkService {
     }
 
     public void deleteWork(Long workId, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
 
+        workRepository.delete(work);
+    }
+
+    private User getValidatedUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Work getValidatedWorkByUserAndWorkId(User user, Long workId) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
 
         if (!work.getUser().equals(user)) {
             throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
+        } else {
+            return work;
         }
-
-        work.delete();
-        workRepository.save(work);
     }
 
 }

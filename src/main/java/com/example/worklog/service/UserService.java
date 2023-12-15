@@ -50,7 +50,6 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .username(dto.getUsername())
-                .isDeleted(false)
                 .build();
         userRepository.save(user);
 
@@ -141,10 +140,7 @@ public class UserService {
             refreshTokenRedisRepository.deleteById(username);
             log.info("레디스에서 리프레시 토큰 삭제 완료");
         }
-        if (!user.getIsDeleted()) {
-            user.delete();
-        }
-        userRepository.save(user);
+        userRepository.delete(user);
         log.info("{} 회원 탈퇴 완료", username);
     }
 
