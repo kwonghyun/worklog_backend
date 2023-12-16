@@ -2,6 +2,7 @@ package com.example.worklog.dto.memo;
 
 import com.example.worklog.exception.CustomDateValid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
