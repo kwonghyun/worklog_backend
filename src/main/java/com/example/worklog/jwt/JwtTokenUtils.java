@@ -34,12 +34,15 @@ public class JwtTokenUtils {
     private final int refreshExpirationTime;
 
     public JwtTokenUtils(
-            @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.accessExpirationTime}") int accessExpirationTime)
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.accessExpirationTime}") int accessExpirationTime,
+            @Value("${jwt.refreshExpirationTime}") int refreshExpirationTime
+    )
     {
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.jwtParser = Jwts.parserBuilder().setSigningKey(this.signingKey).build();
         this.accessExpirationTime = accessExpirationTime;
-        this.refreshExpirationTime = 36000;
+        this.refreshExpirationTime = refreshExpirationTime;
     }
 
     public JwtDto generateToken(UserDetails userDetails) {
