@@ -40,6 +40,7 @@ jobs:
       env:
         jwt.secret: ${{ secrets.JWT_SECRET }}
         jwt.accessExpirationTime: ${{ secrets.JWT_EXPIRATION }}
+        jwt.refreshExpirationTime: ${{ secrets.JWT_REFRESH_EXPIRATION }}
     - name: yml db 환경변수 설정
       uses: microsoft/variable-substitution@v1
       with:
