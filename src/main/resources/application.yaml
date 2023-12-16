@@ -10,7 +10,7 @@ jwt:
   accessExpirationTime: ${JWT_EXPIRATION}
   refreshExpirationTime : ${JWT_REFRESH_EXPIRATION}
 
-version: 1.0.3
+version: 1.0.4
 spring:
   redis:
     host: ${REDIS_HOST}
