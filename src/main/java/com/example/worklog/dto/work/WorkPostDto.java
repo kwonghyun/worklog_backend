@@ -12,6 +12,7 @@ public class WorkPostDto {
     private String content;
 
     @CustomDateValid
+    @NotNull(message = "날짜를 입력해주세요")
     private String date;
 
     @NotNull(message = "업무 유형을 선택해주세요.")
