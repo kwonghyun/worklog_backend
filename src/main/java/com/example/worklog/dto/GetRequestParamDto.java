@@ -5,6 +5,7 @@ import com.example.worklog.exception.CustomDateValid;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -48,7 +49,7 @@ public class GetRequestParamDto {
     }
 
     private String getToday() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDate currentDate = LocalDate.now(ZoneId.of("Asia/Seoul"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return currentDate.format(formatter);
     }
