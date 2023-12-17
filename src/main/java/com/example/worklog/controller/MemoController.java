@@ -1,5 +1,7 @@
 package com.example.worklog.controller;
 
+import com.example.worklog.dto.GetRequestParamDto;
+import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.memo.MemoContentPatchDto;
 import com.example.worklog.dto.memo.MemoPostDto;
@@ -29,6 +31,17 @@ public class MemoController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_CREATED));
+    }
+
+    @GetMapping
+    public ResponseEntity<ResourceResponseDto> readMemos(
+            @Valid @ModelAttribute GetRequestParamDto paramDto,
+            Authentication auth
+    ) {
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(memoService.readMemos(paramDto, auth.getName()));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
     }
 
     @PatchMapping("/{memoId}")
