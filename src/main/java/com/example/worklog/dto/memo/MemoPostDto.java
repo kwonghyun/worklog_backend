@@ -11,5 +11,6 @@ public class MemoPostDto {
     private String content;
 
     @CustomDateValid
+    @NotNull(message = "날짜를 입력해주세요")
     private String  date;
 }

@@ -20,6 +20,9 @@ public class DateValidator implements ConstraintValidator<CustomDateValid, Strin
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return true;
+        }
         try {
             LocalDate.from(LocalDate.parse(value, DateTimeFormatter.ofPattern(this.pattern)));
         } catch (DateTimeParseException e) {
