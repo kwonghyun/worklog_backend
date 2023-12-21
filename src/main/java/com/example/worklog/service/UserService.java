@@ -106,9 +106,9 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WRONG_REFRESH_TOKEN));
 
         // 2. 리프레시 토큰을 발급한 IP와 동일한 IP에서 온 요청인지 확인
-//        if (!IpUtil.getClientIp(request).equals(refreshToken.getIp())) {
-//            throw new CustomException(ErrorCode.IP_NOT_MATCHED);
-//        }
+        if (!IpUtil.getClientIp(request).equals(refreshToken.getIp())) {
+            throw new CustomException(ErrorCode.IP_NOT_MATCHED);
+        }
 
         // 3. 리프레시 토큰에서 username 찾기
         String username = refreshToken.getId();
