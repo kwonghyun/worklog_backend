@@ -1,22 +1,25 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.work.WorkCategoryPatchDto;
-import com.example.worklog.dto.work.WorkContentPatchDto;
-import com.example.worklog.dto.work.WorkPostDto;
-import com.example.worklog.dto.work.WorkStatePatchDto;
+import com.example.worklog.dto.PageDto;
+import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
+import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WorkService {
 
@@ -24,16 +27,35 @@ public class WorkService {
     private final WorkRepository workRepository;
     public void createWork(WorkPostDto dto, String username) {
         User user = getValidatedUserByUsername(username);
-
+        LocalDate date = LocalDate.parse(dto.getDate());
         workRepository.save(
                 Work.builder()
                         .content(dto.getContent())
-                        .date(LocalDate.parse(dto.getDate()))
+                        .date(date)
+                        .displayOrder(workRepository.countDisplayOrder(date, user))
+                        .importance(Importance.MID)
                         .category(dto.getCategory())
                         .state(WorkState.IN_PROGRESS)
                         .user(user)
                         .build()
         );
+    }
+
+    public PageDto<WorkGetDto> readWorks(WorkGetRequestParamDto paramDto, String username) {
+        User user = getValidatedUserByUsername(username);
+
+        WorkGetRepoParamDto repoDto = WorkGetRepoParamDto.fromGetRequestDto(paramDto);
+        log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
+        log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
+        Page<Work> pagedWorks = workRepository.readWorksByParamsAndUser(
+                repoDto, user,
+                PageRequest.of(paramDto.getPageNum(), paramDto.getPageSize())
+        );
+
+        Page<WorkGetDto> pageDto
+                = pagedWorks.map(work -> WorkGetDto.fromEntity(work));
+
+        return PageDto.fromPage(pageDto);
     }
 
     public void updateWorkContent(WorkContentPatchDto dto, Long workId, String username) {

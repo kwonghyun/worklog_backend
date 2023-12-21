@@ -1,10 +1,8 @@
 package com.example.worklog.controller;
 
+import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
-import com.example.worklog.dto.work.WorkCategoryPatchDto;
-import com.example.worklog.dto.work.WorkContentPatchDto;
-import com.example.worklog.dto.work.WorkPostDto;
-import com.example.worklog.dto.work.WorkStatePatchDto;
+import com.example.worklog.dto.work.*;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
@@ -30,6 +28,17 @@ public class WorkController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_CREATED));
+    }
+
+    @GetMapping
+    public ResponseEntity<ResourceResponseDto> readWorks(
+            @Valid WorkGetRequestParamDto paramDto,
+            Authentication auth
+    ) {
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(workService.readWorks(paramDto, auth.getName()));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
     }
 
     @PatchMapping("/{workId}/content")
@@ -78,7 +87,7 @@ public class WorkController {
         workService.deleteWork(workId, auth.getName());
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_DELETE_SUCCESS));
+                .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_DELETE_SUCCESS));
     }
 
 }
