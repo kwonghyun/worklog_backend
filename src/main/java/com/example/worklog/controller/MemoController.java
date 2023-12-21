@@ -1,6 +1,6 @@
 package com.example.worklog.controller;
 
-import com.example.worklog.dto.GetRequestParamDto;
+import com.example.worklog.dto.memo.MemoGetRequestParamDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.memo.MemoContentPatchDto;
@@ -35,7 +35,7 @@ public class MemoController {
 
     @GetMapping
     public ResponseEntity<ResourceResponseDto> readMemos(
-            @Valid @ModelAttribute GetRequestParamDto paramDto,
+            @Valid @ModelAttribute MemoGetRequestParamDto paramDto,
             Authentication auth
     ) {
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(memoService.readMemos(paramDto, auth.getName()));

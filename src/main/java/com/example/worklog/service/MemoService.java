@@ -1,13 +1,14 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.GetRequestParamDto;
+import com.example.worklog.dto.memo.MemoGetRequestParamDto;
 import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.memo.MemoContentPatchDto;
 import com.example.worklog.dto.memo.MemoGetDto;
 import com.example.worklog.dto.memo.MemoPostDto;
-import com.example.worklog.dto.work.RepoRequestParamDto;
+import com.example.worklog.dto.memo.MemoGetRepoParamDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.MemoRepository;
@@ -27,20 +28,22 @@ public class MemoService {
 
     public void createMemo(MemoPostDto dto, String username) {
         User user = getValidatedUserByUsername(username);
-
+        LocalDate date = LocalDate.parse(dto.getDate());
         memoRepository.save(
                 Memo.builder()
                         .content(dto.getContent())
-                        .date(LocalDate.parse(dto.getDate()))
+                        .date(date)
+                        .displayOrder(memoRepository.countDisplayOrder(date, user))
+                        .importance(Importance.MID)
                         .user(user)
                         .build()
         );
     }
 
-    public PageDto<MemoGetDto> readMemos(GetRequestParamDto paramDto, String username) {
+    public PageDto<MemoGetDto> readMemos(MemoGetRequestParamDto paramDto, String username) {
         User user = getValidatedUserByUsername(username);
 
-        RepoRequestParamDto repoDto = RepoRequestParamDto.fromGetRequestDto(paramDto);
+        MemoGetRepoParamDto repoDto = MemoGetRepoParamDto.fromGetRequestDto(paramDto);
 
         Page<Memo> pagedMemos = memoRepository.readMemosByParamsAndUser(
                 repoDto, user,
@@ -84,9 +87,4 @@ public class MemoService {
             return memo;
         }
     }
-
-//    public PageDto<MemoGetDto> readMemos(GetRequestParamDto paramDto, String username) {
-//
-//        return null;
-//    }
 }
