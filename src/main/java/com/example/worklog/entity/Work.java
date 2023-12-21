@@ -2,6 +2,7 @@ package com.example.worklog.entity;
 
 import com.example.worklog.entity.base.BaseTimeEntity;
 import com.example.worklog.entity.enums.Category;
+import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.entity.enums.WorkState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -34,13 +35,18 @@ public class Work extends BaseTimeEntity {
     private LocalDate date;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private Category category;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private WorkState state;
 
-//    @Nullable
-//    private Integer order;
+    @NotNull
+    private Integer displayOrder;
+
+    @NotNull
+    private Importance importance;
 
     @Builder.Default
     private Boolean isDeleted = false;
@@ -65,7 +71,11 @@ public class Work extends BaseTimeEntity {
         this.state = state;
     }
 
-//    public void updateOrder(Integer order) {
-//        this.order = order;
-//    }
+    public void updateOrder(Integer order) {
+        this.displayOrder = order;
+    }
+
+    public void updateImportance(Importance importance) {
+        this.importance = importance;
+    }
 }
