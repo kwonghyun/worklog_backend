@@ -28,8 +28,8 @@ public class MemoGetRequestParamDto {
     public MemoGetRequestParamDto(
             @RequestParam(name = "page") Integer pageNum,
             @RequestParam(name = "size") Integer pageSize,
-            @RequestParam(name = "start") String startDate,
-            @RequestParam(name = "end") String endDate,
+            @RequestParam(name = "startDate") String startDate,
+            @RequestParam(name = "endDate") String endDate,
             @RequestParam(name = "key") String keyword,
             SortParam.SortBy sortBy,
             SortParam.Direction direction
