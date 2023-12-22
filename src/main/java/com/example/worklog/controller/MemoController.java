@@ -1,5 +1,6 @@
 package com.example.worklog.controller;
 
+import com.example.worklog.dto.memo.MemoDisplayOrderPatchDto;
 import com.example.worklog.dto.memo.MemoGetRequestParamDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
@@ -44,14 +45,27 @@ public class MemoController {
                 .body(responseDto);
     }
 
-    @PatchMapping("/{memoId}")
-    public ResponseEntity<ResponseDto> updateMemo(
+    @PatchMapping("/{memoId}/content")
+    public ResponseEntity<ResponseDto> updateMemoContent(
             @PathVariable("memoId") Long memoId,
             @Valid @RequestBody MemoContentPatchDto dto,
             Authentication auth
     ) {
         log.info("memoId: {} 수정 요청", memoId);
         memoService.updateMemoContent(dto, memoId, auth.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
+    }
+
+    @PatchMapping("/{memoId}/order")
+    public ResponseEntity<ResponseDto> updateMemoOrder(
+            @PathVariable("memoId") Long memoId,
+            @Valid @RequestBody MemoDisplayOrderPatchDto dto,
+            Authentication auth
+    ) {
+        log.info("memoId: {} 수정 요청", memoId);
+        memoService.updateMemoDisplayOrder(dto, memoId, auth.getName());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
