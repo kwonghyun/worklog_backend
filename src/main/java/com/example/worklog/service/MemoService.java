@@ -1,11 +1,7 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.memo.MemoGetRequestParamDto;
+import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.memo.MemoContentPatchDto;
-import com.example.worklog.dto.memo.MemoGetDto;
-import com.example.worklog.dto.memo.MemoPostDto;
-import com.example.worklog.dto.memo.MemoGetRepoParamDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.Importance;
@@ -47,7 +43,7 @@ public class MemoService {
 
         Page<Memo> pagedMemos = memoRepository.readMemosByParamsAndUser(
                 repoDto, user,
-                PageRequest.of(paramDto.getPageNum(), paramDto.getPageSize())
+                PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );
 
         Page<MemoGetDto> pageDto
@@ -71,6 +67,11 @@ public class MemoService {
         memoRepository.delete(memo);
     }
 
+
+    public void updateMemoDisplayOrder(MemoDisplayOrderPatchDto dto, Long memoId, String username) {
+        User user = getValidatedUserByUsername(username);
+        Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
+    }
 
     private User getValidatedUserByUsername(String username) {
         return userRepository.findByUsername(username)

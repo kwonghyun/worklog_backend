@@ -49,7 +49,7 @@ public class WorkService {
         log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
         Page<Work> pagedWorks = workRepository.readWorksByParamsAndUser(
                 repoDto, user,
-                PageRequest.of(paramDto.getPageNum(), paramDto.getPageSize())
+                PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );
 
         Page<WorkGetDto> pageDto

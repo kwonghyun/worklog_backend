@@ -41,7 +41,7 @@ public class WorkGetRequestParamDto {
             @RequestParam(name = "category") Category category,
             @RequestParam(name = "state") WorkState state
     ) {
-        this.pageNum = pageNum == null ? 0 : pageNum;
+        this.pageNum = pageNum == null ? 1 : pageNum;
         this.pageSize = pageSize == null ? 10 : pageSize;
         this.startDate = startDate;
         this.endDate = endDate;
