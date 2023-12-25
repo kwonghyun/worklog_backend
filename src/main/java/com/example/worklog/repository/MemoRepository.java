@@ -15,18 +15,18 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
     @Query(
             "SELECT m FROM Memo m " +
                 "WHERE " +
-                    ":#{#dto.startDate} IS NULL OR m.date >= :#{#dto.startDate} " +
-                    "AND :#{#dto.endDate} IS NULL OR m.date <= :#{#dto.endDate} " +
-                    "AND :#{#dto.keyword} IS NULL OR m.content LIKE :#{#dto.keyword} " +
-                    "AND m.user = :user " +
+                    "(:#{#dto.startDate} IS NULL OR m.date >= :#{#dto.startDate}) " +
+                    "AND (:#{#dto.endDate} IS NULL OR m.date <= :#{#dto.endDate}) " +
+                    "AND (:#{#dto.keyword} IS NULL OR m.content LIKE :#{#dto.keyword}) " +
+                    "AND (m.user = :user) " +
                 "ORDER BY m.displayOrder ASC "
     )
     Page<Memo> readMemosByParamsAndUser(@Param("dto") MemoGetRepoParamDto dto, @Param("user") User user, Pageable pageable);
 
     @Query(
             "SELECT COUNT(m) FROM Memo m " +
-                    "WHERE m.date = :targetDate " +
-                    "AND m.user = :user"
+                    "WHERE (m.date = :targetDate) " +
+                    "AND (m.user = :user)"
     )
     Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("user") User user);
 }
