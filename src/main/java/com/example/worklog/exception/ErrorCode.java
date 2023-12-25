@@ -42,14 +42,16 @@ public enum ErrorCode {
     // Memo
     MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 메모입니다."),
     MEMO_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 메모입니다."),
+    MEMO_ORDER_INVALID(400, "BAD_REQUEST", "유효하지 않은 메모의 순번입니다."),
 
-    // SavedMemo
+    // SavedMemo,
     SAVED_MEMO_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 메모입니다."),
     SAVED_MEMO_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 저장된 메모입니다."),
 
     // Work
     WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 업무입니다."),
     WORK_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 업무입니다."),
+    WORK_ORDER_INVALID(400, "BAD_REQUEST", "유효하지 않은 업무의 순번입니다."),
 
     // SavedWork
     SAVED_WORK_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 저장된 업무입니다."),

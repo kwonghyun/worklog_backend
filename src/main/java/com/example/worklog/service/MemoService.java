@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +72,32 @@ public class MemoService {
     public void updateMemoDisplayOrder(MemoDisplayOrderPatchDto dto, Long memoId, String username) {
         User user = getValidatedUserByUsername(username);
         Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
+
+        Integer currentOrder = memo.getDisplayOrder();
+        Integer targetOrder = dto.getOrder();
+        if (currentOrder.equals(targetOrder)) {
+            return;
+        }
+
+        Integer lastOrder = memoRepository.countDisplayOrder(memo.getDate(), user) - 1;
+        if (targetOrder > lastOrder) {
+            throw new CustomException(ErrorCode.MEMO_ORDER_INVALID);
+        }
+
+        List<Memo> memosToUpdateOrder;
+        memo.updateOrder(targetOrder);
+        if (currentOrder > targetOrder) {
+            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, targetOrder, currentOrder - 1);
+            for (Memo memoToUpdate : memosToUpdateOrder) {
+                memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() + 1);
+            }
+        } else {
+            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, currentOrder + 1, targetOrder);
+            for (Memo memoToUpdate : memosToUpdateOrder) {
+                memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() - 1);
+            }
+        }
+        memoRepository.saveAll(memosToUpdateOrder);
     }
 
     private User getValidatedUserByUsername(String username) {

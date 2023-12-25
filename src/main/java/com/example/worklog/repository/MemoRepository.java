@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface MemoRepository extends JpaRepository<Memo, Long> {
     @Query(
@@ -25,8 +26,25 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
 
     @Query(
             "SELECT COUNT(m) FROM Memo m " +
-                    "WHERE (m.date = :targetDate) " +
-                    "AND (m.user = :user)"
+                    "WHERE " +
+                        "(m.date = :targetDate) " +
+                        "AND (m.user = :user)"
     )
     Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("user") User user);
+
+    @Query(
+            "SELECT m FROM Memo m " +
+                    "WHERE " +
+                        "(m.user = :user) " +
+                        "AND (m.date = :targetDate) " +
+                        "AND (m.displayOrder >= :smallOrder) " +
+                        "AND (m.displayOrder <= :bigOrder) " +
+                    "ORDER BY m.displayOrder ASC "
+    )
+    List<Memo> readMemosToUpdateDisplayOrder(
+            @Param("targetDate") LocalDate targetDate,
+            @Param("user") User user,
+            @Param("smallOrder") Integer smallOrder,
+            @Param("bigOrder") Integer bigOrder
+            );
 }
