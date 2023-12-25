@@ -2,6 +2,7 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.work.*;
+import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Importance;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -109,4 +111,34 @@ public class WorkService {
         }
     }
 
+    public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, String username) {
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+
+        Integer currentOrder = work.getDisplayOrder();
+        Integer targetOrder = dto.getOrder();
+        if (currentOrder.equals(targetOrder)) {
+            return;
+        }
+
+        Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), user) - 1;
+        if (targetOrder > lastOrder) {
+            throw new CustomException(ErrorCode.WORK_ORDER_INVALID);
+        }
+
+        List<Work> worksToUpdateOrder;
+        work.updateOrder(targetOrder);
+        if (currentOrder > targetOrder) {
+            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, targetOrder, currentOrder - 1);
+            for (Work workToUpdate : worksToUpdateOrder) {
+                workToUpdate.updateOrder(workToUpdate.getDisplayOrder() + 1);
+            }
+        } else {
+            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, currentOrder + 1, targetOrder);
+            for (Work workToUpdate : worksToUpdateOrder) {
+                workToUpdate.updateOrder(workToUpdate.getDisplayOrder() - 1);
+            }
+        }
+        workRepository.saveAll(worksToUpdateOrder);
+    }
 }

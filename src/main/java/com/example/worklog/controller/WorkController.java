@@ -53,6 +53,18 @@ public class WorkController {
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
     }
 
+    @PatchMapping("/{workId}/order")
+    public ResponseEntity<ResponseDto> updateWorkOrder(
+            @PathVariable("workId") Long workId,
+            @Valid @RequestBody WorkDisplayOrderPatchDto dto,
+            Authentication auth
+    ) {
+        workService.updateWorkDisplayOrder(dto, workId, auth.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
+    }
+
     @PatchMapping("/{workId}/state")
     public ResponseEntity<ResponseDto> updateWorkState(
             @PathVariable("workId") Long workId,
