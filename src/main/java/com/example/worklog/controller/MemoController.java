@@ -1,5 +1,6 @@
 package com.example.worklog.controller;
 
+import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.memo.MemoDisplayOrderPatchDto;
 import com.example.worklog.dto.memo.MemoGetRequestParamDto;
 import com.example.worklog.dto.ResourceResponseDto;
@@ -39,7 +40,8 @@ public class MemoController {
             @Valid @ModelAttribute MemoGetRequestParamDto paramDto,
             Authentication auth
     ) {
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(memoService.readMemos(paramDto, auth.getName()));
+        PageDto pageDto = memoService.readMemos(paramDto, auth.getName());
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(responseDto);

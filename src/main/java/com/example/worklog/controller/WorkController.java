@@ -1,5 +1,6 @@
 package com.example.worklog.controller;
 
+import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.work.*;
@@ -35,7 +36,8 @@ public class WorkController {
             @Valid WorkGetRequestParamDto paramDto,
             Authentication auth
     ) {
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(workService.readWorks(paramDto, auth.getName()));
+        PageDto pageDto = workService.readWorks(paramDto, auth.getName());
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(responseDto);
