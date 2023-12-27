@@ -38,7 +38,7 @@ public class UserController {
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.login(dto, request /*, response*/)));
+                .body(ResourceResponseDto.fromData(userService.login(dto, request /*, response*/), 2));
     }
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto> logout(
@@ -56,7 +56,7 @@ public class UserController {
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.reissue(request)));
+                .body(ResourceResponseDto.fromData(userService.reissue(request), 2));
     }
 
     // 비밀번호 수정
@@ -86,7 +86,7 @@ public class UserController {
     public ResponseEntity<ResourceResponseDto> checkEmailDuplicated(@RequestParam String email) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.checkEmailDuplicated(email)));
+                .body(ResourceResponseDto.fromData(userService.checkEmailDuplicated(email), 1));
     }
 
     // username 중복확인
@@ -94,6 +94,6 @@ public class UserController {
     public ResponseEntity<ResourceResponseDto> checkUsernameDuplicated(@RequestParam String username) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.checkUsernameDuplicated(username)));
+                .body(ResourceResponseDto.fromData(userService.checkUsernameDuplicated(username), 1));
     }
 }
