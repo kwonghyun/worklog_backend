@@ -26,7 +26,7 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
                         "AND (:#{#dto.category} IS NULL OR w.category = :#{#dto.category}) " +
                         "AND (:#{#dto.state} IS NULL OR w.state = :#{#dto.state}) " +
                         "AND (w.user = :user) " +
-                    "ORDER BY w.displayOrder ASC"
+                    "ORDER BY w.displayOrder ASC "
     )
     Page<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("user") User user, Pageable pageable);
 
@@ -34,17 +34,17 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
             "SELECT COUNT(w) FROM Work w " +
                     "WHERE " +
                         "(w.date = :targetDate) " +
-                        "AND (w.user = :user)"
+                        "AND (w.user = :user) "
     )
     Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("user") User user);
 
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE " +
-                    "(w.user = :user) " +
-                    "AND (w.date = :targetDate) " +
-                    "AND (w.displayOrder >= :smallOrder) " +
-                    "AND (w.displayOrder <= :bigOrder) " +
+                        "(w.user = :user) " +
+                        "AND (w.date = :targetDate) " +
+                        "AND (w.displayOrder >= :smallOrder) " +
+                        "AND (w.displayOrder <= :bigOrder) " +
                     "ORDER BY w.displayOrder ASC "
     )
     List<Work> readWorksToUpdateDisplayOrder(
