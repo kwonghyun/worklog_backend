@@ -22,22 +22,22 @@ public class CalendarService {
     public YearResponseDto readYears(String username) {
         User user = getValidatedUserByUsername(username);
 
-        List<Integer> yearsFromMemo = calendarRepository.readDistinctYear(user.getId());
-        return YearResponseDto.fromList(yearsFromMemo);
+        List<Integer> yearsFromMemoAndWork = calendarRepository.readDistinctYear(user.getId());
+        return YearResponseDto.fromList(yearsFromMemoAndWork);
     }
 
     public MonthResponseDto readMonths(MonthRequestDto dto, String username) {
         User user = getValidatedUserByUsername(username);
 
-        List<Integer> monthsFromMemo = calendarRepository.readDistinctMonthsByYear(dto.getYear(), user.getId());
-        return MonthResponseDto.fromList(monthsFromMemo);
+        List<Integer> monthsFromMemoAndWork = calendarRepository.readDistinctMonthsByYear(dto.getYear(), user.getId());
+        return MonthResponseDto.fromList(monthsFromMemoAndWork);
     }
 
     public DayResponseDto readDays(DayRequestDto dto, String username) {
         User user = getValidatedUserByUsername(username);
 
-        List<Integer> daysFromMemo = calendarRepository.readDistinctDaysByYearAndMonth(dto.getYear(), dto.getMonth(), user.getId());
-        return DayResponseDto.fromList(daysFromMemo);
+        List<Integer> daysFromMemoAndWork = calendarRepository.readDistinctDaysByYearAndMonth(dto.getYear(), dto.getMonth(), user.getId());
+        return DayResponseDto.fromList(daysFromMemoAndWork);
     }
 
     private User getValidatedUserByUsername(String username) {
