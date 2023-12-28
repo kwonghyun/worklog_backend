@@ -14,8 +14,8 @@ public interface CalendarRepository extends JpaRepository<Memo, Long> {
             value =
                     "SELECT combinded_dates.year FROM " +
                             "( " +
-                                "(SELECT DISTINCT YEAR(m.date)  AS year FROM Memo m WHERE (m.is_deleted = false) AND (m.user_id = :userId)) " +
-                                "UNION (SELECT DISTINCT YEAR(w.date) AS year FROM Work w WHERE (w.is_deleted = false) AND (w.user_id = :userId)) " +
+                                "(SELECT DISTINCT YEAR(m.date)  AS year FROM memo m WHERE (m.is_deleted = false) AND (m.user_id = :userId)) " +
+                                "UNION (SELECT DISTINCT YEAR(w.date) AS year FROM work w WHERE (w.is_deleted = false) AND (w.user_id = :userId)) " +
                             ") combinded_dates " +
                             "ORDER BY year ASC "
     )
@@ -26,8 +26,8 @@ public interface CalendarRepository extends JpaRepository<Memo, Long> {
             value =
                     "SELECT combinded_dates.month FROM " +
                             "( " +
-                                "(SELECT DISTINCT MONTH(m.date) AS month FROM Memo m WHERE (YEAR(m.date) = :year) AND (m.is_deleted = false) AND (m.user_id = :userId)) " +
-                                "UNION (SELECT DISTINCT MONTH(w.date) AS month FROM Work w WHERE (YEAR(w.date) = :year) AND (w.is_deleted = false) AND (w.user_id = :userId)) " +
+                                "(SELECT DISTINCT MONTH(m.date) AS month FROM memo m WHERE (YEAR(m.date) = :year) AND (m.is_deleted = false) AND (m.user_id = :userId)) " +
+                                "UNION (SELECT DISTINCT MONTH(w.date) AS month FROM work w WHERE (YEAR(w.date) = :year) AND (w.is_deleted = false) AND (w.user_id = :userId)) " +
                             ") combinded_dates " +
                             "ORDER BY month ASC "
     )
@@ -41,8 +41,8 @@ public interface CalendarRepository extends JpaRepository<Memo, Long> {
             value =
                     "SELECT combinded_dates.day FROM " +
                             "( " +
-                                "(SELECT DISTINCT DAY(m.date) AS day FROM Memo m WHERE (YEAR(m.date) = :year) AND (MONTH(m.date) = :month) AND (m.is_deleted = false) AND (m.user_id = :userId)) " +
-                                "UNION (SELECT DISTINCT DAY(w.date) AS day FROM Work w WHERE (YEAR(w.date) = :year) AND (MONTH(w.date) = :month) AND (w.is_deleted = false) AND (w.user_id = :userId)) " +
+                                "(SELECT DISTINCT DAY(m.date) AS day FROM memo m WHERE (YEAR(m.date) = :year) AND (MONTH(m.date) = :month) AND (m.is_deleted = false) AND (m.user_id = :userId)) " +
+                                "UNION (SELECT DISTINCT DAY(w.date) AS day FROM work w WHERE (YEAR(w.date) = :year) AND (MONTH(w.date) = :month) AND (w.is_deleted = false) AND (w.user_id = :userId)) " +
                             ") " +
                             "combinded_dates " +
                             "ORDER BY day ASC "
