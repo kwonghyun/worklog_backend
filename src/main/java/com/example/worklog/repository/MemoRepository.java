@@ -50,36 +50,4 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
             @Param("bigOrder") Integer bigOrder
             );
 
-    @Query(
-            "SELECT DISTINCT YEAR(m.date) FROM Memo m " +
-                    "WHERE (m.user = :user) " +
-                    "ORDER BY YEAR(m.date) ASC "
-    )
-    List<Integer> readDistinctYear(@Param("user") User user);
-
-    @Query(
-            "SELECT DISTINCT MONTH(m.date) FROM Memo m " +
-                    "WHERE " +
-                        "(YEAR(m.date) = :year) " +
-                        "AND (m.user = :user) " +
-                    "ORDER BY MONTH(m.date) ASC "
-    )
-    List<Integer> readDistinctMonthsByYear(
-            @Param("year") int year,
-            @Param("user") User user
-    );
-
-    @Query(
-            "SELECT DISTINCT DAY(m.date) FROM Memo m " +
-                "WHERE " +
-                    "(YEAR(m.date) = :year) " +
-                    "AND (MONTH(m.date) = :month) " +
-                    "AND (m.user = :user) " +
-                "ORDER BY DAY(m.date) ASC "
-    )
-    List<Integer> readDistinctDaysByYearAndMonth(
-            @Param("year") int year,
-            @Param("month") int month,
-            @Param("user") User user
-    );
 }
