@@ -4,7 +4,6 @@ import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.work.*;
-import com.example.worklog.entity.Work;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
@@ -39,7 +38,7 @@ public class WorkController {
             @Valid @ModelAttribute WorkGetParamDto paramDto,
             Authentication auth
     ) {
-        List<Work> works = workService.readWorks(paramDto, auth.getName());
+        List<WorkGetDto> works = workService.readWorks(paramDto, auth.getName());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(works, works.size());
         return ResponseEntity
                 .status(HttpStatus.OK)

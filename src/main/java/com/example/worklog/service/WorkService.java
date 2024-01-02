@@ -42,7 +42,7 @@ public class WorkService {
         );
     }
 
-    public List<Work> readWorks(WorkGetParamDto paramDto, String username) {
+    public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, String username) {
         User user = getValidatedUserByUsername(username);
 
         WorkGetRepoParamDto repoDto = WorkGetRepoParamDto.fromGetRequestDto(paramDto);
@@ -50,7 +50,9 @@ public class WorkService {
                 repoDto, user
         );
 
-        return works;
+        return works.stream()
+                .map(work -> WorkGetDto.fromEntity(work))
+                .collect(Collectors.toList());
     }
 
     public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, String username) {
