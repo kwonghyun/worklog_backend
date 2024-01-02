@@ -4,6 +4,7 @@ import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.PageDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
@@ -76,7 +77,17 @@ public class MemoService {
     public void deleteMemo(Long memoId, String username) {
         User user = getValidatedUserByUsername(username);
         Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
-
+        int lastOrder = memoRepository.countDisplayOrder(memo.getDate(), user);
+        int orderToDelete = memo.getDisplayOrder();
+        if (orderToDelete < lastOrder) {
+            List<Memo> memosToUpdateOrder
+                    = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, orderToDelete + 1, lastOrder);
+            for (Memo memoToUpdate : memosToUpdateOrder) {
+                memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() - 1);
+            }
+            memoRepository.saveAll(memosToUpdateOrder);
+        }
+        memo.updateOrder(Integer.MIN_VALUE);
         memoRepository.delete(memo);
     }
 

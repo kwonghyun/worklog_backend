@@ -137,23 +137,17 @@ public class WorkService {
         User user = getValidatedUserByUsername(username);
         Work work = getValidatedWorkByUserAndWorkId(user, workId);
 
-        workRepository.delete(work);
-    }
-
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private Work getValidatedWorkByUserAndWorkId(User user, Long workId) {
-        Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-
-        if (!work.getUser().equals(user)) {
-            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
-        } else {
-            return work;
+        int lastOrder = workRepository.countDisplayOrder(work.getDate(), user);
+        int orderToDelete = work.getDisplayOrder();
+        if (orderToDelete < lastOrder) {
+            List<Work> worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, orderToDelete + 1, lastOrder);
+            for (Work workToUpdate : worksToUpdateOrder) {
+                workToUpdate.updateOrder(workToUpdate.getDisplayOrder() - 1);
+            }
+            workRepository.saveAll(worksToUpdateOrder);
         }
+        work.updateOrder(Integer.MIN_VALUE);
+        workRepository.delete(work);
     }
 
     public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, String username) {
@@ -185,5 +179,21 @@ public class WorkService {
             }
         }
         workRepository.saveAll(worksToUpdateOrder);
+    }
+
+    private User getValidatedUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Work getValidatedWorkByUserAndWorkId(User user, Long workId) {
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
+
+        if (!work.getUser().equals(user)) {
+            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
+        } else {
+            return work;
+        }
     }
 }
