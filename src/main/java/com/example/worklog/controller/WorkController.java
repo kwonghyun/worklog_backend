@@ -57,6 +57,29 @@ public class WorkController {
                 .body(responseDto);
     }
 
+    @PutMapping("/{workId}")
+    public ResponseEntity<ResponseDto> updateWork(
+            @PathVariable("workId") Long workId,
+            @Valid @RequestBody WorkPutDto dto,
+            Authentication auth
+    ) {
+        workService.updateWork(dto,workId, auth.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
+    }
+
+    @PatchMapping("/{workId}/title")
+    public ResponseEntity<ResponseDto> updateWorkTitle(
+            @PathVariable("workId") Long workId,
+            @Valid @RequestBody WorkTitlePatchDto dto,
+            Authentication auth
+    ) {
+        workService.updateWorkTitle(dto, workId, auth.getName());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
+    }
     @PatchMapping("/{workId}/content")
     public ResponseEntity<ResponseDto> updateWorkContent(
             @PathVariable("workId") Long workId,

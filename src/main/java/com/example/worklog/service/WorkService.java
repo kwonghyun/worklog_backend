@@ -17,7 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -74,6 +77,32 @@ public class WorkService {
                 = pagedWorks.map(work -> WorkGetDto.fromEntity(work));
 
         return PageDto.fromPage(pageDto);
+    }
+
+    public void updateWork(WorkPutDto dto, Long workId, String username) {
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+
+        LocalDateTime deadline = dto.getDeadline() == null ?
+                null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+        work.updateTitle(dto.getTitle());
+        work.updateContent(dto.getContent());
+        work.updateDeadline(deadline);
+        work.updateCategory(dto.getCategory());
+        work.updateState(dto.getState());
+
+        workRepository.save(work);
+    }
+
+    public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, String username) {
+
+        User user = getValidatedUserByUsername(username);
+        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+
+        work.updateTitle(dto.getTitle());
+
+        workRepository.save(work);
     }
 
     public void updateWorkContent(WorkContentPatchDto dto, Long workId, String username) {
