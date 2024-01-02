@@ -24,7 +24,9 @@ public class WorkGetDto {
         dto.setTitle(work.getTitle());
         dto.setContent(work.getContent());
         dto.setDate(work.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        dto.setDeadline(work.getDeadline().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        if (work.getDeadline() != null) {
+            dto.setDeadline(work.getDeadline().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        }
         dto.setCategory(work.getCategory());
         dto.setState(work.getState());
         dto.setOrder(work.getDisplayOrder());
