@@ -29,10 +29,14 @@ public class WorkService {
     public void createWork(WorkPostDto dto, String username) {
         User user = getValidatedUserByUsername(username);
         LocalDate date = LocalDate.parse(dto.getDate());
+        LocalDateTime deadline = dto.getDeadline() == null ?
+                null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         workRepository.save(
                 Work.builder()
+                        .title(dto.getTitle())
                         .content(dto.getContent())
                         .date(date)
+                        .deadline(deadline)
                         .displayOrder(workRepository.countDisplayOrder(date, user))
                         .importance(Importance.MID)
                         .category(dto.getCategory())

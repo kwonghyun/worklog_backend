@@ -15,6 +15,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +30,15 @@ public class Work extends BaseTimeEntity {
     private Long id;
 
     @NotNull
+    private String title;
+
+    @NotNull
     private String content;
 
     @NotNull
     private LocalDate date;
+
+    private LocalDateTime deadline;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -59,8 +65,16 @@ public class Work extends BaseTimeEntity {
     @Builder.Default
     private List<SavedWork> savedWorks = new ArrayList<>();
 
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
     public void updateContent(String content) {
         this.content = content;
+    }
+
+    public void updateDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
     }
 
     public void updateCategory(Category category) {
