@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +38,15 @@ public class MemoService {
         );
     }
 
-    public List<Memo> readMemos(MemoGetParamDto paramDto, String username) {
+    public List<MemoGetDto> readMemos(MemoGetParamDto paramDto, String username) {
         User user = getValidatedUserByUsername(username);
 
         MemoGetRepoParamDto repoDto = MemoGetRepoParamDto.fromGetRequestDto(paramDto);
+        List<Memo> memos= memoRepository.readMemosByParamsAndUser(repoDto, user);
 
-        return memoRepository.readMemosByParamsAndUser(repoDto, user);
+        return memos.stream()
+                .map(memo -> MemoGetDto.fromEntity(memo))
+                .collect(Collectors.toList());
     }
 
     public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, String username) {

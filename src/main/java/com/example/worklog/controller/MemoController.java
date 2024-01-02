@@ -40,7 +40,7 @@ public class MemoController {
             @Valid @ModelAttribute MemoGetParamDto paramDto,
             Authentication auth
     ) {
-        List<Memo> memos = memoService.readMemos(paramDto, auth.getName());
+        List<MemoGetDto> memos = memoService.readMemos(paramDto, auth.getName());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(memos, memos.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
