@@ -37,12 +37,20 @@ public class MemoService {
         );
     }
 
-    public PageDto<MemoGetDto> readMemos(MemoGetRequestParamDto paramDto, String username) {
+    public List<Memo> readMemos(MemoGetParamDto paramDto, String username) {
         User user = getValidatedUserByUsername(username);
 
         MemoGetRepoParamDto repoDto = MemoGetRepoParamDto.fromGetRequestDto(paramDto);
 
-        Page<Memo> pagedMemos = memoRepository.readMemosByParamsAndUser(
+        return memoRepository.readMemosByParamsAndUser(repoDto, user);
+    }
+
+    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, String username) {
+        User user = getValidatedUserByUsername(username);
+
+        MemoSearchRepoParamDto repoDto = MemoSearchRepoParamDto.fromGetRequestDto(paramDto);
+
+        Page<Memo> pagedMemos = memoRepository.searchMemosByParamsAndUser(
                 repoDto, user,
                 PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );

@@ -1,7 +1,7 @@
 package com.example.worklog.repository;
 
 import com.example.worklog.dto.work.WorkGetRepoParamDto;
-import com.example.worklog.entity.Memo;
+import com.example.worklog.dto.work.WorkSearchRepoParamDto;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import org.springframework.data.domain.Page;
@@ -20,16 +20,24 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE " +
-                        "(:#{#dto.startDate} IS NULL OR w.date >= :#{#dto.startDate}) " +
-                        "AND (:#{#dto.endDate} IS NULL OR w.date <= :#{#dto.endDate}) " +
-                        "AND (:#{#dto.keyword} IS NULL OR w.content LIKE :#{#dto.keyword}) " +
-                        "AND (:#{#dto.category} IS NULL OR w.category = :#{#dto.category}) " +
-                        "AND (:#{#dto.state} IS NULL OR w.state = :#{#dto.state}) " +
+                        "(w.date = :#{#dto.date}) " +
                         "AND (w.user = :user) " +
                     "ORDER BY w.displayOrder ASC "
     )
-    Page<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("user") User user, Pageable pageable);
+    List<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("user") User user);
 
+    @Query(
+            "SELECT w FROM Work w " +
+                    "WHERE " +
+                    "(:#{#dto.startDate} IS NULL OR w.date >= :#{#dto.startDate}) " +
+                    "AND (:#{#dto.endDate} IS NULL OR w.date <= :#{#dto.endDate}) " +
+                    "AND (:#{#dto.keyword} IS NULL OR w.content LIKE :#{#dto.keyword}) " +
+                    "AND (:#{#dto.category} IS NULL OR w.category = :#{#dto.category}) " +
+                    "AND (:#{#dto.state} IS NULL OR w.state = :#{#dto.state}) " +
+                    "AND (w.user = :user) " +
+                    "ORDER BY w.date ASC, w.displayOrder ASC "
+    )
+    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchRepoParamDto repoDto, @Param("user") User user, Pageable pageable);
     @Query(
             "SELECT COUNT(w) FROM Work w " +
                     "WHERE " +

@@ -1,12 +1,10 @@
 package com.example.worklog.controller;
 
 import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.memo.MemoDisplayOrderPatchDto;
-import com.example.worklog.dto.memo.MemoGetRequestParamDto;
+import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
-import com.example.worklog.dto.memo.MemoContentPatchDto;
-import com.example.worklog.dto.memo.MemoPostDto;
+import com.example.worklog.entity.Memo;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.MemoService;
 import jakarta.validation.Valid;
@@ -16,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,10 +37,22 @@ public class MemoController {
 
     @GetMapping
     public ResponseEntity<ResourceResponseDto> readMemos(
-            @Valid @ModelAttribute MemoGetRequestParamDto paramDto,
+            @Valid @ModelAttribute MemoGetParamDto paramDto,
             Authentication auth
     ) {
-        PageDto pageDto = memoService.readMemos(paramDto, auth.getName());
+        List<Memo> memos = memoService.readMemos(paramDto, auth.getName());
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(memos, memos.size());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResourceResponseDto> searchMemos(
+            @Valid @ModelAttribute MemoSearchParamDto paramDto,
+            Authentication auth
+    ) {
+        PageDto pageDto = memoService.searchMemos(paramDto, auth.getName());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)

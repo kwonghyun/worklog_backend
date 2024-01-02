@@ -4,6 +4,7 @@ import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.work.*;
+import com.example.worklog.entity.Work;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,10 +36,22 @@ public class WorkController {
 
     @GetMapping
     public ResponseEntity<ResourceResponseDto> readWorks(
-            @Valid WorkGetRequestParamDto paramDto,
+            @Valid @ModelAttribute WorkGetParamDto paramDto,
             Authentication auth
     ) {
-        PageDto pageDto = workService.readWorks(paramDto, auth.getName());
+        List<Work> works = workService.readWorks(paramDto, auth.getName());
+        ResourceResponseDto responseDto = ResourceResponseDto.fromData(works, works.size());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(responseDto);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResourceResponseDto> searchWorks(
+            @Valid @ModelAttribute WorkSearchParamDto paramDto,
+            Authentication auth
+    ) {
+        PageDto pageDto = workService.searchWorks(paramDto, auth.getName());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)

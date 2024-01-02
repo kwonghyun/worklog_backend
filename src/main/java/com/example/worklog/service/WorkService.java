@@ -2,7 +2,6 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.work.*;
-import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Importance;
@@ -43,13 +42,24 @@ public class WorkService {
         );
     }
 
-    public PageDto<WorkGetDto> readWorks(WorkGetRequestParamDto paramDto, String username) {
+    public List<Work> readWorks(WorkGetParamDto paramDto, String username) {
         User user = getValidatedUserByUsername(username);
 
         WorkGetRepoParamDto repoDto = WorkGetRepoParamDto.fromGetRequestDto(paramDto);
+        List<Work> works = workRepository.readWorksByParamsAndUser(
+                repoDto, user
+        );
+
+        return works;
+    }
+
+    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, String username) {
+        User user = getValidatedUserByUsername(username);
+
+        WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.fromGetRequestDto(paramDto);
         log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
         log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
-        Page<Work> pagedWorks = workRepository.readWorksByParamsAndUser(
+        Page<Work> pagedWorks = workRepository.searchWorksByParamsAndUser(
                 repoDto, user,
                 PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );
