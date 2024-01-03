@@ -13,7 +13,6 @@ import org.hibernate.annotations.Where;
 @Entity
 @Getter
 @SuperBuilder
-@Where(clause = "is_saved = TRUE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SavedMemo extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
