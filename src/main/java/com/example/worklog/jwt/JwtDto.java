@@ -1,4 +1,4 @@
-package com.example.worklog.dto.auth;
+package com.example.worklog.jwt;
 
 
 import lombok.Builder;

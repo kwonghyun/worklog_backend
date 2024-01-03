@@ -1,7 +1,6 @@
 package com.example.worklog.jwt;
 
 
-import com.example.worklog.dto.auth.JwtDto;
 import com.example.worklog.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
