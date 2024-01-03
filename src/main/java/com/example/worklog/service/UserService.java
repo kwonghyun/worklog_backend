@@ -1,6 +1,6 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.auth.JwtDto;
+import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.dto.user.UserLoginDto;
 import com.example.worklog.dto.user.UserSignupDto;
 import com.example.worklog.dto.user.UserUpdatePwDto;
@@ -12,6 +12,7 @@ import com.example.worklog.jwt.RefreshToken;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.utils.IpUtil;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,10 +70,17 @@ public class UserService {
         log.info("login: 비밀번호 확인완료");
 
         JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
+
+        // 유효기간 초단위 설정 후 redis에 timeToLive 설정
+        Claims refreshTokenClaims = jwtTokenUtils.parseClaims(jwtDto.getRefreshToken());
+        Long validPeriod
+                = refreshTokenClaims.getExpiration().toInstant().getEpochSecond()
+                - refreshTokenClaims.getIssuedAt().toInstant().getEpochSecond();
         refreshTokenRedisRepository.save(
                 RefreshToken.builder()
                         .id(dto.getUsername())
                         .ip(IpUtil.getClientIp(request))
+                        .ttl(validPeriod)
                         .refreshToken(jwtDto.getRefreshToken())
                         .build()
         );
@@ -118,7 +126,13 @@ public class UserService {
 
         log.info("reissue: refresh token 재발급 완료");
         JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
-        refreshToken.setRefreshToken(jwtDto.getRefreshToken());
+        refreshToken.updateRefreshToken(jwtDto.getRefreshToken());
+        // 유효기간 초단위 설정 후 redis에 timeToLive 설정
+        Claims refreshTokenClaims = jwtTokenUtils.parseClaims(jwtDto.getRefreshToken());
+        Long validPeriod
+                = refreshTokenClaims.getExpiration().toInstant().getEpochSecond()
+                - refreshTokenClaims.getIssuedAt().toInstant().getEpochSecond();
+        refreshToken.updateTtl(validPeriod);
         refreshTokenRedisRepository.save(refreshToken);
         return jwtDto;
     }

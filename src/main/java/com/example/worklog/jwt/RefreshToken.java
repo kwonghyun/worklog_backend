@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -15,7 +16,7 @@ import java.util.Collection;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@RedisHash(value = "refresh", timeToLive = 1209600)
+@RedisHash(value = "refresh")
 public class RefreshToken {
 
     @Id
@@ -28,7 +29,13 @@ public class RefreshToken {
     @Indexed
     private String refreshToken;
 
-    public void setRefreshToken(String refreshToken) {
+    @TimeToLive
+    private Long ttl;
+
+    public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+    public void updateTtl(Long ttl) {
+        this.ttl = ttl;
     }
 }
