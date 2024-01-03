@@ -16,7 +16,7 @@ import java.util.Collection;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@RedisHash(value = "refresh")
+@RedisHash(value = "refresh",  timeToLive = 1000L)
 public class RefreshToken {
 
     @Id
