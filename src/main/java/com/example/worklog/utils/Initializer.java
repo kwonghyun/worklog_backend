@@ -16,7 +16,7 @@ public class Initializer {
     // 테스트용 유저 생성
     @PostConstruct
     public void makeTestUser() {
-        if (!userRepository.existsByEmail("a@a.a")) {
+        if (!userRepository.existsByUsername("1")) {
             User user1 = User.builder()
                     .email("a@a.a")
                     .password(passwordEncoder.encode("1"))
@@ -24,7 +24,7 @@ public class Initializer {
                     .build();
             userRepository.save(user1);
         }
-        if (!userRepository.existsByEmail("b@b.b")) {
+        if (!userRepository.existsByUsername("2")) {
             User user2 = User.builder()
                     .email("b@b.b")
                     .password(passwordEncoder.encode("2"))
@@ -32,7 +32,7 @@ public class Initializer {
                     .build();
             userRepository.save(user2);
         }
-        if (!userRepository.existsByEmail("c@c.c")) {
+        if (!userRepository.existsByUsername("3")) {
             User user3 = User.builder()
                     .email("c@c.c")
                     .password(passwordEncoder.encode("3"))
