@@ -1,9 +1,10 @@
 package com.example.worklog.jwt;
 
 import com.example.worklog.exception.ErrorCode;
-import com.example.worklog.dto.ResponseDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.*;
+import com.example.worklog.exception.FilterExceptionHandler;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -23,7 +23,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtValidationFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
-    private final ObjectMapper objectMapper;
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -43,31 +42,21 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 jwtTokenUtils.parseClaims(token);
             } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
                 log.info("JWT 서명이 잘못되었습니다.");
-                jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
+                FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
             } catch (ExpiredJwtException e) {
                 log.info("JWT 토큰이 만료되었습니다.");
-                jwtExceptionHandler(response, ErrorCode.TOKEN_EXPIRED);
+                FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_EXPIRED);
             } catch (UnsupportedJwtException e) {
                 log.info("지원되지 않는 토큰입니다.");
-                jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
+                FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
             } catch (IllegalArgumentException e) {
                 log.info("잘못된 토큰입니다.");
-                jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
+                FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    public void jwtExceptionHandler(HttpServletResponse response, ErrorCode error) {
-        response.setStatus(error.getStatus());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        log.info("필터 에러 커스텀");
-        try {
-            objectMapper.writeValue(response.getWriter(), ResponseDto.fromErrorCode(error));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
+
 }
