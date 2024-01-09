@@ -1,21 +1,15 @@
 package com.example.worklog.jwt;
 
 
-import com.example.worklog.exception.ErrorCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
@@ -81,35 +75,13 @@ public class JwtTokenUtils {
     }
 
     // 문자열로 저장된 authorities를 다시 Collection으로 변환
-    public Collection<? extends GrantedAuthority> getAuthFromClaims(Claims claims){
+    public Collection<? extends GrantedAuthority> getAuthoritiesFromClaims(Claims claims){
 
     String authoritiesString = (String) claims.get("authorities"); // authorities 정보 가져오기
 
     return Arrays.stream(authoritiesString.split(","))
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
-    }
-
-    private void setErrorResponse(
-            HttpServletResponse response,
-            ErrorCode errorCode
-    ){
-        ObjectMapper objectMapper = new ObjectMapper();
-        response.setStatus(errorCode.getStatus());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ErrorResponse errorResponse = new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage());
-        try{
-            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
-    @Data
-    public static class ErrorResponse{
-        private final Integer status;
-        private final String code;
-        private final String message;
     }
 
 }
