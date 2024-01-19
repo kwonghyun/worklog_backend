@@ -148,6 +148,7 @@ public class UserService {
     }
 
     public void deleteUser(String username) {
+        log.info("{} 회원 탈퇴 시작", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         if (refreshTokenRedisRepository.existsById(username)) {
