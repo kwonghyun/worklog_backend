@@ -29,6 +29,8 @@ public class WorkService {
 
     private final UserRepository userRepository;
     private final WorkRepository workRepository;
+    private final NotificationService notificationService;
+
     public void createWork(WorkPostDto dto, String username) {
         User user = getValidatedUserByUsername(username);
         LocalDate date = LocalDate.parse(dto.getDate());
@@ -47,6 +49,13 @@ public class WorkService {
                         .user(user)
                         .build()
         );
+
+        if (
+                dto.getDeadline() != null
+                && deadline.isBefore(LocalDateTime.now().plusHours(25L))
+        ) {
+            notificationService.checkNotificationAndSend(username);
+        }
     }
 
     public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, String username) {
@@ -60,6 +69,11 @@ public class WorkService {
         return works.stream()
                 .map(work -> WorkGetDto.fromEntity(work))
                 .collect(Collectors.toList());
+    }
+
+    public Work findOne(Long id) {
+        return workRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
     }
 
     public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, String username) {
@@ -79,6 +93,7 @@ public class WorkService {
         return PageDto.fromPage(pageDto);
     }
 
+
     public void updateWork(WorkPutDto dto, Long workId, String username) {
         User user = getValidatedUserByUsername(username);
         Work work = getValidatedWorkByUserAndWorkId(user, workId);
@@ -93,6 +108,13 @@ public class WorkService {
         work.updateState(dto.getState());
 
         workRepository.save(work);
+
+        if(
+                dto.getDeadline() != null
+                        && deadline.isBefore(LocalDateTime.now().plusHours(25L))
+        ) {
+            notificationService.checkNotificationAndSend(username);
+        }
     }
 
     public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, String username) {
