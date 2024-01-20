@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -38,6 +39,16 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
                     "ORDER BY w.date ASC, w.displayOrder ASC "
     )
     Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchRepoParamDto repoDto, @Param("user") User user, Pageable pageable);
+
+    @Query(
+            "SELECT w FROM Work w " +
+                    "WHERE (w.deadline <= :deadline) " +
+                    "AND (w.state = com.example.worklog.entity.enums.WorkState.IN_PROGRESS) " +
+                    "AND (w.noticed = false) " +
+                    "AND (w.user = :user) " +
+                    "ORDER BY w.deadline ASC "
+    )
+    List<Work> readWorkByDeadlineBeforeAndUserAndNoticedFalse(@Param("deadline") LocalDateTime deadline, @Param("user") User user);
     @Query(
             "SELECT COUNT(w) FROM Work w " +
                     "WHERE " +
