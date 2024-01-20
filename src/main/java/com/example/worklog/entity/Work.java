@@ -55,6 +55,9 @@ public class Work extends BaseTimeEntity {
     private Importance importance;
 
     @Builder.Default
+    private Boolean noticed = false;
+
+    @Builder.Default
     private Boolean isDeleted = false;
 
     @NotNull
@@ -87,6 +90,10 @@ public class Work extends BaseTimeEntity {
 
     public void updateOrder(Integer order) {
         this.displayOrder = order;
+    }
+
+    public void updateNoticed(boolean isNoticed) {
+        this.noticed = isNoticed;
     }
 
     public void updateImportance(Importance importance) {

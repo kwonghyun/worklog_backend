@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,9 @@ public class User extends BaseTimeEntity {
     @NotNull
     private String password;
 
+    // 알림 보낸 마지막 시간
+    private LocalDateTime lastNoticedAt;
+
     @Builder.Default
     private Boolean isDeleted = false;
 
@@ -48,5 +52,8 @@ public class User extends BaseTimeEntity {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+    public void updateLastNoticedAt(LocalDateTime lastNoticedAt) {
+        this.lastNoticedAt = lastNoticedAt;
     }
 }
