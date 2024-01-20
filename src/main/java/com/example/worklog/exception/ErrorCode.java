@@ -62,6 +62,14 @@ public enum ErrorCode {
     WRONG_CATEGORY(400, "BAD_REQUEST", "잘못된 업무 유형입니다."),
     WRONG_IMPORTANCE(400, "BAD_REQUEST", "잘못된 업무 중요도입니다."),
 
+    // Notification
+    NOTIFICATION_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 알림입니다."),
+    NOTIFICATION_USER_NOT_MATCHED(403, "FORBIDDEN", "접근권한이 없는 알림입니다."),
+    SSE_CONNECTION_BROKEN(410, "GONE", "SSE 연결이 끊겼습니다."),
+
+    // Scheduler
+    SCHEDULER_FAILED(500, "INTERNAL_SERVER", "스케줄러에 문제가 생겼습니다."),
+
     // JWT 관련 에러
     TOKEN_NO_AUTH(403, "FORBIDDEN", "권한 정보가 없는 토큰입니다."),
     IP_NOT_MATCHED(403, "FORBIDDEN", "리프레시 토큰의 IP주소가 일치하지 않습니다."),
