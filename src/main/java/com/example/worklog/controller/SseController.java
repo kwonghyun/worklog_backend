@@ -2,6 +2,7 @@ package com.example.worklog.controller;
 
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.service.SseService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -23,10 +24,11 @@ public class SseController {
     public ResponseEntity<SseEmitter> connect(
             Authentication auth,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
-            String lastEventId
+            String lastEventId,
+            HttpServletResponse response
     ) {
         SseEmitter emitter = sseService.subscribe(auth.getName(), SseRole.NOTIFICATION, lastEventId);
-
+        response.setHeader("X-Accel-Buffering", "no");
         return ResponseEntity.ok(emitter);
     }
 
