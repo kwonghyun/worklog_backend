@@ -54,7 +54,7 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 // common
                                 "/index.html",
-                                "/", "/error"
+                                "/", "/error", "/connect"
                                 )
                         .permitAll()
                         .requestMatchers(

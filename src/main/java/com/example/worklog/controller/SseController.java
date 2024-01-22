@@ -5,11 +5,13 @@ import com.example.worklog.service.SseService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,12 +24,14 @@ public class SseController {
 
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect(
-            Authentication auth,
+//            Authentication auth,
+            @RequestParam("username") String username,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
             String lastEventId,
             HttpServletResponse response
     ) {
-        SseEmitter emitter = sseService.subscribe(auth.getName(), SseRole.NOTIFICATION, lastEventId);
+//        SseEmitter emitter = sseService.subscribe(auth.getName(), SseRole.NOTIFICATION, lastEventId);
+        SseEmitter emitter = sseService.subscribe(username, SseRole.NOTIFICATION, lastEventId);
         response.setHeader("X-Accel-Buffering", "no");
         return ResponseEntity.ok(emitter);
     }
