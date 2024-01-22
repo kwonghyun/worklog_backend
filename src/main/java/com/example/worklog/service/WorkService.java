@@ -49,13 +49,6 @@ public class WorkService {
                         .user(user)
                         .build()
         );
-
-        if (
-                dto.getDeadline() != null
-                && deadline.isBefore(LocalDateTime.now().plusHours(25L))
-        ) {
-            notificationService.checkNotificationAndSend(username);
-        }
     }
 
     public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, String username) {
@@ -108,13 +101,6 @@ public class WorkService {
         work.updateState(dto.getState());
 
         workRepository.save(work);
-
-        if(
-                dto.getDeadline() != null
-                        && deadline.isBefore(LocalDateTime.now().plusHours(25L))
-        ) {
-            notificationService.checkNotificationAndSend(username);
-        }
     }
 
     public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, String username) {
