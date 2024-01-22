@@ -11,6 +11,12 @@ jwt:
   refreshExpirationTime : ${JWT_REFRESH_EXPIRATION}
 
 version: 1.0.4
+
+notification:
+  workDeadlineTriggerHours: ${WORK_DEADLINE_TRIGGER_HOURS}
+  searchFutureNotificationMinutes: ${SEARCH_FUTURE_NOTIFICATION_MINUTES}
+
+
 spring:
   redis:
     host: ${REDIS_HOST}

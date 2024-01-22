@@ -49,6 +49,20 @@ jobs:
         spring.datasource.url: ${{ secrets.DB_URL }}
         spring.datasource.username: ${{ secrets.DB_USERNAME }}
         spring.datasource.password: ${{ secrets.DB_PASSWORD }}
+    - name: yml redis 환경변수 설정
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: ./src/main/resources/application.yaml
+      env:
+        spring.redis.host: ${{ secrets.REDIS_HOST }}
+        spring.redis.post: ${{ secrets.REDIS_PORT }}
+    - name: yml notification 환경변수 설정
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: ./src/main/resources/application.yaml
+      env:
+        notification.workDeadlineTriggerHours: ${{ secrets.WORK_DEADLINE_TRIGGER_HOURS }}
+        notification.searchFutureNotificationMinutes: ${{ secrets.SEARCH_FUTURE_NOTIFICATION_MINUTES }}
     - name: gradlew에 실행 권한 부여
       run: chmod +x ./gradlew
     - name: 프로젝트 빌드

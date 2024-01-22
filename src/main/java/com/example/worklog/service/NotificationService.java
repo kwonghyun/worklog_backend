@@ -12,9 +12,11 @@ import com.example.worklog.repository.NotificationRepository;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,13 @@ public class NotificationService {
     private final SseService sseService;
     private final Scheduler scheduler;
 
+    @Value("${WORK_DEADLINE_TRIGGER_HOURS}")
+    @Getter
+    private final long workDeadlineTriggerHours;
+    @Value("${SEARCH_FUTURE_NOTIFICATION_MINUTES}")
+    @Getter
+    private final long searchFutureNotificationMinutes;
+
     private final ApplicationContext applicationContext;
 
     public Boolean checkTimeToNotice(String username) {
@@ -48,7 +57,7 @@ public class NotificationService {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
         User user = getValidatedUserByUsername(username);
         List<Work> worksToNotice = workRepository.readWorkByDeadlineBeforeAndUserAndNoticedFalse(
-                LocalDateTime.now().plusDays(1L).plusHours(1L), user
+                LocalDateTime.now().plusHours(workDeadlineTriggerHours).plusMinutes(searchFutureNotificationMinutes), user
         );
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링 후 isNoticed true로 변경
@@ -81,7 +90,7 @@ public class NotificationService {
 
         // 1시간 이내에 알림을 보내야하는 work들 찾아서 스케줄러에 등록
         List<Work> worksToNoticeLater = worksToNotice.stream()
-                .filter(work -> work.getDeadline().isAfter(LocalDateTime.now().plusDays(1L)))
+                .filter(work -> work.getDeadline().isAfter(LocalDateTime.now().plusHours(workDeadlineTriggerHours)))
                 .collect(Collectors.toList());
         reserveNotification(worksToNoticeLater);
 
@@ -125,7 +134,7 @@ public class NotificationService {
                     .build();
 
             Date startAt = Date.from(
-                    work.getDeadline().minusDays(1L)
+                    work.getDeadline().minusHours(workDeadlineTriggerHours)
                             .atZone(ZoneId.systemDefault())
                             .toInstant()
             );
