@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class NotificationService {
     private final NotificationRepository notificationRepository;
@@ -37,14 +36,35 @@ public class NotificationService {
     private final SseService sseService;
     private final Scheduler scheduler;
 
-    @Value("${WORK_DEADLINE_TRIGGER_HOURS}")
+
     @Getter
     private final long workDeadlineTriggerHours;
-    @Value("${SEARCH_FUTURE_NOTIFICATION_MINUTES}")
     @Getter
     private final long searchFutureNotificationMinutes;
 
     private final ApplicationContext applicationContext;
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            UserRepository userRepository,
+            WorkRepository workRepository,
+            SseService sseService,
+            Scheduler scheduler,
+            @Value("${WORK_DEADLINE_TRIGGER_HOURS}")
+            long workDeadlineTriggerHours,
+            @Value("${SEARCH_FUTURE_NOTIFICATION_MINUTES}")
+            long searchFutureNotificationMinutes,
+            ApplicationContext applicationContext
+    ) {
+        this.notificationRepository = notificationRepository;
+        this.userRepository = userRepository;
+        this.workRepository = workRepository;
+        this.sseService = sseService;
+        this.scheduler = scheduler;
+        this.workDeadlineTriggerHours = workDeadlineTriggerHours;
+        this.searchFutureNotificationMinutes = searchFutureNotificationMinutes;
+        this.applicationContext = applicationContext;
+    }
 
     public Boolean checkTimeToNotice(String username) {
         User user = getValidatedUserByUsername(username);
