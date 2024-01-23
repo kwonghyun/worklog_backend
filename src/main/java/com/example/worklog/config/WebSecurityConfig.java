@@ -5,6 +5,7 @@ import com.example.worklog.jwt.JwtValidationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,11 +21,21 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Slf4j
-@RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig {
     private final AuthCreationFilter authCreationFilter;
     private final JwtValidationFilter jwtValidationFilter;
+    private final String localClientUrl;
+
+    public WebSecurityConfig(
+            AuthCreationFilter authCreationFilter,
+            JwtValidationFilter jwtValidationFilter,
+            @Value("${LOCAL_CLIENT_URL}") String localClientUrl
+    ) {
+        this.authCreationFilter = authCreationFilter;
+        this.jwtValidationFilter = jwtValidationFilter;
+        this.localClientUrl = localClientUrl;
+    }
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -41,7 +52,7 @@ public class WebSecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Arrays.asList("http://localhost:8100", "https://today-worklog.vercel.app"));
+                        config.setAllowedOrigins(Arrays.asList("http://localhost:8100", "https://today-worklog.vercel.app", localClientUrl));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
