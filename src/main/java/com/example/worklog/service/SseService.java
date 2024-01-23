@@ -51,7 +51,7 @@ public class SseService {
                             .name("connect")
                             .reconnectTime(sseTimeout)
                             .data("connect")
-                            .build(), MediaType.TEXT_EVENT_STREAM
+                            .build()
             );
             log.info("username: {} 에게 sse 연결 성공", key.split("_")[0]);
         } catch (IOException exception) {
@@ -75,7 +75,7 @@ public class SseService {
                             .name(emitterKey.split("_")[1])
                             .reconnectTime(sseTimeout)
                             .data(dto, MediaType.APPLICATION_JSON)
-                            .build(), MediaType.TEXT_EVENT_STREAM
+                            .build()
             );
             log.info("SSE : username: {} 에게 sse message : {} 전송", emitterKey.split("_")[0], dto.toString());
         } catch (IOException exception) {
