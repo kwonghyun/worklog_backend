@@ -26,8 +26,6 @@ import java.util.Collections;
 public class WebSecurityConfig {
     private final AuthCreationFilter authCreationFilter;
     private final JwtValidationFilter jwtValidationFilter;
-    private final String localClientUrl;
-
 
     @Bean
     public WebSecurityCustomizer configure() {
