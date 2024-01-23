@@ -2,6 +2,7 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.notification.NotificationDto;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.enums.EventType;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +50,14 @@ public class SseService {
         try {
             emitter.send(
                     SseEmitter.event()
-                            .id("connect")
-                            .name("connect")
+                            .id("connect_" + username)
                             .reconnectTime(sseTimeout)
-                            .data("connect")
+                            .data(
+                                    new HashMap<String, EventType>(){{
+                                        put("eventType", EventType.CONNECTION);
+                                    }},
+                                    MediaType.APPLICATION_JSON
+                            )
                             .build()
             );
             log.info("username: {} 에게 sse 연결 성공", key.split("_")[0]);
@@ -72,7 +79,6 @@ public class SseService {
             emitter.send(
                     SseEmitter.event()
                             .id(emitterKey + "_" + dto.getNotificationId())
-                            .name(emitterKey.split("_")[1])
                             .reconnectTime(sseTimeout)
                             .data(dto, MediaType.APPLICATION_JSON)
                             .build()
