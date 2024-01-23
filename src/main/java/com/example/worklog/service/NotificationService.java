@@ -182,7 +182,7 @@ public class NotificationService {
             case USER, MEMO -> throw new CustomException(ErrorCode.ERROR_NOT_FOUND);
             case WORK -> {
                 Work work = workRepository.findById(entityId)
-                        .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
+                        .orElseThrow(() -> new CustomException(ErrorCode.ERROR_GATEWAY_TIMEOUT));
                 String date = work.getDate().toString();
                 String title = work.getTitle();
                 LocalDateTime deadline = work.getDeadline();
