@@ -10,8 +10,10 @@ import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
+import com.example.worklog.utils.WorkChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,14 +31,14 @@ public class WorkService {
 
     private final UserRepository userRepository;
     private final WorkRepository workRepository;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public void createWork(WorkPostDto dto, String username) {
         User user = getValidatedUserByUsername(username);
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalDateTime deadline = dto.getDeadline() == null ?
                 null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        workRepository.save(
+        Work work = workRepository.save(
                 Work.builder()
                         .title(dto.getTitle())
                         .content(dto.getContent())
@@ -48,6 +50,10 @@ public class WorkService {
                         .state(WorkState.IN_PROGRESS)
                         .user(user)
                         .build()
+        );
+
+        applicationEventPublisher.publishEvent(
+                WorkChangeEvent.builder().work(work).build()
         );
     }
 
@@ -99,8 +105,13 @@ public class WorkService {
         work.updateDeadline(deadline);
         work.updateCategory(dto.getCategory());
         work.updateState(dto.getState());
+        work.updateNoticed(false);
 
-        workRepository.save(work);
+        Work updatedWork = workRepository.save(work);
+
+        applicationEventPublisher.publishEvent(
+                    WorkChangeEvent.builder().work(updatedWork).build()
+        );
     }
 
     public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, String username) {
