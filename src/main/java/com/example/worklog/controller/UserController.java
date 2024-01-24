@@ -7,11 +7,15 @@ import com.example.worklog.dto.user.UserLoginDto;
 import com.example.worklog.dto.user.UserSignupDto;
 import com.example.worklog.dto.user.UserUpdatePwDto;
 import com.example.worklog.exception.SuccessCode;
+import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +37,27 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<ResourceResponseDto> login(
             @RequestBody UserLoginDto dto,
-            HttpServletRequest request /*,
-             HttpServletResponse response */
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
+        JwtDto jwtDto = userService.login(dto, request);
+
+        Cookie accessTokenCookie = new Cookie("accessToken", jwtDto.getAccessToken());
+        accessTokenCookie.setDomain("today-worklog.vercel.app");
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setHttpOnly(true);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", jwtDto.getRefreshToken());
+        refreshTokenCookie.setDomain("today-worklog.vercel.app");
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setHttpOnly(true);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.login(dto, request /*, response*/), 2));
+                .body(ResourceResponseDto.fromData(jwtDto, 2));
     }
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto> logout(
@@ -52,11 +71,26 @@ public class UserController {
     }
     @PostMapping("/reissue")
     public ResponseEntity<ResourceResponseDto> reissue(
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
+        JwtDto jwtDto = userService.reissue(request);
+        Cookie accessTokenCookie = new Cookie("accessToken", jwtDto.getAccessToken());
+        accessTokenCookie.setDomain("today-worklog.vercel.app");
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setHttpOnly(true);
+
+        Cookie refreshTokenCookie = new Cookie("refreshToken", jwtDto.getRefreshToken());
+        refreshTokenCookie.setDomain("today-worklog.vercel.app");
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setHttpOnly(true);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.reissue(request), 2));
+                .body(ResourceResponseDto.fromData(jwtDto, 2));
     }
 
     // 비밀번호 수정
