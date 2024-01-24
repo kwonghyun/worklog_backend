@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,7 +24,8 @@ public class Notification extends BaseTimeEntity {
     private NotificationEntityType entityType;
     private Long entityId;
     private String message;
-    private Boolean isChecked = false;
+    private LocalDateTime timeToSend;
+    private Boolean isSent = false;
     private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,12 +40,14 @@ public class Notification extends BaseTimeEntity {
             Long id,
             NotificationEntityType entityType,
             Long entityId,
+            LocalDateTime timeToSend,
             User receiver,
             User sender
     ) {
         this.id = id;
         this.entityType = entityType;
         this.entityId = entityId;
+        this.timeToSend = timeToSend;
         this.receiver = receiver;
         this.sender = sender;
     }
@@ -50,7 +55,7 @@ public class Notification extends BaseTimeEntity {
     public void setMessage(String message) {
         this.message = message;
     }
-    public void check() {
-        this.isChecked = true;
+    public void updateIsSent(Boolean isSent) {
+        this.isSent = isSent;
     }
 }
