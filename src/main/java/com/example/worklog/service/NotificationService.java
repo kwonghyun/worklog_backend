@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,9 +87,8 @@ public class NotificationService {
         List<Work> worksToNoticeNow = worksToNotice.stream()
                 .filter(work -> isNeededSendingNow(work.getDeadline()))
                 .collect(Collectors.toList());
-        if (worksToNoticeNow.size() != 0) {
-            createNotificationFrom(worksToNoticeNow);
-        }
+        createNotificationFrom(worksToNoticeNow);
+
 
         // 안보낸 모든 알림 찾아서 전송 (이전에 전송 실패한 알림이 있을 수 있으므로...)
         sendAllNotificationsNotChecked(username);
@@ -97,10 +97,8 @@ public class NotificationService {
         List<Work> worksToReserve = worksToNotice.stream()
                 .filter(work -> isNeededReservation(work.getDeadline()))
                 .collect(Collectors.toList());
-        if (worksToReserve.size() != 0) {
-            createNotificationFrom(worksToReserve).stream()
+        createNotificationFrom(worksToReserve).stream()
                     .forEach(notification -> reserveNotification(notification));
-        }
         // 마지막으로 알림 보낸 시간 업데이트
         user.updateLastNoticedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -118,6 +116,8 @@ public class NotificationService {
     }
 
     public List<Notification> createNotificationFrom(List<Work> works) {
+        if (works.size() == 0) return new ArrayList<Notification>();
+
         workRepository.saveAll(
                 works.stream()
                         .map(work -> {work.updateNoticed(true); return work;})
@@ -234,13 +234,15 @@ public class NotificationService {
         }
         notificationRepository.save(notification);
     }
+
     public void sendNotification(List<Notification> notifications) {
-        String username = notifications.get(0).getReceiver().getUsername();
+        if (notifications.size() == 0) return;
+
         notificationRepository.saveAll(
                 notifications.stream()
                     .map(notification -> {
                                 generateMessage(notification);
-                                String emitterKey = username + "_" + SseRole.NOTIFICATION;
+                                String emitterKey = notification.getReceiver().getUsername() + "_" + SseRole.NOTIFICATION;
                                 sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
                                 notification.updateIsSent(true);
                                 return notification;
