@@ -27,6 +27,10 @@ public class SseService {
     private final UserRepository userRepository;
     private final SseEmitterRepository sseEmitterRepository;
 
+    public Boolean isSseConnected(String username, SseRole role) {
+        return sseEmitterRepository.existsByKey(username + "_" + role.name());
+    }
+
     public SseEmitter subscribe(String username, SseRole role, String lastEventId) {
         User user = getValidatedUserByUsername(username);
         SseEmitter emitter = new SseEmitter(sseTimeout);
