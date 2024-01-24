@@ -41,19 +41,22 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.login(dto, request);
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtDto.getAccessToken())
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .build();
 
-        Cookie accessTokenCookie = new Cookie("accessToken", jwtDto.getAccessToken());
-        accessTokenCookie.setDomain("today-worklog.vercel.app");
-        accessTokenCookie.setSecure(true);
-        accessTokenCookie.setHttpOnly(true);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", jwtDto.getRefreshToken());
-        refreshTokenCookie.setDomain("today-worklog.vercel.app");
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setHttpOnly(true);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .build();
 
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -75,18 +78,22 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.reissue(request);
-        Cookie accessTokenCookie = new Cookie("accessToken", jwtDto.getAccessToken());
-        accessTokenCookie.setDomain("today-worklog.vercel.app");
-        accessTokenCookie.setSecure(true);
-        accessTokenCookie.setHttpOnly(true);
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtDto.getAccessToken())
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .build();
 
-        Cookie refreshTokenCookie = new Cookie("refreshToken", jwtDto.getRefreshToken());
-        refreshTokenCookie.setDomain("today-worklog.vercel.app");
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setHttpOnly(true);
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
-        response.addCookie(accessTokenCookie);
-        response.addCookie(refreshTokenCookie);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+                .sameSite("None")
+                .httpOnly(true)
+                .secure(true)
+                .build();
+
+        response.addHeader("Set-Cookie", accessTokenCookie.toString());
+        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
