@@ -12,7 +12,6 @@ import com.example.worklog.repository.NotificationRepository;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Value;
