@@ -47,7 +47,6 @@ public class UserController {
                 .secure(true)
                 .build();
 
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
                 .sameSite("None")
