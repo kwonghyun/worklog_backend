@@ -35,10 +35,7 @@ public class NotificationService {
     private final SseService sseService;
     private final Scheduler scheduler;
 
-
-    @Getter
     private final long workDeadlineTriggerHours;
-    @Getter
     private final long searchFutureNotificationMinutes;
 
     private final ApplicationContext applicationContext;
@@ -81,7 +78,7 @@ public class NotificationService {
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링 후 isNoticed true로 변경
         List<Work> worksToNoticeNow = worksToNotice.stream()
-                .filter(work -> work.getDeadline().isBefore(LocalDateTime.now().plusDays(1L)))
+                .filter(work -> isNeededSendingNow(work.getDeadline()))
                 .map(work -> {work.updateNoticed(true); return work;})
                 .collect(Collectors.toList());
 
@@ -97,7 +94,6 @@ public class NotificationService {
                 .collect(Collectors.toList());
 
         log.info("찾은 work 갯수: {}", worksToNotice.size());
-        log.info("찾은 work 갯수: {}", worksToNotice.stream().toString());
         log.info("찾은 work noti로 변환된 갯수: {}", newNotifications.size());
         notificationRepository.saveAll(newNotifications);
 
@@ -108,71 +104,115 @@ public class NotificationService {
         sendAllNotificationsNotChecked(username);
 
         // 1시간 이내에 알림을 보내야하는 work들 찾아서 스케줄러에 등록
-        List<Work> worksToNoticeLater = worksToNotice.stream()
-                .filter(work -> work.getDeadline().isAfter(LocalDateTime.now().plusHours(workDeadlineTriggerHours)))
-                .collect(Collectors.toList());
-        reserveNotification(worksToNoticeLater);
+        worksToNotice.stream()
+                .filter(work -> isNeededReservation(work.getDeadline()))
+                .forEach(work -> reserveNotification(work));
 
         // 마지막으로 알림 보낸 시간 업데이트
         user.updateLastNoticedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
+    public void sendWorkNotification(Work work) {
+        work.updateNoticed(true);
+        User user = work.getUser();
+        Notification notification = Notification.builder()
+                        .entityType(NotificationEntityType.WORK)
+                        .entityId(work.getId())
+                        .receiver(user)
+                        .build();
+        workRepository.save(work);
+
+        NotificationDto notificationDto = NotificationDto.fromEntity(notification);
+        String username = user.getUsername();
+        String emitterKey = username + "_" + SseRole.NOTIFICATION.name();
+        sseService.sendToClient(emitterKey, notificationDto);
+
+        notification.check();
+        notificationRepository.save(notification);
+    }
+
 
     public void sendAllNotificationsNotChecked(String username) {
         // isChecked가 false인 알림 모두 찾기
         List<Notification> notifications = notificationRepository.findAllByUsernameAndIsCheckedFalse(username);
+        log.info("NotificationService.sendAllNotificationsNotChecked: db에서 찾은 알림보낼 알림 갯수 {}", notifications.size());
 
         // 메세지 입력(메세지에 현재시간 부터 몇 시간 뒤인지 알려주기 때문에 나중에 입력)
-        notifications.stream().forEach(
-                notification -> notification.setMessage(
-                        generateMessage(NotificationEntityType.WORK, notification.getEntityId())
-                ));
-        sendNotification(username, notifications);
+        notifications.stream()
+                .map(notification -> {
+                    log.info("NotificationService.sendAllNotificationsNotChecked: notification에 저장된 entityId {}",notification.getEntityId());
+                    notification.setMessage(
+                        generateMessage(NotificationEntityType.WORK, notification.getEntityId()));
+                    return notification;
+                    })
+                .forEach(notification -> sendNotification(username, notification));
     }
-    public void reserveNotification(List<Work> works) {
-        for (Work work : works) {
-            Long workId = work.getId();
-            User user = work.getUser();
-            Notification notification = notificationRepository.save(
-                    Notification.builder()
-                    .entityType(NotificationEntityType.WORK)
-                    .entityId(work.getId())
-                    .receiver(user)
-                    .build()
-            );
-            JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put("applicationContext", applicationContext);
-            jobDataMap.put("workId", workId);
-            jobDataMap.put("username", user.getUsername());
-            jobDataMap.put("notificationId", notification.getId());
 
-            JobDetail jobDetail = JobBuilder.newJob(NotificationJob.class)
-                    .setJobData(jobDataMap)
-                    .withIdentity("work_" + workId, "work_notification")
-                    .build();
+    public void reserveNotification(Work work) {
+        Long workId = work.getId();
+        User user = work.getUser();
+        Notification notification = notificationRepository.save(
+                Notification.builder()
+                        .entityType(NotificationEntityType.WORK)
+                        .entityId(work.getId())
+                        .receiver(user)
+                        .build()
+        );
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("applicationContext", applicationContext);
+        jobDataMap.put("workId", workId);
+        jobDataMap.put("username", user.getUsername());
+        jobDataMap.put("notificationId", notification.getId());
 
-            Date startAt = Date.from(
-                    work.getDeadline().minusHours(workDeadlineTriggerHours)
-                            .atZone(ZoneId.systemDefault())
-                            .toInstant()
-            );
+        JobDetail jobDetail = JobBuilder.newJob(NotificationJob.class)
+                .setJobData(jobDataMap)
+                .withIdentity("work_" + workId, "work_notification")
+                .build();
 
-            Trigger trigger = TriggerBuilder.newTrigger()
-                    .startAt(startAt)
-                    .withIdentity("work_" + workId, "work_notification")
-                    .forJob(jobDetail)
-                    .build();
-            try {
-                scheduler.scheduleJob(jobDetail, trigger);
-                log.info("스케줄링 완료 workId: {}, notificationId: {}", workId, notification.getId());
-            } catch (SchedulerException e) {
-                throw new CustomException(ErrorCode.SCHEDULER_FAILED);
-            }
+        Date startAt = Date.from(
+                work.getDeadline().minusHours(workDeadlineTriggerHours)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+        );
 
-            // 스케줄된 작업이 실행되기 전에 알림해야할 work로 조회되지 않기 위함
-            work.updateNoticed(true);
-            workRepository.save(work);
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .startAt(startAt)
+                .withIdentity("work_" + workId, "work_notification")
+                .forJob(jobDetail)
+                .build();
+        try {
+            scheduler.scheduleJob(jobDetail, trigger);
+            log.info("스케줄링 완료 workId: {}, notificationId: {}", workId, notification.getId());
+        } catch (SchedulerException e) {
+            log.error(e.getMessage());
+            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
+        }
+
+        // 스케줄된 작업이 실행되기 전에 알림해야할 work로 조회되지 않기 위함
+        work.updateNoticed(true);
+        workRepository.save(work);
+    }
+
+    public boolean existsReservedNotification(Work work) {
+        Long workId = work.getId();
+        // "work_" + workId, "work_notification"
+        try {
+            return scheduler.checkExists(TriggerKey.triggerKey("work_" + workId, "work_notification"));
+        } catch (SchedulerException e) {
+            log.error(e.getMessage());
+            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
+        }
+    }
+
+    public void cancelReservedNotification(Work work) {
+        Long workId = work.getId();
+        // "work_" + workId, "work_notification"
+        try {
+            scheduler.unscheduleJob(TriggerKey.triggerKey("work_" + workId, "work_notification"));
+        } catch (SchedulerException e) {
+            log.error(e.getMessage());
+            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
         }
     }
 
@@ -181,6 +221,7 @@ public class NotificationService {
         switch (type) {
             case USER, MEMO -> throw new CustomException(ErrorCode.ERROR_NOT_FOUND);
             case WORK -> {
+                log.info("NotificationService.generateMessage: 여기서 entityId: {}", entityId);
                 Work work = workRepository.findById(entityId)
                         .orElseThrow(() -> new CustomException(ErrorCode.ERROR_GATEWAY_TIMEOUT));
                 String date = work.getDate().toString();
@@ -205,18 +246,22 @@ public class NotificationService {
         notification.check();
         notificationRepository.save(notification);
     }
-    public void sendNotification(String username, List<Notification> notifications) {
 
-        String emitterKey = username + "_" + SseRole.NOTIFICATION;
+    public Boolean isNeededSendingNow(LocalDateTime deadline) {
+        return deadline.isBefore(
+                LocalDateTime.now().plusHours(workDeadlineTriggerHours)
+        );
+    }
 
-        log.info("전송할 Notification 갯수 : {}", notifications.size());
-        notifications.stream()
-                .map(notification -> {
-                    sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
-                    return notification;
-                })
-                .forEach(notification -> notification.check());
-        notificationRepository.saveAll(notifications);
+    public Boolean isNeededReservation(LocalDateTime deadline) {
+        return deadline.isAfter(
+                LocalDateTime.now().plusHours(workDeadlineTriggerHours)
+                )
+                && deadline.isBefore(
+                        LocalDateTime.now()
+                                .plusHours(workDeadlineTriggerHours)
+                                .plusHours(searchFutureNotificationMinutes)
+                );
     }
 
     public Notification findOne(Long id) {
