@@ -33,9 +33,8 @@ public class NotificationController {
 
     @GetMapping("/noticed-at/check")
     public ResponseEntity<ResourceResponseDto> check(Authentication auth) {
-        Boolean isTimeToNotice = notificationService.checkTimeToNotice(auth.getName());
-        Map<String,Boolean> response = new HashMap<>();
-        response.put("isTimeToNotice", isTimeToNotice);
-        return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(response, 1));
+        Boolean isTimeToNotice = notificationService.isTimeToNotice(auth.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(
+                new HashMap<>(){{put("isTimeToNotice", isTimeToNotice);}}, 1));
     }
 }

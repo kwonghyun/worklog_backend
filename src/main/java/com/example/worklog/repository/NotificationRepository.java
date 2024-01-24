@@ -11,8 +11,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query(
             "SELECT n FROM Notification n " +
                     "WHERE (n.receiver.username = :username) " +
-                    "AND (n.isChecked = false) " +
+                    "AND (n.isSent = false) " +
                     "ORDER BY n.createdAt ASC "
     )
-    List<Notification> findAllByUsernameAndIsCheckedFalse(@Param("username") String username);
+    List<Notification> findAllByUsernameAndIsSentFalse(@Param("username") String username);
 }
