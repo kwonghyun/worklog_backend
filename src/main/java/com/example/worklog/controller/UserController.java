@@ -41,15 +41,17 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.login(dto, request);
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtDto.getAccessToken())
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", jwtDto.getAccessToken())
                 .sameSite("None")
+                .path("/")
                 .httpOnly(true)
                 .secure(true)
                 .build();
 
 
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", jwtDto.getRefreshToken())
                 .sameSite("None")
+                .path("/")
                 .httpOnly(true)
                 .secure(true)
                 .build();
@@ -77,16 +79,18 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.reissue(request);
-        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtDto.getAccessToken())
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", jwtDto.getAccessToken())
                 .sameSite("None")
+                .path("/")
                 .httpOnly(true)
                 .secure(true)
                 .build();
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
 
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtDto.getRefreshToken())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", jwtDto.getRefreshToken())
                 .sameSite("None")
+                .path("/")
                 .httpOnly(true)
                 .secure(true)
                 .build();
