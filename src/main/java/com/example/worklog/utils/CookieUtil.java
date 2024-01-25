@@ -10,7 +10,7 @@ public class CookieUtil {
             HttpServletResponse response
             ) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
-                .sameSite("None")
+//                .sameSite("None")
                 .path("/")
                 .httpOnly(true)
 //                .secure(true)
