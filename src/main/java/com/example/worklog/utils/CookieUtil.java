@@ -11,8 +11,8 @@ public class CookieUtil {
             ) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
 //                .sameSite("None")
-                .path("/")
-                .httpOnly(true)
+//                .path("/")
+//                .httpOnly(true)
 //                .secure(true)
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
