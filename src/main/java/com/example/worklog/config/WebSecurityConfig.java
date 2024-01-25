@@ -5,9 +5,9 @@ import com.example.worklog.jwt.JwtValidationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,7 +42,11 @@ public class WebSecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Arrays.asList("http://localhost:8100", "https://today-worklog.vercel.app", "http://localhost:63342"));
+                        config.setAllowedOrigins(Arrays.asList(
+                                "http://localhost:8100",
+                                "https://today-worklog.vercel.app",
+                                "http://localhost:63342"
+                        ));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
@@ -53,18 +57,22 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authHttp -> authHttp
                         .requestMatchers(
-                                // common
-                                "/index.html",
-                                "/", "/error", "/connect"
+                                HttpMethod.GET,
+                                "/", "/connect"
                                 )
                         .permitAll()
                         .requestMatchers(
-                                "/users/login",  "/users",
-                                "/users/email/check",
-                                "/users/username/check",
+                                HttpMethod.POST,
+                                "/users",
+                                "/users/login",
                                 "/users/reissue"
                         )
                         .anonymous()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/users/email/check",
+                                "/users/username/check"
+                        ).anonymous()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
