@@ -57,7 +57,7 @@ jobs:
         spring.redis.host: ${{ secrets.REDIS_HOST }}
         spring.redis.post: ${{ secrets.REDIS_PORT }}
     - name: Set published time in application.yml
-      run: 
+      run: |
         sed -i "s/publishedAt:.*/publishedAt: ${{ env.PUBLISHED_AT }}/g" ./src/main/resources/application.yaml
       env:
         PUBLISHED_AT: $(date -d '9 hours' '+%Y-%m-%d %H:%M:%S KST')
