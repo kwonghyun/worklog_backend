@@ -58,7 +58,7 @@ jobs:
         spring.redis.post: ${{ secrets.REDIS_PORT }}
     - name: Set published time in application.yml
         run:
-          sed -i 's/publishedAt: .*/publishedAt: $(date -d '9 hours' '+%Y-%m-%d %H:%M:%S KST')/g' ./src/main/resources/application.yaml
+          sed -i "s/publishedAt: .*/publishedAt: \$(date -d '9 hours' '+%Y-%m-%d %H:%M:%S KST')/g" ./src/main/resources/application.yaml
     - name: gradlew에 실행 권한 부여
       run: chmod +x ./gradlew
     - name: 프로젝트 빌드
