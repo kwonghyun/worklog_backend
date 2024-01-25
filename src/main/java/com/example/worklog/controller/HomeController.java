@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HomeController {
-    @Value("${version}")
-    private String version;
+    @Value("${publishedAt}")
+    private String publishedAt;
 
     @GetMapping("/")
     public String home() {
-        return "Hello CICD! version: " + version;
+        return "This version was published at: " + publishedAt;
     }
 }

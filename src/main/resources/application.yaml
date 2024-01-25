@@ -10,7 +10,7 @@ jwt:
   accessExpirationTime: ${JWT_EXPIRATION}
   refreshExpirationTime : ${JWT_REFRESH_EXPIRATION}
 
-version: 1.0.4
+publishedAt: 0000-00-00
 
 notification:
   workDeadlineTriggerHours: 24 #${WORK_DEADLINE_TRIGGER_HOURS}
