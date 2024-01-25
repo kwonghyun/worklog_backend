@@ -9,6 +9,7 @@ import com.example.worklog.dto.user.UserUpdatePwDto;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
+import com.example.worklog.utils.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,23 +42,8 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.login(dto, request);
-        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", jwtDto.getAccessToken())
-                .sameSite("None")
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .build();
-
-
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", jwtDto.getRefreshToken())
-                .sameSite("None")
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .build();
-
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+        CookieUtil.addCookie("access_token", jwtDto.getAccessToken(), response);
+        CookieUtil.addCookie("refresh_token", jwtDto.getRefreshToken(), response);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -79,24 +65,8 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.reissue(request);
-        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", jwtDto.getAccessToken())
-                .sameSite("None")
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .build();
-
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", jwtDto.getRefreshToken())
-                .sameSite("None")
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .build();
-
-        response.addHeader("Set-Cookie", accessTokenCookie.toString());
-        response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+        CookieUtil.addCookie("access_token", jwtDto.getAccessToken(), response);
+        CookieUtil.addCookie("refresh_token", jwtDto.getRefreshToken(), response);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
