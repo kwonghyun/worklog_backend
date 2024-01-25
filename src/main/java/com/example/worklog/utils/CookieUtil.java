@@ -10,10 +10,10 @@ public class CookieUtil {
             HttpServletResponse response
             ) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
-//                .sameSite("None")
-//                .path("/")
-//                .httpOnly(true)
-//                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
