@@ -3,6 +3,7 @@ package com.example.worklog.controller;
 
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
+import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.dto.user.UserLoginDto;
 import com.example.worklog.dto.user.UserSignupDto;
 import com.example.worklog.dto.user.UserUpdatePwDto;
@@ -10,15 +11,13 @@ import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
 import com.example.worklog.utils.CookieUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -78,9 +77,9 @@ public class UserController {
     public ResponseEntity<ResponseDto> updatePassword(
             @Valid @RequestBody
             UserUpdatePwDto dto,
-            Authentication auth
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        userService.updateUserPassword(dto, auth.getName());
+        userService.updateUserPassword(dto, userDetails.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_PASSWORD_CHANGE_SUCCESS));
@@ -88,8 +87,8 @@ public class UserController {
 
     // 회원탈퇴
     @DeleteMapping("/me")
-    public ResponseEntity<ResponseDto> deleteUser(Authentication auth) {
-        userService.deleteUser(auth.getName());
+    public ResponseEntity<ResponseDto> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUser(userDetails.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_DELETE_SUCCESS));
