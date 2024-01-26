@@ -14,7 +14,7 @@ public class CookieUtil {
                 .path("/")
                 .httpOnly(true)
                 .secure(true)
-                .domain("today-worklog.vercel.app")
+                .domain("worklog.shop")
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }

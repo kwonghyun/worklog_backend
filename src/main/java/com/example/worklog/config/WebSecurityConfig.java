@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                         config.setAllowedOrigins(Arrays.asList(
                                 "http://localhost:8100",
                                 "https://today-worklog.vercel.app",
+                                "https://today.worklog.shop",
                                 "http://localhost:63342"
                         ));
                         config.setAllowedMethods(Collections.singletonList("*"));
