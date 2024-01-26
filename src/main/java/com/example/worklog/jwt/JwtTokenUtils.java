@@ -1,13 +1,15 @@
 package com.example.worklog.jwt;
 
 
-import io.jsonwebtoken.*;
+import com.example.worklog.dto.user.CustomUserDetails;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -38,7 +40,7 @@ public class JwtTokenUtils {
         this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    public JwtDto generateToken(UserDetails userDetails) {
+    public JwtDto generateToken(CustomUserDetails userDetails) {
         log.info("\"{}\" jwt 발급", userDetails.getUsername());
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
@@ -50,6 +52,7 @@ public class JwtTokenUtils {
         String accessToken = Jwts.builder()
                 .setClaims(accessTokenClaims)
                 .claim("authorities", authorities)
+                .claim("id", userDetails.getUserId())
                 .signWith(signingKey)
                 .compact();
 

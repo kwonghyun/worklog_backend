@@ -62,6 +62,7 @@ public class AuthCreationFilter extends OncePerRequestFilter {
                 authentication = new UsernamePasswordAuthenticationToken(
                         CustomUserDetails.builder()
                                 .username(claims.getSubject())
+                                .id((Long) claims.get("id"))
                                 .build(),
                         token,
                         jwtTokenUtils.getAuthoritiesFromClaims(claims)

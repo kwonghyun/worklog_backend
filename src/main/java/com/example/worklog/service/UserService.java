@@ -1,12 +1,13 @@
 package com.example.worklog.service;
 
-import com.example.worklog.jwt.JwtDto;
+import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.dto.user.UserLoginDto;
 import com.example.worklog.dto.user.UserSignupDto;
 import com.example.worklog.dto.user.UserUpdatePwDto;
 import com.example.worklog.entity.User;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.jwt.JwtTokenUtils;
 import com.example.worklog.jwt.RefreshToken;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
@@ -16,7 +17,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class UserService {
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     private final PasswordEncoder passwordEncoder;
-    private final CustomUserDetailsManager manager;
+    private final UserDetailsService userDetailsService;
     private final JwtTokenUtils jwtTokenUtils;
 
 
@@ -94,12 +95,6 @@ public class UserService {
                         .build()
         );
         return jwtDto;
-
-
-        // 응답 헤더에 jwt 전달
-//        response.setHeader("Authorization", "Bearer " + jwtToken);
-//        log.info("Header: {}", response.getHeader("Authorization"));
-//        return JwtDto.builder().accessToken(jwtToken).build();
     }
     public void logout(HttpServletRequest request) {
         // 1. 레디스에 해당 토큰 있는 지 확인
@@ -131,7 +126,8 @@ public class UserService {
         String username = refreshToken.getId();
         log.info("refresh token에서 추출한 username : {}", username);
         // 4. userdetails 불러오기
-        UserDetails userDetails = manager.loadUserByUsername(username);
+        // TODO username이용해서 db 접근하지 않고 @AuthorizationPrincipal로 User 객체 받아서 쓰기
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
 
         log.info("reissue: refresh token 재발급 완료");
         JwtDto jwtDto = jwtTokenUtils.generateToken(userDetails);
@@ -146,6 +142,7 @@ public class UserService {
         return jwtDto;
     }
 
+    // TODO 중복확인시 json으로 값 전달하기
     public Boolean checkEmailDuplicated(String email) {
         log.info("{} 중복검사 existsByEmail: {}", email, userRepository.existsByEmail(email));
         return userRepository.existsByEmail(email);
