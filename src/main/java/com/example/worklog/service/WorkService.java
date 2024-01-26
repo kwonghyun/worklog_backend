@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+// TODO AOP로 프로젝트 전체 로깅 설정하기
+// TODO 모니터링 툴 적용하기
 public class WorkService {
 
     private final UserRepository userRepository;
