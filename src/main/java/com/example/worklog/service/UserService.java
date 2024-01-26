@@ -59,13 +59,22 @@ public class UserService {
     }
 
     // 로그인
-    public JwtDto login(UserLoginDto dto, HttpServletRequest request /*, HttpServletResponse response */) {
-        UserDetails userDetails = manager.loadUserByUsername(dto.getUsername());
+    public JwtDto login(UserLoginDto dto, HttpServletRequest request) {
+        // TODO ID,PW 유효성 검사 후 유효하지 않으면 DB에서 확인 하지 않고 ID, PW 확인하라고 하기
+        // TODO 같은 ID로 5회이상 로그인 실패시 계정 잠그고 이메일 인증으로 비밀번호 재설정하게 하기
+        CustomUserDetails userDetails;
+
+        try {
+            userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(dto.getUsername());
+        } catch (CustomException e) {
+            throw new CustomException(ErrorCode.LOGIN_FAILED);
+        }
+
         log.info("\"{}\" 로그인", dto.getUsername());
 
         if (!passwordEncoder.matches(dto.getPassword(), userDetails.getPassword())) {
             log.info("login: 비밀번호 불일치");
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+            throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
         log.info("login: 비밀번호 확인완료");
 

@@ -32,8 +32,9 @@ public enum ErrorCode {
     USER_NO_AUTH(403, "FORBIDDEN", "해당 자원에 대해 권한이 없습니다."),
 
     // 404 NOT_FOUND 잘못된 리소스 접근
-    WRONG_PASSWORD(404, "NOT_FOUND", "비밀번호가 일치하지 않습니다."),
+    WRONG_PASSWORD(404, "NOT_FOUND", "잘못된 비밀번호 입니다."),
     USER_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 회원입니다."),
+    LOGIN_FAILED(404, "NOT_FOUND", "존재하지 않는 회원입니다."),
     UNMATCHED_PASSWORD(404, "NOT_FOUND", "비밀번호 확인이 일치하지 않습니다."),
 
     // 500 내부 서버 에러
