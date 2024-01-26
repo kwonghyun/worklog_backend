@@ -41,9 +41,6 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.login(dto, request);
-        CookieUtil.addCookie("access_token", jwtDto.getAccessToken(), response);
-        CookieUtil.addCookie("refresh_token", jwtDto.getRefreshToken(), response);
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResourceResponseDto.fromData(jwtDto, 2));
@@ -64,9 +61,6 @@ public class UserController {
             HttpServletResponse response
     ) {
         JwtDto jwtDto = userService.reissue(request);
-        CookieUtil.addCookie("access_token", jwtDto.getAccessToken(), response);
-        CookieUtil.addCookie("refresh_token", jwtDto.getRefreshToken(), response);
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResourceResponseDto.fromData(jwtDto, 2));
