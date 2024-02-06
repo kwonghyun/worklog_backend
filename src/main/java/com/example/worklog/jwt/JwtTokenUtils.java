@@ -52,7 +52,7 @@ public class JwtTokenUtils {
         String accessToken = Jwts.builder()
                 .setClaims(accessTokenClaims)
                 .claim("authorities", authorities)
-                .claim("id", userDetails.getUserId())
+                .claim("id", userDetails.getUserId().toString())
                 .signWith(signingKey)
                 .compact();
 
