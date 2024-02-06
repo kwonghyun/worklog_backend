@@ -7,6 +7,7 @@ import org.hibernate.Hibernate;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
@@ -21,9 +22,10 @@ public class NotificationJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        ApplicationContext appCtx = (ApplicationContext)context.getJobDetail()
-                .getJobDataMap().get("applicationContext");
-        notificationService = appCtx.getBean(NotificationService.class);
+        ObjectProvider<NotificationService> objectProvider = (ObjectProvider<NotificationService>) context.getJobDetail()
+                .getJobDataMap().get("objectProvider");
+
+        notificationService = objectProvider.getObject(NotificationService.class);
 
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Long notificationId = dataMap.getLong("notificationId");

@@ -14,8 +14,8 @@ import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,7 +39,7 @@ public class NotificationService {
     private final long searchFutureNotificationMinutes;
     private final long accessExpirationTime;
 
-    private final ApplicationContext applicationContext;
+    private final ObjectProvider<NotificationService> notificationServiceObjectProvider;
 
     public NotificationService(
             NotificationRepository notificationRepository,
@@ -53,8 +53,7 @@ public class NotificationService {
             long workDeadlineTriggerHours,
             @Value("${notification.searchFutureNotificationMinutes}")
             long searchFutureNotificationMinutes,
-            ApplicationContext applicationContext
-    ) {
+            ObjectProvider<NotificationService> notificationServiceObjectProvider) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.workRepository = workRepository;
@@ -63,7 +62,7 @@ public class NotificationService {
         this.accessExpirationTime = accessExpirationTime;
         this.workDeadlineTriggerHours = workDeadlineTriggerHours;
         this.searchFutureNotificationMinutes = searchFutureNotificationMinutes;
-        this.applicationContext = applicationContext;
+        this.notificationServiceObjectProvider = notificationServiceObjectProvider;
     }
 
     public Boolean isTimeToNotice(String username) {
@@ -145,7 +144,7 @@ public class NotificationService {
     public void reserveNotification(Notification notification) {
 
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put("applicationContext", applicationContext);
+        jobDataMap.put("objectProvider", notificationServiceObjectProvider);
         jobDataMap.put("notificationId", notification.getId());
 
         JobDetail jobDetail = JobBuilder.newJob(NotificationJob.class)
