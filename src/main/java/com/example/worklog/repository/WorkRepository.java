@@ -4,6 +4,7 @@ import com.example.worklog.dto.work.WorkGetRepoParamDto;
 import com.example.worklog.dto.work.WorkSearchRepoParamDto;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
+import com.example.worklog.entity.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,9 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     )
     List<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("user") User user);
 
+//    IS NULL 에 enum이 들어오면
+//    java.lang.NullPointerException: Cannot invoke "org.hibernate.metamodel.mapping.JdbcMapping.getJdbcValueBinder()" because "jdbcMapping" is null
+//    Querydsl로 동적쿼리 만들 예정
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE " +
