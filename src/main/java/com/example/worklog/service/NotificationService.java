@@ -273,6 +273,11 @@ public class NotificationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
     }
 
+    public Notification findOneWithReceiver(Long id) {
+        return notificationRepository.findByIdFetchReceiver(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+    }
+
     private User getValidatedUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

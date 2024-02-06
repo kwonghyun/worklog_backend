@@ -28,8 +28,7 @@ public class Notification extends BaseTimeEntity {
     private Boolean isSent = false;
     private Boolean isDeleted = false;
 
-    // TODO LAZY로 변경해도 QuartzJobBean에서 정상작동하게 해놓을 것
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @NotNull
     private User receiver;
 
