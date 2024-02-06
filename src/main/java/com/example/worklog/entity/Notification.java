@@ -58,4 +58,17 @@ public class Notification extends BaseTimeEntity {
     public void updateIsSent(Boolean isSent) {
         this.isSent = isSent;
     }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "id=" + id +
+                ", entityType=" + entityType +
+                ", entityId=" + entityId +
+                ", message='" + message + '\'' +
+                ", timeToSend=" + timeToSend +
+                ", isSent=" + isSent +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
 }

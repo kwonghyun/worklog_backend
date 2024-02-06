@@ -60,4 +60,16 @@ public class Memo extends BaseTimeEntity {
     public void updateImportance(Importance importance) {
         this.importance = importance;
     }
+
+    @Override
+    public String toString() {
+        return "Memo{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", displayOrder=" + displayOrder +
+                ", importance=" + importance +
+                ", date=" + date +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
 }

@@ -99,4 +99,21 @@ public class Work extends BaseTimeEntity {
     public void updateImportance(Importance importance) {
         this.importance = importance;
     }
+
+    @Override
+    public String toString() {
+        return "Work{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", date=" + date +
+                ", deadline=" + deadline +
+                ", category=" + category +
+                ", state=" + state +
+                ", displayOrder=" + displayOrder +
+                ", importance=" + importance +
+                ", noticed=" + noticed +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
 }

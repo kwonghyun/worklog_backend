@@ -56,4 +56,16 @@ public class User extends BaseTimeEntity {
     public void updateLastNoticedAt(LocalDateTime lastNoticedAt) {
         this.lastNoticedAt = lastNoticedAt;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", lastNoticedAt=" + lastNoticedAt +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
 }
