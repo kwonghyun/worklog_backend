@@ -83,7 +83,7 @@ public class WorkService {
         WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.fromGetRequestDto(paramDto);
         log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
         log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
-        Page<Work> pagedWorks = workRepository.searchWorksByParamsAndUser(
+        Page<Work> pagedWorks = workRepository.findBySearchParams(
                 repoDto, user,
                 PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );

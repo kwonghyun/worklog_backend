@@ -4,7 +4,7 @@ import com.example.worklog.dto.work.WorkGetRepoParamDto;
 import com.example.worklog.dto.work.WorkSearchRepoParamDto;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
-import com.example.worklog.entity.enums.Category;
+import com.example.worklog.repository.querydsl.WorkRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface WorkRepository extends JpaRepository<Work, Long> {
+public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositoryCustom {
 
     @Query(
             "SELECT w FROM Work w " +
