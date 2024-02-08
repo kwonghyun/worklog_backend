@@ -1,5 +1,6 @@
 package com.example.worklog.exception;
 
+import com.example.worklog.utils.Constant;
 import lombok.Getter;
 
 @Getter
@@ -25,17 +26,21 @@ public enum ErrorCode {
     ALREADY_EXISTED_EMAIL(400, "BAD_REQUEST", "이미 존재하는 이메일입니다"),
     ALREADY_USED_PASSWORD(400, "BAD_REQUEST", "기존에 사용하던 비밀번호입니다."),
 
+    WRONG_EMAIL_FORMAT(400, "BAD_REQUEST", Constant.EMAIL_NOT_VALID_MESSAGE),
+    WRONG_USERNAME_FORMAT(400, "BAD_REQUEST", Constant.USERNAME_NOT_VALID_MESSAGE),
+    WRONG_PASSWORD_FORMAT(400, "BAD_REQUEST", Constant.PASSWORD_NOT_VALID_MESSAGE),
+    UNMATCHED_PASSWORD(400, "BAD_REQUEST", Constant.PASSWORD_CHECK_NOT_VALID_MESSAGE),
+
     INVALID_PARAMETER(400, "BAD_REQUEST","파라미터 값을 확인해주세요."),
     ERROR_NO_KEYWORD(400,"BAD_REQUEST","검색어를 입력해주세요."),
 
     // 403 FORBIDDEN 권한이 없는 경우
     USER_NO_AUTH(403, "FORBIDDEN", "해당 자원에 대해 권한이 없습니다."),
 
-    // 404 NOT_FOUND 잘못된 리소스 접근
-    WRONG_PASSWORD(404, "NOT_FOUND", "잘못된 비밀번호 입니다."),
+    // 404 NOT_FOUND 잘못된 리소스 접근,
     USER_NOT_FOUND(404, "NOT_FOUND", "존재하지 않는 회원입니다."),
-    LOGIN_FAILED(404, "NOT_FOUND", "존재하지 않는 회원입니다."),
-    UNMATCHED_PASSWORD(404, "NOT_FOUND", "비밀번호 확인이 일치하지 않습니다."),
+    LOGIN_FAILED(404, "NOT_FOUND", "아이디와 비밀번호를 다시 확인해주세요."),
+    WRONG_PASSWORD(404, "NOT_FOUND", "비밀번호가 틀렸습니다."),
 
     // 500 내부 서버 에러
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR","No message available."),

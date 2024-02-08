@@ -12,14 +12,7 @@ jwt:
 
 publishedAt: 0000-00-00
 
-notification:
-  workDeadlineTriggerHours: 24 #${WORK_DEADLINE_TRIGGER_HOURS}
-  searchFutureNotificationMinutes: 60 #${SEARCH_FUTURE_NOTIFICATION_MINUTES}
-
-
 spring:
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
-
-allowedCorsOrigin: ${LOCAL_CLIENT_URL}
