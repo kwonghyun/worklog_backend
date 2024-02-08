@@ -63,6 +63,17 @@ public class UserService {
     public JwtDto login(UserLoginDto dto, HttpServletRequest request) {
         // TODO ID,PW 유효성 검사 후 유효하지 않으면 DB에서 확인 하지 않고 ID, PW 확인하라고 하기
         // TODO 같은 ID로 5회이상 로그인 실패시 계정 잠그고 이메일 인증으로 비밀번호 재설정하게 하기
+        Pattern usernamePattern = Pattern.compile(Constant.USERNAME_REGEX);
+        Pattern passwordPattern = Pattern.compile(Constant.PASSWORD_REGEX);
+        if (
+                !usernamePattern.matcher(dto.getUsername()).matches()
+                || !passwordPattern.matcher(dto.getPassword()).matches()
+        ) {
+            if (dto.getUsername().length() != 1 || dto.getPassword().length() != 1) {
+                throw new CustomException(ErrorCode.LOGIN_FAILED);
+            }
+        }
+
         CustomUserDetails userDetails;
 
         try {
@@ -165,7 +176,12 @@ public class UserService {
         log.info("{} 회원 탈퇴 완료", username);
     }
 
-    public void updateUserPassword(UserUpdatePwDto dto, String username) {
+    public void updateUserPassword(UserPasswordUpdateDto dto, String username) {
+        Pattern passwordPattern = Pattern.compile(Constant.PASSWORD_REGEX);
+        if (!passwordPattern.matcher(dto.getCurrentPassword()).matches()) {
+            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+        }
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         log.info("비밀번호 수정");
