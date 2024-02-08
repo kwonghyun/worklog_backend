@@ -72,7 +72,9 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/users/email/check",
-                                "/users/username/check"
+                                "/users/username/check",
+                                "/users/password/check",
+                                "/users/password-check/check"
                         ).anonymous()
                         .anyRequest().authenticated()
                 )

@@ -148,15 +148,37 @@ public class UserService {
         return jwtDto;
     }
 
-    // TODO 중복확인시 json으로 값 전달하기
-    public Boolean checkEmailDuplicated(String email) {
-        log.info("{} 중복검사 existsByEmail: {}", email, userRepository.existsByEmail(email));
-        return userRepository.existsByEmail(email);
+    public void checkEmail(String email) {
+        Pattern emailPattern = Pattern.compile(Constant.EMAIL_REGEX);
+        if (!emailPattern.matcher(email).matches()) {
+            throw new CustomException(ErrorCode.WRONG_EMAIL_FORMAT);
+        }
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTED_EMAIL);
+        }
     }
 
-    public Boolean checkUsernameDuplicated(String username) {
-        log.info("{} 중복검사 existsByUsername: {}", username, userRepository.existsByUsername(username));
-        return userRepository.existsByUsername(username);
+    public void checkUsername(String username) {
+        Pattern usernamePattern = Pattern.compile(Constant.USERNAME_REGEX);
+        if (!usernamePattern.matcher(username).matches()) {
+            throw new CustomException(ErrorCode.WRONG_USERNAME_FORMAT);
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTED_USERNAME);
+        }
+    }
+
+    public void checkPassword(String password) {
+        Pattern passwordPattern = Pattern.compile(Constant.PASSWORD_REGEX);
+        if (!passwordPattern.matcher(password).matches()) {
+            throw new CustomException(ErrorCode.WRONG_PASSWORD_FORMAT);
+        }
+    }
+
+    public void checkPasswordCheck(UserPasswordCheckDto dto) {
+        if (!dto.getPassword().equals(dto.getPasswordCheck())) {
+            throw new CustomException(ErrorCode.UNMATCHED_PASSWORD);
+        }
     }
 
     public void deleteUser(String username) {

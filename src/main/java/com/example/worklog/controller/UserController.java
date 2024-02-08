@@ -3,14 +3,10 @@ package com.example.worklog.controller;
 
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
-import com.example.worklog.dto.user.CustomUserDetails;
-import com.example.worklog.dto.user.UserLoginDto;
-import com.example.worklog.dto.user.UserSignupDto;
-import com.example.worklog.dto.user.UserUpdatePwDto;
+import com.example.worklog.dto.user.*;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
-import com.example.worklog.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -70,7 +66,7 @@ public class UserController {
     @PatchMapping("/me/password")
     public ResponseEntity<ResponseDto> updatePassword(
             @Valid @RequestBody
-            UserUpdatePwDto dto,
+            UserPasswordUpdateDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         userService.updateUserPassword(dto, userDetails.getUsername());
@@ -90,17 +86,35 @@ public class UserController {
 
     // email 중복확인
     @GetMapping("/email/check")
-    public ResponseEntity<ResourceResponseDto> checkEmailDuplicated(@RequestParam String email) {
+    public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
+        userService.checkEmail(email);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.checkEmailDuplicated(email), 1));
+                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_EMAIL));
     }
 
     // username 중복확인
     @GetMapping("/username/check")
-    public ResponseEntity<ResourceResponseDto> checkUsernameDuplicated(@RequestParam String username) {
+    public ResponseEntity<ResponseDto> checkUsername(@RequestParam String username) {
+        userService.checkUsername(username);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(userService.checkUsernameDuplicated(username), 1));
+                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_USERNAME));
+    }
+
+    @GetMapping("/password/check")
+    public ResponseEntity<ResponseDto> checkUsername(@RequestBody UserPasswordDto dto) {
+        userService.checkPassword(dto.getPassword());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_PASSWORD));
+    }
+
+    @GetMapping("/password-check/check")
+    public ResponseEntity<ResponseDto> checkUsername(@RequestBody UserPasswordCheckDto dto) {
+        userService.checkPasswordCheck(dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_PASSWORD_CHECK));
     }
 }
