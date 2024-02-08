@@ -3,7 +3,7 @@ package com.example.worklog.dto.work;
 import com.example.worklog.dto.enums.SortParam;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
-import com.example.worklog.exception.CustomDateValid;
+import com.example.worklog.exception.CustomDateValidation;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,10 +15,10 @@ public class WorkSearchParamDto {
 
     private int pageSize;
 
-    @CustomDateValid
+    @CustomDateValidation
     private String startDate;
 
-    @CustomDateValid
+    @CustomDateValidation
     private String endDate;
 
     private SortParam.Direction direction;

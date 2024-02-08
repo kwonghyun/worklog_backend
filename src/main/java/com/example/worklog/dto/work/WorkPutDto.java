@@ -2,7 +2,7 @@ package com.example.worklog.dto.work;
 
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
-import com.example.worklog.exception.CustomDateTimeValid;
+import com.example.worklog.exception.CustomDateTimeValidation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class WorkPutDto {
     @NotBlank(message = "내용을 입력해주세요.")
     private String content;
 
-    @CustomDateTimeValid
+    @CustomDateTimeValidation
     private String deadline;
 
     @NotNull(message = "업무 상태를 선택해주세요.")

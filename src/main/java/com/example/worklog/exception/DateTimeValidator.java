@@ -9,12 +9,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 @Slf4j
-public class DateTimeValidator implements ConstraintValidator<CustomDateTimeValid, String> {
+public class DateTimeValidator implements ConstraintValidator<CustomDateTimeValidation, String> {
 
     private String pattern;
 
     @Override
-    public void initialize(CustomDateTimeValid constraintAnnotation) {
+    public void initialize(CustomDateTimeValidation constraintAnnotation) {
         this.pattern = constraintAnnotation.pattern();
     }
 

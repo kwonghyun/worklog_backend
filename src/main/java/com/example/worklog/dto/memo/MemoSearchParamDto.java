@@ -1,7 +1,7 @@
 package com.example.worklog.dto.memo;
 
 import com.example.worklog.dto.enums.SortParam;
-import com.example.worklog.exception.CustomDateValid;
+import com.example.worklog.exception.CustomDateValidation;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,10 +13,10 @@ public class MemoSearchParamDto {
 
     private int pageSize;
 
-    @CustomDateValid
+    @CustomDateValidation
     private String startDate;
 
-    @CustomDateValid
+    @CustomDateValidation
     private String endDate;
 
     private SortParam.Direction direction;

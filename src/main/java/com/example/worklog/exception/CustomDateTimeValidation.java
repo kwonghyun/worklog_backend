@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = DateTimeValidator.class)
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CustomDateTimeValid {
+public @interface CustomDateTimeValidation {
     String message() default "날짜를 yyyy-MM-dd HH:mm 형식으로 입력해주세요.";
 
     Class<?>[] groups() default {};
