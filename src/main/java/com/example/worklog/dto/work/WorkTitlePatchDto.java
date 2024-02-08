@@ -1,9 +1,11 @@
 package com.example.worklog.dto.work;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class WorkTitlePatchDto {
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;

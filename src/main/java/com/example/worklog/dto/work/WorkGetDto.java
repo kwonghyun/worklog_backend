@@ -3,11 +3,15 @@ package com.example.worklog.dto.work;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.format.DateTimeFormatter;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class WorkGetDto {
     private Long id;
     private String content;

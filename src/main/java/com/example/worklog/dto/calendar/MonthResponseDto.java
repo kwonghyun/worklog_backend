@@ -1,11 +1,14 @@
 package com.example.worklog.dto.calendar;
 
-import com.example.worklog.dto.ResponseDto;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class MonthResponseDto {
     List<Integer> months;
 

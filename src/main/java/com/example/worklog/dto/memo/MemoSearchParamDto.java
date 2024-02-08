@@ -4,10 +4,12 @@ import com.example.worklog.dto.enums.SortParam;
 import com.example.worklog.exception.CustomDateValidation;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Getter
 @Setter
+@ToString
 public class MemoSearchParamDto {
     private int pageNum;
 

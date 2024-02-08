@@ -5,9 +5,11 @@ import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.CustomDateTimeValidation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class WorkPutDto {
     @NotBlank(message = "제목을 입력해주세요.")
     private String title;

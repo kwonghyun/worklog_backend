@@ -1,8 +1,8 @@
 package com.example.worklog.dto.user;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserPasswordDto {
     private String password;
 }

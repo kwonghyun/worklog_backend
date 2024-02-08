@@ -1,11 +1,15 @@
 package com.example.worklog.dto.memo;
 
 import com.example.worklog.entity.Memo;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.format.DateTimeFormatter;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class MemoGetDto {
     private Long id;
     private String content;

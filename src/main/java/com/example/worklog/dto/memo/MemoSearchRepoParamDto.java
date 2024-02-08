@@ -1,11 +1,15 @@
 package com.example.worklog.dto.memo;
 
 import com.example.worklog.dto.enums.SortParam;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class MemoSearchRepoParamDto {
     private LocalDate startDate;
     private LocalDate endDate;

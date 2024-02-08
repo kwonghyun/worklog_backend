@@ -5,11 +5,11 @@ import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.CustomDateValidation;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.ToString;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Getter
-@Setter
+@ToString
 public class WorkSearchParamDto {
     private int pageNum;
 

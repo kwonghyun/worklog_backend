@@ -1,10 +1,14 @@
 package com.example.worklog.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-@Data
+@Getter
+@Setter
+@ToString
 public class PageDto<T> {
     private List<T> content;
     private int pageNumber;

@@ -4,9 +4,9 @@ package com.example.worklog.dto.user;
 import com.example.worklog.utils.Constant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserPasswordUpdateDto {
     @NotBlank(message = Constant.PASSWORD_NOT_BLANK_MESSAGE)
     private String currentPassword;

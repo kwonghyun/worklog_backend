@@ -3,9 +3,13 @@ package com.example.worklog.dto.notification;
 import com.example.worklog.entity.Notification;
 import com.example.worklog.entity.enums.EventType;
 import com.example.worklog.entity.enums.NotificationEntityType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 public class NotificationDto {
     private Long notificationId;
     private String message;

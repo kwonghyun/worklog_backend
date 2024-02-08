@@ -1,11 +1,12 @@
 package com.example.worklog.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
-@Data
+@Getter
+@Setter
+@ToString
 public class ResourceResponseDto<T> {
     int status = 200;
     int count;

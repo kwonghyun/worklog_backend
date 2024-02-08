@@ -3,11 +3,12 @@ package com.example.worklog.dto.calendar;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Data
+@Getter
+@ToString
 public class MonthRequestDto {
 
     @Min(value = 1000, message = "년도는 YYYY 형식으로 입력해주세요.")

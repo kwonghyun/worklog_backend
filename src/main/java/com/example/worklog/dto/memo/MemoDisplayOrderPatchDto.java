@@ -1,9 +1,11 @@
 package com.example.worklog.dto.memo;
 
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Data;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
+@ToString
 public class MemoDisplayOrderPatchDto {
     @PositiveOrZero
     private Integer order;

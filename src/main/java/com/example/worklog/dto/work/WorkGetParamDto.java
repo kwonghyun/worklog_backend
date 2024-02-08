@@ -4,10 +4,12 @@ import com.example.worklog.exception.CustomDateValidation;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Getter
 @Setter
+@ToString
 public class WorkGetParamDto {
     @CustomDateValidation
     @NotNull

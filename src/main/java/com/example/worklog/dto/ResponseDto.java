@@ -3,7 +3,9 @@ package com.example.worklog.dto;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.exception.SuccessCode;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -11,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 public class ResponseDto<T> {
     private int status;
