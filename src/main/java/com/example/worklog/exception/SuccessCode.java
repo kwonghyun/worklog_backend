@@ -14,6 +14,10 @@ public enum SuccessCode {
     USER_LOGOUT_SUCCESS(200, "OK", "로그아웃 되었습니다."),
     USER_PASSWORD_CHANGE_SUCCESS(200, "OK", "비밀번호가 변경되었습니다."),
     USER_DELETE_SUCCESS(200, "OK", "회원탈퇴가 완료되었습니다."),
+    VALID_EMAIL(200, "OK", "사용 가능한 이메일입니다."),
+    VALID_USERNAME(200, "OK", "사용 가능한 아이디입니다."),
+    VALID_PASSWORD(200, "OK", "사용 가능한 비밀번호입니다."),
+    VALID_PASSWORD_CHECK(200, "OK", "비밀번호가 일치합니다."),
 
     // work
     WORK_CREATED(201, "CREATED", "업무일지가 생성되었습니다."),

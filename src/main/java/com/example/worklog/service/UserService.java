@@ -1,9 +1,6 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.user.CustomUserDetails;
-import com.example.worklog.dto.user.UserLoginDto;
-import com.example.worklog.dto.user.UserSignupDto;
-import com.example.worklog.dto.user.UserUpdatePwDto;
+import com.example.worklog.dto.user.*;
 import com.example.worklog.entity.User;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
@@ -12,6 +9,7 @@ import com.example.worklog.jwt.JwtTokenUtils;
 import com.example.worklog.jwt.RefreshToken;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
 import com.example.worklog.repository.UserRepository;
+import com.example.worklog.utils.Constant;
 import com.example.worklog.utils.IpUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,18 +19,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-
-    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
-
-    private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
-
 
     public void register(UserSignupDto dto) {
         log.info("회원가입: 비밀번호 입력 확인");
@@ -61,7 +58,6 @@ public class UserService {
 
     // 로그인
     public JwtDto login(UserLoginDto dto, HttpServletRequest request) {
-        // TODO ID,PW 유효성 검사 후 유효하지 않으면 DB에서 확인 하지 않고 ID, PW 확인하라고 하기
         // TODO 같은 ID로 5회이상 로그인 실패시 계정 잠그고 이메일 인증으로 비밀번호 재설정하게 하기
         Pattern usernamePattern = Pattern.compile(Constant.USERNAME_REGEX);
         Pattern passwordPattern = Pattern.compile(Constant.PASSWORD_REGEX);
@@ -75,7 +71,6 @@ public class UserService {
         }
 
         CustomUserDetails userDetails;
-
         try {
             userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(dto.getUsername());
         } catch (CustomException e) {
@@ -122,7 +117,7 @@ public class UserService {
         }
     }
 
-    public JwtDto reissue(HttpServletRequest request /*, HttpServletResponse response */) {
+    public JwtDto reissue(HttpServletRequest request) {
         // 1. 레디스에 해당 토큰 있는 지 확인
         RefreshToken refreshToken = refreshTokenRedisRepository
                 .findByRefreshToken(request.getHeader("Authorization").split(" ")[1])
@@ -185,6 +180,7 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         log.info("비밀번호 수정");
+
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             log.info("비밀번호 불일치");
             throw new CustomException(ErrorCode.WRONG_PASSWORD);
