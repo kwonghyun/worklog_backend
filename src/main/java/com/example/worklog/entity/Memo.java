@@ -45,10 +45,6 @@ public class Memo extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "memo")
-    @Builder.Default
-    private List<SavedMemo> savedMemos = new ArrayList<>();
-
     public void updateContent(String content) {
         this.content = content;
     }

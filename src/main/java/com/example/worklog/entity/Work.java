@@ -64,10 +64,6 @@ public class Work extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "work")
-    @Builder.Default
-    private List<SavedWork> savedWorks = new ArrayList<>();
-
     public void updateTitle(String title) {
         this.title = title;
     }
