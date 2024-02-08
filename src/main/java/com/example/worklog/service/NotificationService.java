@@ -12,6 +12,7 @@ import com.example.worklog.repository.NotificationRepository;
 import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
+import com.example.worklog.utils.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,10 +34,8 @@ public class NotificationService {
     private final WorkRepository workRepository;
     private final SseService sseService;
     private final Scheduler scheduler;
-
-    private final long workDeadlineTriggerHours;
-    private final long searchFutureNotificationMinutes;
     private final long accessExpirationTime;
+
     public NotificationService(
             NotificationRepository notificationRepository,
             UserRepository userRepository,
@@ -44,11 +43,7 @@ public class NotificationService {
             SseService sseService,
             Scheduler scheduler,
             @Value("${jwt.accessExpirationTime}")
-            long accessExpirationTime,
-            @Value("${notification.workDeadlineTriggerHours}")
-            long workDeadlineTriggerHours,
-            @Value("${notification.searchFutureNotificationMinutes}")
-            long searchFutureNotificationMinutes
+            long accessExpirationTime
             ) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
@@ -56,8 +51,6 @@ public class NotificationService {
         this.sseService = sseService;
         this.scheduler = scheduler;
         this.accessExpirationTime = accessExpirationTime;
-        this.workDeadlineTriggerHours = workDeadlineTriggerHours;
-        this.searchFutureNotificationMinutes = searchFutureNotificationMinutes;
     }
 
     public Boolean isTimeToNotice(String username) {
@@ -65,7 +58,7 @@ public class NotificationService {
         LocalDateTime lastNoticedAt = user.getLastNoticedAt();
         return lastNoticedAt == null
                 || lastNoticedAt
-                    .plusHours(searchFutureNotificationMinutes)
+                    .plusHours(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES)
                     .minusSeconds(accessExpirationTime)
                     .isAfter(LocalDateTime.now());
     }
@@ -74,7 +67,7 @@ public class NotificationService {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
         User user = getValidatedUserByUsername(username);
         List<Work> worksToNotice = workRepository.readWorkByDeadlineBeforeAndUserAndNoticedFalse(
-                LocalDateTime.now().plusHours(workDeadlineTriggerHours).plusMinutes(searchFutureNotificationMinutes), user
+                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES), user
         );
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링
@@ -104,7 +97,7 @@ public class NotificationService {
         return notificationRepository.save(Notification.builder()
                 .entityType(NotificationEntityType.WORK)
                 .entityId(work.getId())
-                .timeToSend(work.getDeadline().minusHours(workDeadlineTriggerHours))
+                .timeToSend(work.getDeadline().minusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS))
                 .receiver(work.getUser())
                 .build());
     }
@@ -121,7 +114,7 @@ public class NotificationService {
                 .map(work -> Notification.builder()
                         .entityType(NotificationEntityType.WORK)
                         .entityId(work.getId())
-                        .timeToSend(work.getDeadline().minusHours(workDeadlineTriggerHours))
+                        .timeToSend(work.getDeadline().minusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS))
                         .receiver(work.getUser())
                         .build())
                 .collect(Collectors.toList())
@@ -247,18 +240,18 @@ public class NotificationService {
 
     public Boolean isNeededSendingNow(LocalDateTime deadline) {
         return deadline.isBefore(
-                LocalDateTime.now().plusHours(workDeadlineTriggerHours)
+                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
         );
     }
 
     public Boolean isNeededReservation(LocalDateTime deadline) {
         return deadline.isAfter(
-                LocalDateTime.now().plusHours(workDeadlineTriggerHours)
+                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
                 )
                 && deadline.isBefore(
                         LocalDateTime.now()
-                                .plusHours(workDeadlineTriggerHours)
-                                .plusHours(searchFutureNotificationMinutes)
+                                .plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
+                                .plusHours(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES)
                 );
     }
 
