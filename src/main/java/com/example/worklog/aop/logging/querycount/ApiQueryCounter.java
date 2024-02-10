@@ -1,4 +1,4 @@
-package com.example.worklog.aop;
+package com.example.worklog.aop.logging.querycount;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;

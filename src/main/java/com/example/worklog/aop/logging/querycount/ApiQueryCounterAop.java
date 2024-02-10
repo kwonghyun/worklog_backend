@@ -1,5 +1,6 @@
-package com.example.worklog.aop;
+package com.example.worklog.aop.logging.querycount;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,13 +12,10 @@ import java.lang.reflect.Proxy;
 @Component
 @Aspect
 @Slf4j
+@RequiredArgsConstructor
 public class ApiQueryCounterAop {
 
     private final ApiQueryCounter apiQueryCounter;
-
-    public ApiQueryCounterAop(final ApiQueryCounter apiQueryCounter) {
-        this.apiQueryCounter = apiQueryCounter;
-    }
 
     @Around("execution(* javax.sql.DataSource.getConnection())")
     public Object getConnection(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {

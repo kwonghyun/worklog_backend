@@ -43,7 +43,7 @@ public class SseService {
         });
         emitter.onTimeout(() -> {
             log.info("onTimeout callback");
-            //만료 시 Repository에서 삭제 되어야함.
+            //만료 시 Repository에서 삭제
             emitter.complete();
         });
 

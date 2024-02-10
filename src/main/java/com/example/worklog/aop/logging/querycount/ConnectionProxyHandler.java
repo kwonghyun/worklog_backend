@@ -1,18 +1,15 @@
-package com.example.worklog.aop;
+package com.example.worklog.aop.logging.querycount;
+
+import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
+@RequiredArgsConstructor
 public class ConnectionProxyHandler implements InvocationHandler {
 
     private final Object connection;
     private final ApiQueryCounter apiQueryCounter;
-
-    public ConnectionProxyHandler(final Object connection, final ApiQueryCounter apiQueryCounter) {
-        this.connection = connection;
-        this.apiQueryCounter = apiQueryCounter;
-    }
 
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
