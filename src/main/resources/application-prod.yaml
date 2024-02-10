@@ -6,7 +6,6 @@ spring:
     password: ${DB_PASSWORD}
 
   jpa:
-    show-sql: true
     hibernate:
       ddl-auto: update
       database-platform: org.hibernate.dialect.MySQL57Dialect
@@ -14,3 +13,7 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
