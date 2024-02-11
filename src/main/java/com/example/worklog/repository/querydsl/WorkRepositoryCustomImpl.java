@@ -61,8 +61,8 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
     }
 
     private BooleanExpression keywordLike(String keyword) {
-        return keyword != null ? QWork.work.content.like("%" + keyword + "%")
-                .or(QWork.work.title.like("%" + keyword + "%")) : null;
+        return keyword != null ? QWork.work.content.contains(keyword)
+                .or(QWork.work.title.contains(keyword)) : null;
     }
 
     private BooleanExpression categoryEq(Category category) {
