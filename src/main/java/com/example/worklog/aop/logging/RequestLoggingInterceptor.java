@@ -15,9 +15,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class RequestLoggingInterceptor implements HandlerInterceptor {
     private final RequestLogger logger;
     private final JwtTokenUtils jwtTokenUtils;
-    private static final String QUERY_COUNT_LOG_FORMAT = "{}STATUS_CODE: {}, QUERY_COUNT: {}, ACCUMULATED_QUERY_COUNT: {}";
+    private static final String QUERY_COUNT_LOG_FORMAT = "{}STATUS_CODE: {}, QUERY_COUNT: {}, EXECUTION_TIME: {}ms";
     private final ApiQueryCounter apiQueryCounter;
-    private Long accumulatedQueryCount = 0L;
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -40,10 +40,8 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     public void afterCompletion(final HttpServletRequest request, final HttpServletResponse response,
                                 final Object handler, final Exception ex) {
         final int queryCount = apiQueryCounter.getCount();
-        accumulatedQueryCount += queryCount;
-
+        logger.setEndTimeMillis(System.currentTimeMillis());
         log.info(QUERY_COUNT_LOG_FORMAT, logger, response.getStatus(),
-                queryCount, accumulatedQueryCount);
-
+                queryCount, logger.getExecutionTime());
     }
 }

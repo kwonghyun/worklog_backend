@@ -22,7 +22,14 @@ public class RequestLogger {
     private String requestURL;
     @Setter
     private String username;
+    @Setter
+    private long startTimeMillis;
+    @Setter
+    private long endTimeMillis;
 
+    public long getExecutionTime() {
+        return endTimeMillis - startTimeMillis;
+    }
     @Override
     public String toString() {
         return String.format("[%s][%s%s][%s] ", uuid, requestMethod, requestURL, username);
@@ -30,6 +37,7 @@ public class RequestLogger {
 
     @PostConstruct
     public void init() {
+        setStartTimeMillis(System.currentTimeMillis());
         uuid = UUID.randomUUID().toString();
         log.info("[{}] request scope bean create", uuid);
     }
