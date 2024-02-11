@@ -9,10 +9,18 @@ spring:
     hibernate:
       ddl-auto: create
       database-platform: org.hibernate.dialect.MySQL57Dialect
+      properties:
+        hibernate:
+          show_sql: true
+          format_sql: true
+
 
 logging:
   level:
     org:
-      springframework: debug
-
+      springframework: info
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
 
