@@ -151,6 +151,10 @@ public class WorkService {
         }
         work.updateOrder(Integer.MIN_VALUE);
         workRepository.delete(work);
+
+        applicationEventPublisher.publishEvent(
+                WorkChangeEvent.builder().work(work).build()
+        );
     }
 
     public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, Long userId) {

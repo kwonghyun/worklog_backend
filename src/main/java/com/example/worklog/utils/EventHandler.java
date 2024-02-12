@@ -21,8 +21,15 @@ public class EventHandler {
     @EventListener
     public void onWorkChanged(WorkChangeEvent workChangeEvent) {
         Work work = workChangeEvent.getWork();
-        String username = work.getUser().getUsername();
-        if (!sseService.isSseConnected(username, SseRole.NOTIFICATION)) {
+        Long userId = work.getUser().getId();
+
+        if (work.getIsDeleted() && notificationService.existsByWork(work)) {
+            notificationService.deleteAll(
+                    notificationService.findAllByWork(work)
+            );
+        }
+
+        if (!sseService.isSseConnected(userId, SseRole.NOTIFICATION)) {
             log.info("EventHandler.onWorkChanged: sse연결 없어서 종료");
             return;
         }
