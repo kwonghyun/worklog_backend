@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-
 public class AuthCreationFilter extends OncePerRequestFilter {
     private final JwtTokenUtils jwtTokenUtils;
 
@@ -59,10 +60,16 @@ public class AuthCreationFilter extends OncePerRequestFilter {
             } else {
                 log.info("사용자 인증 객체 생성 시작");
                 Claims claims = jwtTokenUtils.parseClaims(token);
+                Object lastNoticedAtClaim = claims.get("last-noticed-at");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime lastNoticedAt = lastNoticedAtClaim != null ? LocalDateTime.parse((String) lastNoticedAtClaim, formatter) : null;
+
                 authentication = new UsernamePasswordAuthenticationToken(
                         CustomUserDetails.builder()
                                 .username(claims.getSubject())
                                 .id(Long.parseLong((String) claims.get("id")))
+                                .lastNoticedAt(lastNoticedAt)
                                 .build(),
                         token,
                         jwtTokenUtils.getAuthoritiesFromClaims(claims)

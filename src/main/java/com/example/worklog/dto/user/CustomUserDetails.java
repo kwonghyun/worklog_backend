@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +21,7 @@ public class CustomUserDetails implements UserDetails {
     private Long id;
     private String username;
     private String password;
+    private LocalDateTime lastNoticedAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -41,8 +43,12 @@ public class CustomUserDetails implements UserDetails {
         return this.username;
     }
 
-    public Long getUserId() {
+    public Long getId() {
         return this.id;
+    }
+
+    public LocalDateTime getLastNoticedAt() {
+        return this.lastNoticedAt;
     }
     @Override
     public boolean isAccountNonExpired() {
@@ -69,6 +75,7 @@ public class CustomUserDetails implements UserDetails {
                 .id(user.getId())
                 .username(user.getUsername())
                 .password(user.getPassword())
+                .lastNoticedAt(user.getLastNoticedAt())
                 .build();
     }
 
@@ -77,6 +84,7 @@ public class CustomUserDetails implements UserDetails {
                 .id(id)
                 .password(password)
                 .email(username)
+                .lastNoticedAt(lastNoticedAt)
                 .build();
     }
 }
