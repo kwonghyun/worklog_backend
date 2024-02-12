@@ -212,7 +212,7 @@ public class NotificationService {
     public void sendNotification(Notification notification) {
         String username = notification.getReceiver().getUsername();
         generateMessage(notification);
-        String emitterKey = username + "_" + SseRole.NOTIFICATION;
+        EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
             sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
             notification.updateIsSent(true);
@@ -229,7 +229,7 @@ public class NotificationService {
                 notifications.stream()
                     .map(notification -> {
                                 generateMessage(notification);
-                                String emitterKey = notification.getReceiver().getUsername() + "_" + SseRole.NOTIFICATION;
+                                EmitterKey emitterKey = new EmitterKey(notification.getReceiver().getId(), SseRole.NOTIFICATION);
                                 sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
                                 notification.updateIsSent(true);
                                 return notification;

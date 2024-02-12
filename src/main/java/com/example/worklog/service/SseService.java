@@ -8,6 +8,7 @@ import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.SseEmitterRepository;
 import com.example.worklog.repository.UserRepository;
+import com.example.worklog.utils.EmitterKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -27,19 +28,17 @@ public class SseService {
     private final UserRepository userRepository;
     private final SseEmitterRepository sseEmitterRepository;
 
-    public Boolean isSseConnected(String username, SseRole role) {
-        return sseEmitterRepository.existsByKey(username + "_" + role.name());
+    public Boolean isSseConnected(Long userId, SseRole role) {
+        return sseEmitterRepository.existsByKey(new EmitterKey(userId, role));
     }
 
     public SseEmitter subscribe(String username, SseRole role, String lastEventId) {
         User user = getValidatedUserByUsername(username);
         SseEmitter emitter = new SseEmitter(sseTimeout);
-
-        String key = username + "_" + role.name();
-
+        EmitterKey emitterKey = new EmitterKey(userId, role);
         emitter.onCompletion(() -> {
             log.info("onCompletion callback");
-            sseEmitterRepository.remove(key);
+            sseEmitterRepository.remove(emitterKey);
         });
         emitter.onTimeout(() -> {
             log.info("onTimeout callback");
@@ -47,8 +46,7 @@ public class SseService {
             emitter.complete();
         });
 
-        sseEmitterRepository.put(key, emitter);
-        log.info("구독시 emitterKey: {}", key);
+        sseEmitterRepository.put(emitterKey, emitter);
 
         try {
             emitter.send(
@@ -65,7 +63,7 @@ public class SseService {
             );
             log.info("username: {} 에게 sse 연결 성공", key.split("_")[0]);
         } catch (IOException exception) {
-            sseEmitterRepository.remove(key);
+            sseEmitterRepository.remove(emitterKey);
             log.info("SSE Exception: {}", exception.getMessage());
             throw new CustomException(ErrorCode.SSE_CONNECTION_BROKEN);
         }
@@ -73,7 +71,7 @@ public class SseService {
         return emitter;
     }
 
-    public void sendToClient(String emitterKey, NotificationDto dto) {
+    public void sendToClient(EmitterKey emitterKey, NotificationDto dto) {
         log.info("전송시 emitter 있나요? {}", sseEmitterRepository.existsByKey(emitterKey));
         log.info("emitter 몇개 있나요? {}", sseEmitterRepository.countAll());
         SseEmitter emitter = sseEmitterRepository.findByKey(emitterKey)
@@ -86,7 +84,7 @@ public class SseService {
                             .data(dto, MediaType.APPLICATION_JSON)
                             .build()
             );
-            log.info("SSE : username: {} 에게 sse message : {} 전송", emitterKey.split("_")[0], dto.toString());
+            log.info("SSE : userId: {} 에게 sse message : {} 전송", emitterKey.toString().split("_")[1], dto.toString());
         } catch (IOException exception) {
             sseEmitterRepository.remove(emitterKey);
             log.info("SSE Exception: {}", exception.getMessage());
