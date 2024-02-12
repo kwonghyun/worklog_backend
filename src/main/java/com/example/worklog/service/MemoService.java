@@ -2,6 +2,7 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.PageDto;
+import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
@@ -13,6 +14,8 @@ import com.example.worklog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,63 +28,56 @@ public class MemoService {
     private final UserRepository userRepository;
     private final MemoRepository memoRepository;
 
-    public void createMemo(MemoPostDto dto, String username) {
-        User user = getValidatedUserByUsername(username);
+    public void createMemo(MemoPostDto dto, CustomUserDetails userDetails) {
+        User user = userDetails.toEntity();
         LocalDate date = LocalDate.parse(dto.getDate());
         memoRepository.save(
                 Memo.builder()
                         .content(dto.getContent())
                         .date(date)
-                        .displayOrder(memoRepository.countDisplayOrder(date, user))
+                        .displayOrder(memoRepository.countDisplayOrder(date, user.getId()))
                         .importance(Importance.MID)
                         .user(user)
                         .build()
         );
     }
 
-    public List<MemoGetDto> readMemos(MemoGetParamDto paramDto, String username) {
-        User user = getValidatedUserByUsername(username);
-
+    public List<MemoGetDto> readMemos(MemoGetParamDto paramDto, Long userId) {
         MemoGetRepoParamDto repoDto = MemoGetRepoParamDto.fromGetRequestDto(paramDto);
-        List<Memo> memos= memoRepository.readMemosByParamsAndUser(repoDto, user);
+        List<Memo> memos= memoRepository.readMemosByParamsAndUser(repoDto, userId);
 
         return memos.stream()
                 .map(memo -> MemoGetDto.fromEntity(memo))
                 .collect(Collectors.toList());
     }
 
-    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, String username) {
-        User user = getValidatedUserByUsername(username);
-
+    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, Long userId) {
         MemoSearchRepoParamDto repoDto = MemoSearchRepoParamDto.fromGetRequestDto(paramDto);
 
         Page<Memo> pagedMemos = memoRepository.searchMemosByParamsAndUser(
-                repoDto, user,
+                repoDto, userId,
                 PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );
-
         Page<MemoGetDto> pageDto
                 = pagedMemos.map(memo -> MemoGetDto.fromEntity(memo));
 
         return PageDto.fromPage(pageDto);
     }
 
-    public void updateMemoContent(MemoContentPatchDto dto, Long memoId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
+    public void updateMemoContent(MemoContentPatchDto dto, Long memoId, Long userId) {
+        Memo memo = getValidatedMemoByUserAndMemoId(userId, memoId);
 
         memo.updateContent(dto.getContent());
         memoRepository.save(memo);
     }
 
-    public void deleteMemo(Long memoId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
-        int lastOrder = memoRepository.countDisplayOrder(memo.getDate(), user);
+    public void deleteMemo(Long memoId, Long userId) {
+        Memo memo = getValidatedMemoByUserAndMemoId(userId, memoId);
+        int lastOrder = memoRepository.countDisplayOrder(memo.getDate(), userId);
         int orderToDelete = memo.getDisplayOrder();
         if (orderToDelete < lastOrder) {
             List<Memo> memosToUpdateOrder
-                    = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, orderToDelete + 1, lastOrder);
+                    = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), userId, orderToDelete + 1, lastOrder);
             for (Memo memoToUpdate : memosToUpdateOrder) {
                 memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() - 1);
             }
@@ -92,9 +88,8 @@ public class MemoService {
     }
 
 
-    public void updateMemoDisplayOrder(MemoDisplayOrderPatchDto dto, Long memoId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Memo memo = getValidatedMemoByUserAndMemoId(user, memoId);
+    public void updateMemoDisplayOrder(MemoDisplayOrderPatchDto dto, Long memoId, Long userId) {
+        Memo memo = getValidatedMemoByUserAndMemoId(userId, memoId);
 
         Integer currentOrder = memo.getDisplayOrder();
         Integer targetOrder = dto.getOrder();
@@ -102,7 +97,7 @@ public class MemoService {
             return;
         }
 
-        Integer lastOrder = memoRepository.countDisplayOrder(memo.getDate(), user) - 1;
+        Integer lastOrder = memoRepository.countDisplayOrder(memo.getDate(), userId) - 1;
         if (targetOrder > lastOrder) {
             throw new CustomException(ErrorCode.MEMO_ORDER_INVALID);
         }
@@ -110,12 +105,12 @@ public class MemoService {
         List<Memo> memosToUpdateOrder;
         memo.updateOrder(targetOrder);
         if (currentOrder > targetOrder) {
-            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, targetOrder, currentOrder - 1);
+            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), userId, targetOrder, currentOrder - 1);
             for (Memo memoToUpdate : memosToUpdateOrder) {
                 memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() + 1);
             }
         } else {
-            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), user, currentOrder + 1, targetOrder);
+            memosToUpdateOrder = memoRepository.readMemosToUpdateDisplayOrder(memo.getDate(), userId, currentOrder + 1, targetOrder);
             for (Memo memoToUpdate : memosToUpdateOrder) {
                 memoToUpdate.updateOrder(memoToUpdate.getDisplayOrder() - 1);
             }
@@ -123,16 +118,11 @@ public class MemoService {
         memoRepository.saveAll(memosToUpdateOrder);
     }
 
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private Memo getValidatedMemoByUserAndMemoId(User user, Long memoId) {
+    private Memo getValidatedMemoByUserAndMemoId(Long userId, Long memoId) {
         Memo memo = memoRepository.findById(memoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMO_NOT_FOUND));
 
-        if (!memo.getUser().equals(user)) {
+        if (!memo.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.MEMO_USER_NOT_MATCHED);
         } else {
             return memo;

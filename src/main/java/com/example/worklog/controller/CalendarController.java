@@ -24,7 +24,7 @@ public class CalendarController {
 
     @GetMapping("/years")
     public ResponseEntity<ResourceResponseDto<YearResponseDto>> readYears(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        YearResponseDto dto = calendarService.readYears(userDetails.getUsername());
+        YearResponseDto dto = calendarService.readYears(userDetails.getId());
         return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(dto, dto.getYears().size()));
     }
 
@@ -33,7 +33,7 @@ public class CalendarController {
             @Valid @ModelAttribute MonthRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        MonthResponseDto responseDto = calendarService.readMonths(requestDto, userDetails.getUsername());
+        MonthResponseDto responseDto = calendarService.readMonths(requestDto, userDetails.getId());
         return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(responseDto, responseDto.getMonths().size()));
     }
 
@@ -42,7 +42,7 @@ public class CalendarController {
             @Valid @ModelAttribute DayRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        DayResponseDto responseDto = calendarService.readDays(requestDto, userDetails.getUsername());
+        DayResponseDto responseDto = calendarService.readDays(requestDto, userDetails.getId());
         return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(responseDto, responseDto.getDays().size()));
     }
 }

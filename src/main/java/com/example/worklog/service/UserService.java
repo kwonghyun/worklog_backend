@@ -30,6 +30,7 @@ public class UserService {
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
+    private final NotificationService notificationService;
 
     public void register(UserSignupDto dto) {
         log.info("회원가입: 비밀번호 입력 확인");

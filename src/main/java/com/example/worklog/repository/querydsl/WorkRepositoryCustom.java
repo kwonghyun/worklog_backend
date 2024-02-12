@@ -7,5 +7,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface WorkRepositoryCustom {
-    Page<Work> findBySearchParams(WorkSearchRepoParamDto dto, User user, Pageable pageable);
+    Page<Work> findBySearchParams(WorkSearchRepoParamDto dto, Long userId, Pageable pageable);
 }

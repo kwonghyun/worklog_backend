@@ -23,10 +23,10 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
             "SELECT w FROM Work w " +
                     "WHERE " +
                         "(w.date = :#{#dto.date}) " +
-                        "AND (w.user = :user) " +
+                        "AND (w.user.id = :userId) " +
                     "ORDER BY w.displayOrder ASC "
     )
-    List<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("user") User user);
+    List<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("userId") Long userId);
 
 //    IS NULL 에 enum이 들어오면
 //    java.lang.NullPointerException: Cannot invoke "org.hibernate.metamodel.mapping.JdbcMapping.getJdbcValueBinder()" because "jdbcMapping" is null
@@ -39,32 +39,32 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
                     "AND (:#{#dto.keyword} IS NULL OR w.content LIKE :#{#dto.keyword}) " +
                     "AND (:#{#dto.category} IS NULL OR w.category = :#{#dto.category}) " +
                     "AND (:#{#dto.state} IS NULL OR w.state = :#{#dto.state}) " +
-                    "AND (w.user = :user) " +
+                    "AND (w.user.id = :userId) " +
                     "ORDER BY w.date ASC, w.displayOrder ASC "
     )
-    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchRepoParamDto repoDto, @Param("user") User user, Pageable pageable);
+    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchRepoParamDto repoDto, @Param("userId") Long userId, Pageable pageable);
 
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE (w.deadline <= :deadline) " +
                     "AND (w.state = com.example.worklog.entity.enums.WorkState.IN_PROGRESS) " +
                     "AND (w.noticed = false) " +
-                    "AND (w.user = :user) " +
+                    "AND (w.user.id = :userId) " +
                     "ORDER BY w.deadline ASC "
     )
-    List<Work> readWorkByDeadlineBeforeAndUserAndNoticedFalse(@Param("deadline") LocalDateTime deadline, @Param("user") User user);
+    List<Work> readWorkByDeadlineBeforeAndUserAndNoticedFalse(@Param("deadline") LocalDateTime deadline, @Param("userId") Long userId);
     @Query(
             "SELECT COUNT(w) FROM Work w " +
                     "WHERE " +
                         "(w.date = :targetDate) " +
-                        "AND (w.user = :user) "
+                        "AND (w.user.id = :userId) "
     )
-    Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("user") User user);
+    Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("userId") Long userId);
 
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE " +
-                        "(w.user = :user) " +
+                        "(w.user.id = :userId) " +
                         "AND (w.date = :targetDate) " +
                         "AND (w.displayOrder >= :smallOrder) " +
                         "AND (w.displayOrder <= :bigOrder) " +
@@ -72,7 +72,7 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
     )
     List<Work> readWorksToUpdateDisplayOrder(
             @Param("targetDate") LocalDate targetDate,
-            @Param("user") User user,
+            @Param("userId") Long userId,
             @Param("smallOrder") Integer smallOrder,
             @Param("bigOrder") Integer bigOrder
     );

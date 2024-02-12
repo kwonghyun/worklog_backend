@@ -26,14 +26,14 @@ public class NotificationController {
 
     @PostMapping("/trigger")
     public ResponseEntity<ResponseDto> trigger(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        notificationService.checkNotificationAndSend(userDetails.getUsername());
+        notificationService.checkNotificationAndSend(userDetails.getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.fromSuccessCode(SuccessCode.SUCCESS));
     }
 
     @GetMapping("/noticed-at/check")
     public ResponseEntity<ResourceResponseDto> check(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        Boolean isTimeToNotice = notificationService.isTimeToNotice(userDetails.getUsername());
+        Boolean isTimeToNotice = notificationService.isTimeToNotice(userDetails.getLastNoticedAt());
         return ResponseEntity.status(HttpStatus.OK).body(ResourceResponseDto.fromData(
                 new HashMap<>(){{put("isTimeToNotice", isTimeToNotice);}}, 1));
     }

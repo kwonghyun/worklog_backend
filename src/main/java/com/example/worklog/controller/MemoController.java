@@ -29,7 +29,7 @@ public class MemoController {
             @Valid @RequestBody MemoPostDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ){
-        memoService.createMemo(dto, userDetails.getUsername());
+        memoService.createMemo(dto, userDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_CREATED));
@@ -40,7 +40,7 @@ public class MemoController {
             @Valid @ModelAttribute MemoGetParamDto paramDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<MemoGetDto> memos = memoService.readMemos(paramDto, userDetails.getUsername());
+        List<MemoGetDto> memos = memoService.readMemos(paramDto, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(memos, memos.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -52,7 +52,7 @@ public class MemoController {
             @Valid @ModelAttribute MemoSearchParamDto paramDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PageDto pageDto = memoService.searchMemos(paramDto, userDetails.getUsername());
+        PageDto pageDto = memoService.searchMemos(paramDto, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -66,7 +66,7 @@ public class MemoController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoContent(dto, memoId, userDetails.getUsername());
+        memoService.updateMemoContent(dto, memoId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -79,7 +79,7 @@ public class MemoController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoDisplayOrder(dto, memoId, userDetails.getUsername());
+        memoService.updateMemoDisplayOrder(dto, memoId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -90,7 +90,7 @@ public class MemoController {
             @PathVariable("memoId") Long memoId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        memoService.deleteMemo(memoId, userDetails.getUsername());
+        memoService.deleteMemo(memoId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_DELETE_SUCCESS));

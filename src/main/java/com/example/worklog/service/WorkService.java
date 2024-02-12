@@ -1,6 +1,7 @@
 package com.example.worklog.service;
 
 import com.example.worklog.dto.PageDto;
+import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
@@ -35,8 +36,8 @@ public class WorkService {
     private final WorkRepository workRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void createWork(WorkPostDto dto, String username) {
-        User user = getValidatedUserByUsername(username);
+    public void createWork(WorkPostDto dto, CustomUserDetails userDetails) {
+        User user = userDetails.toEntity();
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalDateTime deadline = dto.getDeadline() == null ?
                 null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -46,7 +47,7 @@ public class WorkService {
                         .content(dto.getContent())
                         .date(date)
                         .deadline(deadline)
-                        .displayOrder(workRepository.countDisplayOrder(date, user))
+                        .displayOrder(workRepository.countDisplayOrder(date, user.getId()))
                         .importance(Importance.MID)
                         .category(dto.getCategory())
                         .state(WorkState.IN_PROGRESS)
@@ -59,12 +60,10 @@ public class WorkService {
         );
     }
 
-    public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, String username) {
-        User user = getValidatedUserByUsername(username);
-
+    public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, Long userId) {
         WorkGetRepoParamDto repoDto = WorkGetRepoParamDto.fromGetRequestDto(paramDto);
         List<Work> works = workRepository.readWorksByParamsAndUser(
-                repoDto, user
+                repoDto, userId
         );
 
         return works.stream()
@@ -77,14 +76,12 @@ public class WorkService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
     }
 
-    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, String username) {
-        User user = getValidatedUserByUsername(username);
-
+    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, Long userId) {
         WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.fromGetRequestDto(paramDto);
         log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
         log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
         Page<Work> pagedWorks = workRepository.findBySearchParams(
-                repoDto, user,
+                repoDto, userId,
                 PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
         );
 
@@ -95,9 +92,9 @@ public class WorkService {
     }
 
 
-    public void updateWork(WorkPutDto dto, Long workId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+    public void updateWork(WorkPutDto dto, Long workId, Long userId) {
+
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
         LocalDateTime deadline = dto.getDeadline() == null ?
                 null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -116,52 +113,37 @@ public class WorkService {
         );
     }
 
-    public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, String username) {
-
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
-
+    public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
         work.updateTitle(dto.getTitle());
-
         workRepository.save(work);
     }
 
-    public void updateWorkContent(WorkContentPatchDto dto, Long workId, String username) {
-
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
-
+    public void updateWorkContent(WorkContentPatchDto dto, Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
         work.updateContent(dto.getContent());
-
         workRepository.save(work);
     }
 
-    public void updateWorkState(WorkStatePatchDto dto, Long workId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
-
+    public void updateWorkState(WorkStatePatchDto dto, Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
         work.updateState(dto.getState());
-
         workRepository.save(work);
     }
 
-    public void updateWorkCategory(WorkCategoryPatchDto dto, Long workId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
-
+    public void updateWorkCategory(WorkCategoryPatchDto dto, Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
         work.updateCategory(dto.getCategory());
-
         workRepository.save(work);
     }
 
-    public void deleteWork(Long workId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+    public void deleteWork(Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
-        int lastOrder = workRepository.countDisplayOrder(work.getDate(), user);
+        int lastOrder = workRepository.countDisplayOrder(work.getDate(), userId);
         int orderToDelete = work.getDisplayOrder();
         if (orderToDelete < lastOrder) {
-            List<Work> worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, orderToDelete + 1, lastOrder);
+            List<Work> worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), userId, orderToDelete + 1, lastOrder);
             for (Work workToUpdate : worksToUpdateOrder) {
                 workToUpdate.updateOrder(workToUpdate.getDisplayOrder() - 1);
             }
@@ -171,9 +153,8 @@ public class WorkService {
         workRepository.delete(work);
     }
 
-    public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, String username) {
-        User user = getValidatedUserByUsername(username);
-        Work work = getValidatedWorkByUserAndWorkId(user, workId);
+    public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, Long userId) {
+        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
         Integer currentOrder = work.getDisplayOrder();
         Integer targetOrder = dto.getOrder();
@@ -181,7 +162,7 @@ public class WorkService {
             return;
         }
 
-        Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), user) - 1;
+        Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), userId) - 1;
         if (targetOrder > lastOrder) {
             throw new CustomException(ErrorCode.WORK_ORDER_INVALID);
         }
@@ -189,12 +170,12 @@ public class WorkService {
         List<Work> worksToUpdateOrder;
         work.updateOrder(targetOrder);
         if (currentOrder > targetOrder) {
-            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, targetOrder, currentOrder - 1);
+            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), userId, targetOrder, currentOrder - 1);
             for (Work workToUpdate : worksToUpdateOrder) {
                 workToUpdate.updateOrder(workToUpdate.getDisplayOrder() + 1);
             }
         } else {
-            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), user, currentOrder + 1, targetOrder);
+            worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(work.getDate(), userId, currentOrder + 1, targetOrder);
             for (Work workToUpdate : worksToUpdateOrder) {
                 workToUpdate.updateOrder(workToUpdate.getDisplayOrder() - 1);
             }
@@ -202,16 +183,11 @@ public class WorkService {
         workRepository.saveAll(worksToUpdateOrder);
     }
 
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private Work getValidatedWorkByUserAndWorkId(User user, Long workId) {
+    private Work getValidatedWorkByUserIdAndWorkId(Long userId, Long workId) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
 
-        if (!work.getUser().equals(user)) {
+        if (!work.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
         } else {
             return work;

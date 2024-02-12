@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,7 @@ public class NotificationJob extends QuartzJobBean {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         Long notificationId = dataMap.getLong("notificationId");
 
-        Notification notification = notificationService.findOneWithReceiver(notificationId);
+        Notification notification = notificationService.findOne(notificationId);
         notificationService.sendNotification(notification);
     }
 }

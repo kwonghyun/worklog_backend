@@ -28,7 +28,7 @@ public class WorkController {
             @Valid @RequestBody WorkPostDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        workService.createWork(dto, userDetails.getUsername());
+        workService.createWork(dto, userDetails);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_CREATED));
@@ -39,7 +39,7 @@ public class WorkController {
             @Valid @ModelAttribute WorkGetParamDto paramDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<WorkGetDto> works = workService.readWorks(paramDto, userDetails.getUsername());
+        List<WorkGetDto> works = workService.readWorks(paramDto, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(works, works.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -51,7 +51,7 @@ public class WorkController {
             @Valid @ModelAttribute WorkSearchParamDto paramDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PageDto pageDto = workService.searchWorks(paramDto, userDetails.getUsername());
+        PageDto pageDto = workService.searchWorks(paramDto, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -64,7 +64,7 @@ public class WorkController {
             @Valid @RequestBody WorkPutDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWork(dto, workId, userDetails.getUsername());
+        workService.updateWork(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -76,7 +76,7 @@ public class WorkController {
             @Valid @RequestBody WorkTitlePatchDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWorkTitle(dto, workId, userDetails.getUsername());
+        workService.updateWorkTitle(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -87,7 +87,7 @@ public class WorkController {
             @Valid @RequestBody WorkContentPatchDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWorkContent(dto, workId, userDetails.getUsername());
+        workService.updateWorkContent(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -99,7 +99,7 @@ public class WorkController {
             @Valid @RequestBody WorkDisplayOrderPatchDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWorkDisplayOrder(dto, workId, userDetails.getUsername());
+        workService.updateWorkDisplayOrder(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -111,7 +111,7 @@ public class WorkController {
             @Valid @RequestBody WorkStatePatchDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWorkState(dto, workId, userDetails.getUsername());
+        workService.updateWorkState(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -123,7 +123,7 @@ public class WorkController {
             @Valid @RequestBody WorkCategoryPatchDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.updateWorkCategory(dto, workId, userDetails.getUsername());
+        workService.updateWorkCategory(dto, workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -136,7 +136,7 @@ public class WorkController {
             @PathVariable("workId") Long workId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        workService.deleteWork(workId, userDetails.getUsername());
+        workService.deleteWork(workId, userDetails.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_DELETE_SUCCESS));

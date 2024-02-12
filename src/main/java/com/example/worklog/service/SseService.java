@@ -32,8 +32,7 @@ public class SseService {
         return sseEmitterRepository.existsByKey(new EmitterKey(userId, role));
     }
 
-    public SseEmitter subscribe(String username, SseRole role, String lastEventId) {
-        User user = getValidatedUserByUsername(username);
+    public SseEmitter subscribe(Long userId, SseRole role, String lastEventId) {
         SseEmitter emitter = new SseEmitter(sseTimeout);
         EmitterKey emitterKey = new EmitterKey(userId, role);
         emitter.onCompletion(() -> {
@@ -51,7 +50,7 @@ public class SseService {
         try {
             emitter.send(
                     SseEmitter.event()
-                            .id("connect_" + username)
+                            .id("connect_" + userId)
                             .reconnectTime(sseTimeout)
                             .data(
                                     new HashMap<String, EventType>(){{
@@ -61,7 +60,6 @@ public class SseService {
                             )
                             .build()
             );
-            log.info("username: {} 에게 sse 연결 성공", key.split("_")[0]);
         } catch (IOException exception) {
             sseEmitterRepository.remove(emitterKey);
             log.info("SSE Exception: {}", exception.getMessage());
@@ -90,10 +88,5 @@ public class SseService {
             log.info("SSE Exception: {}", exception.getMessage());
             throw new CustomException(ErrorCode.SSE_CONNECTION_BROKEN);
         }
-    }
-
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

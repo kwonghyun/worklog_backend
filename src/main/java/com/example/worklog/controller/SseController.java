@@ -24,14 +24,12 @@ public class SseController {
 
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect(
-//            Authentication auth,
-            @RequestParam("username") String username,
+            @RequestParam("user-id") Long userId,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
             String lastEventId,
             HttpServletResponse response
     ) {
-//        SseEmitter emitter = sseService.subscribe(auth.getName(), SseRole.NOTIFICATION, lastEventId);
-        SseEmitter emitter = sseService.subscribe(username, SseRole.NOTIFICATION, lastEventId);
+        SseEmitter emitter = sseService.subscribe(userId, SseRole.NOTIFICATION, lastEventId);
         response.setHeader("X-Accel-Buffering", "no");
         return ResponseEntity.ok(emitter);
     }

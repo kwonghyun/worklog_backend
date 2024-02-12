@@ -19,29 +19,18 @@ public class CalendarService {
     private final CalendarRepository calendarRepository;
     private final UserRepository userRepository;
 
-    public YearResponseDto readYears(String username) {
-        User user = getValidatedUserByUsername(username);
-
-        List<Integer> yearsFromMemoAndWork = calendarRepository.readDistinctYear(user.getId());
+    public YearResponseDto readYears(Long userId) {
+        List<Integer> yearsFromMemoAndWork = calendarRepository.readDistinctYear(userId);
         return YearResponseDto.fromList(yearsFromMemoAndWork);
     }
 
-    public MonthResponseDto readMonths(MonthRequestDto dto, String username) {
-        User user = getValidatedUserByUsername(username);
-
-        List<Integer> monthsFromMemoAndWork = calendarRepository.readDistinctMonthsByYear(dto.getYear(), user.getId());
+    public MonthResponseDto readMonths(MonthRequestDto dto, Long userId) {
+        List<Integer> monthsFromMemoAndWork = calendarRepository.readDistinctMonthsByYear(dto.getYear(), userId);
         return MonthResponseDto.fromList(monthsFromMemoAndWork);
     }
 
-    public DayResponseDto readDays(DayRequestDto dto, String username) {
-        User user = getValidatedUserByUsername(username);
-
-        List<Integer> daysFromMemoAndWork = calendarRepository.readDistinctDaysByYearAndMonth(dto.getYear(), dto.getMonth(), user.getId());
+    public DayResponseDto readDays(DayRequestDto dto, Long userId) {
+        List<Integer> daysFromMemoAndWork = calendarRepository.readDistinctDaysByYearAndMonth(dto.getYear(), dto.getMonth(), userId);
         return DayResponseDto.fromList(daysFromMemoAndWork);
-    }
-
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

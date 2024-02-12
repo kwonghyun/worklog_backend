@@ -24,11 +24,11 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Work> findBySearchParams(WorkSearchRepoParamDto dto, User user, Pageable pageable) {
+    public Page<Work> findBySearchParams(WorkSearchRepoParamDto dto, Long userId, Pageable pageable) {
         QWork qWork = QWork.work;
         List<Work> works = queryFactory.selectFrom(qWork)
                 .where(
-                        qWork.user.eq(user),
+                        qWork.user.id.eq(userId),
                         startDateGoe(dto.getStartDate()),
                         endDateLoe(dto.getEndDate()),
                         keywordLike(dto.getKeyword()),
@@ -42,7 +42,7 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
 
         JPQLQuery<Work> count = queryFactory.selectFrom(qWork)
                 .where(
-                        qWork.user.eq(user),
+                        qWork.user.id.eq(userId),
                         startDateGoe(dto.getStartDate()),
                         endDateLoe(dto.getEndDate()),
                         keywordLike(dto.getKeyword()),

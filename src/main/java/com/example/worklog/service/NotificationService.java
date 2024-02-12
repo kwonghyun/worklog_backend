@@ -13,6 +13,7 @@ import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
 import com.example.worklog.utils.Constant;
+import com.example.worklog.utils.EmitterKey;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,9 +54,7 @@ public class NotificationService {
         this.accessExpirationTime = accessExpirationTime;
     }
 
-    public Boolean isTimeToNotice(String username) {
-        User user = getValidatedUserByUsername(username);
-        LocalDateTime lastNoticedAt = user.getLastNoticedAt();
+    public Boolean isTimeToNotice(LocalDateTime lastNoticedAt) {
         return lastNoticedAt == null
                 || lastNoticedAt
                     .plusHours(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES)
@@ -63,11 +62,12 @@ public class NotificationService {
                     .isAfter(LocalDateTime.now());
     }
 
-    public void checkNotificationAndSend(String username) {
+    public User checkNotificationAndSend(Long userId) {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
-        User user = getValidatedUserByUsername(username);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         List<Work> worksToNotice = workRepository.readWorkByDeadlineBeforeAndUserAndNoticedFalse(
-                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES), user
+                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES), userId
         );
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링
@@ -76,9 +76,8 @@ public class NotificationService {
                 .collect(Collectors.toList());
         createNotificationFrom(worksToNoticeNow);
 
-
         // 안보낸 모든 알림 찾아서 전송 (이전에 전송 실패한 알림이 있을 수 있으므로...)
-        sendAllNotificationsNotChecked(username);
+        sendAllNotificationsNotChecked(userId);
 
         // 1시간 이내에 알림을 보내야하는 work들 찾아서 스케줄러에 등록
         List<Work> worksToReserve = worksToNotice.stream()
@@ -88,7 +87,7 @@ public class NotificationService {
                     .forEach(notification -> reserveNotification(notification));
         // 마지막으로 알림 보낸 시간 업데이트
         user.updateLastNoticedAt(LocalDateTime.now());
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     public Notification createNotificationFrom(Work work) {
@@ -122,10 +121,9 @@ public class NotificationService {
     }
 
 
-    public void sendAllNotificationsNotChecked(String username) {
+    public void sendAllNotificationsNotChecked(Long userId) {
         // isChecked가 false인 알림 모두 찾기
-        List<Notification> notifications = notificationRepository.findAllByUsernameAndIsSentFalse(username);
-        log.info("NotificationService.sendAllNotificationsNotChecked: db에서 찾은 알림보낼 알림 갯수 {}", notifications.size());
+        List<Notification> notifications = notificationRepository.findAllByUserIdAndIsSentFalse(userId);
         sendNotification(notifications);
     }
 
@@ -192,7 +190,7 @@ public class NotificationService {
             case WORK -> {
                 log.info("NotificationService.generateMessage: 여기서 entityId: {}", notification.getEntityId());
                 Work work = workRepository.findById(notification.getEntityId())
-                        .orElseThrow(() -> new CustomException(ErrorCode.ERROR_GATEWAY_TIMEOUT));
+                        .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
                 String date = work.getDate().toString();
                 String title = work.getTitle();
                 LocalDateTime deadline = work.getDeadline();
@@ -210,7 +208,7 @@ public class NotificationService {
     }
 
     public void sendNotification(Notification notification) {
-        String username = notification.getReceiver().getUsername();
+        Long userId = notification.getReceiver().getId();
         generateMessage(notification);
         EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
@@ -265,22 +263,15 @@ public class NotificationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
     }
 
-    private User getValidatedUserByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public boolean existsByWork(Work work) {
+        return notificationRepository.existsByWorkId(work.getId());
     }
 
-    private Notification getValidatedNotificationByUserAndNotificationId(User user, Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
-
-        if (!notification.getReceiver().equals(user)) {
-            throw new CustomException(ErrorCode.NOTIFICATION_USER_NOT_MATCHED);
-        } else {
-            return notification;
-        }
+    public List<Notification> findAllByWork(Work work) {
+        return notificationRepository.findByWorkId(work. getId());
     }
 
-
-
+    public void deleteAll(List<Notification> notifications) {
+        notificationRepository.deleteAll(notifications);
+    }
 }

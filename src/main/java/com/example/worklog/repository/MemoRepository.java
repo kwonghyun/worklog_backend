@@ -19,10 +19,10 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
             "SELECT m FROM Memo m " +
                 "WHERE " +
                     "(m.date = :#{#dto.date}) " +
-                    "AND (m.user = :user) " +
+                    "AND (m.user.id = :userId) " +
                 "ORDER BY m.displayOrder ASC "
     )
-    List<Memo> readMemosByParamsAndUser(@Param("dto") MemoGetRepoParamDto dto, @Param("user") User user);
+    List<Memo> readMemosByParamsAndUser(@Param("dto") MemoGetRepoParamDto dto, @Param("userId") Long userId);
 
     @Query(
             "SELECT m FROM Memo m " +
@@ -30,24 +30,24 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
                     "(:#{#dto.startDate} IS NULL OR m.date >= :#{#dto.startDate}) " +
                     "AND (:#{#dto.endDate} IS NULL OR m.date <= :#{#dto.endDate}) " +
                     "AND (:#{#dto.keyword} IS NULL OR m.content LIKE :#{#dto.keyword}) " +
-                    "AND (m.user = :user) " +
+                    "AND (m.user.id = :userId) " +
                     "ORDER BY m.date ASC, m.displayOrder ASC "
     )
-    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchRepoParamDto dto, @Param("user") User user, Pageable pageable);
+    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchRepoParamDto dto, @Param("userId") Long userId, Pageable pageable);
 
     @Query(
             "SELECT COUNT(m) FROM Memo m " +
                     "WHERE " +
                         "(m.date = :targetDate) " +
-                        "AND (m.user = :user)"
+                        "AND (m.user.id = :userId)"
     )
-    Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("user") User user);
+    Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("userId") Long userId);
 
 
     @Query(
             "SELECT m FROM Memo m " +
                     "WHERE " +
-                        "(m.user = :user) " +
+                        "(m.user.id = :userId) " +
                         "AND (m.date = :targetDate) " +
                         "AND (m.displayOrder >= :smallOrder) " +
                         "AND (m.displayOrder <= :bigOrder) " +
@@ -55,7 +55,7 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
     )
     List<Memo> readMemosToUpdateDisplayOrder(
             @Param("targetDate") LocalDate targetDate,
-            @Param("user") User user,
+            @Param("userId") Long userId,
             @Param("smallOrder") Integer smallOrder,
             @Param("bigOrder") Integer bigOrder
             );
