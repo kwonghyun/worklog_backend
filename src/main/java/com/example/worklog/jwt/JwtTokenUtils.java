@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -45,7 +46,8 @@ public class JwtTokenUtils {
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
         String lastNoticedAt = userDetails.getLastNoticedAt() == null ?
-                null : userDetails.getLastNoticedAt().toString();
+                null : userDetails.getLastNoticedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         Claims accessTokenClaims = Jwts.claims()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
