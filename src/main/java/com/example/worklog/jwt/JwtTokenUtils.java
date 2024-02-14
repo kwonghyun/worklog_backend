@@ -44,7 +44,8 @@ public class JwtTokenUtils {
         log.info("\"{}\" jwt 발급", userDetails.getUsername());
         String authorities = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-
+        String lastNoticedAt = userDetails.getLastNoticedAt() == null ?
+                null : userDetails.getLastNoticedAt().toString();
         Claims accessTokenClaims = Jwts.claims()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
@@ -53,7 +54,7 @@ public class JwtTokenUtils {
                 .setClaims(accessTokenClaims)
                 .claim("authorities", authorities)
                 .claim("id", userDetails.getId().toString())
-                .claim("last-noticed-at", userDetails.getLastNoticedAt())
+                .claim("last-noticed-at", lastNoticedAt)
                 .signWith(signingKey)
                 .compact();
 
