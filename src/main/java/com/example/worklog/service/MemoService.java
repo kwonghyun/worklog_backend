@@ -1,11 +1,10 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.PageDto;
+import com.example.worklog.dto.memo.*;
 import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
-import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
@@ -13,9 +12,7 @@ import com.example.worklog.repository.MemoRepository;
 import com.example.worklog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -51,12 +48,11 @@ public class MemoService {
                 .collect(Collectors.toList());
     }
 
-    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, Long userId) {
-        MemoSearchRepoParamDto repoDto = MemoSearchRepoParamDto.fromGetRequestDto(paramDto);
+    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, Pageable pageable, Long userId) {
+        MemoSearchRepoParamDto repoDto = MemoSearchRepoParamDto.from(paramDto);
 
         Page<Memo> pagedMemos = memoRepository.searchMemosByParamsAndUser(
-                repoDto, userId,
-                PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
+                repoDto, pageable, userId
         );
         Page<MemoGetDto> pageDto
                 = pagedMemos.map(memo -> MemoGetDto.fromEntity(memo));

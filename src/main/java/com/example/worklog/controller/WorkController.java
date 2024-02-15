@@ -10,6 +10,7 @@ import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,10 +49,11 @@ public class WorkController {
 
     @GetMapping("/search")
     public ResponseEntity<ResourceResponseDto> searchWorks(
+            Pageable pageable,
             @Valid @ModelAttribute WorkSearchParamDto paramDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PageDto pageDto = workService.searchWorks(paramDto, userDetails.getId());
+        PageDto pageDto = workService.searchWorks(paramDto, pageable, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)

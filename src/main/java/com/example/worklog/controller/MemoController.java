@@ -10,6 +10,7 @@ import com.example.worklog.service.MemoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,9 +51,10 @@ public class MemoController {
     @GetMapping("/search")
     public ResponseEntity<ResourceResponseDto> searchMemos(
             @Valid @ModelAttribute MemoSearchParamDto paramDto,
+            Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PageDto pageDto = memoService.searchMemos(paramDto, userDetails.getId());
+        PageDto pageDto = memoService.searchMemos(paramDto, pageable, userDetails.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)

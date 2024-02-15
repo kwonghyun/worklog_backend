@@ -3,7 +3,6 @@ package com.example.worklog.repository;
 import com.example.worklog.dto.memo.MemoGetRepoParamDto;
 import com.example.worklog.dto.memo.MemoSearchRepoParamDto;
 import com.example.worklog.entity.Memo;
-import com.example.worklog.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,7 +32,7 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
                     "AND (m.user.id = :userId) " +
                     "ORDER BY m.date ASC, m.displayOrder ASC "
     )
-    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchRepoParamDto dto, @Param("userId") Long userId, Pageable pageable);
+    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchRepoParamDto dto, Pageable pageable, @Param("userId") Long userId);
 
     @Query(
             "SELECT COUNT(m) FROM Memo m " +

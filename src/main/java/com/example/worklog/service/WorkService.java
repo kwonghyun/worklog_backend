@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -76,13 +76,12 @@ public class WorkService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
     }
 
-    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, Long userId) {
-        WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.fromGetRequestDto(paramDto);
+    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, Pageable pageable, Long userId) {
+        WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.from(paramDto);
         log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
         log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
         Page<Work> pagedWorks = workRepository.findBySearchParams(
-                repoDto, userId,
-                PageRequest.of(paramDto.getPageNum() - 1, paramDto.getPageSize())
+                repoDto, pageable, userId
         );
 
         Page<WorkGetDto> pageDto
