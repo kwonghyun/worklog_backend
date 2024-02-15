@@ -15,7 +15,7 @@ public class WorkSearchParamDto {
     private String startDate;
     @CustomDateValidation
     private String endDate;
-    private String keyword;
+    private String key;
     private Category category;
     private WorkState state;
 }

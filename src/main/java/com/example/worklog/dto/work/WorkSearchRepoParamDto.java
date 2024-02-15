@@ -28,7 +28,7 @@ public class WorkSearchRepoParamDto {
         if (requestParamDto.getEndDate() != null) {
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
         }
-        dto.setKeyword(requestParamDto.getKeyword());
+        dto.setKeyword(requestParamDto.getKey());
         dto.setCategory(requestParamDto.getCategory());
         dto.setState(requestParamDto.getState());
         return dto;

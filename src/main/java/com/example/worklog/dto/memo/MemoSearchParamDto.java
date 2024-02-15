@@ -13,5 +13,5 @@ public class MemoSearchParamDto {
     private String startDate;
     @CustomDateValidation
     private String endDate;
-    private String keyword;
+    private String key;
 }

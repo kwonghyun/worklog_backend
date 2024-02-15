@@ -24,7 +24,7 @@ public class MemoSearchRepoParamDto {
         if (requestParamDto.getEndDate() != null) {
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
         }
-        dto.setKeyword(requestParamDto.getKeyword());
+        dto.setKeyword(requestParamDto.getKey());
         return dto;
     }
 }
