@@ -1,5 +1,6 @@
 package com.example.worklog.exception;
 
+import com.example.worklog.utils.Constant;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -10,7 +11,7 @@ import java.lang.annotation.*;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CustomDateValidation {
-    String message() default "날짜를 yyyy-MM-dd 형식으로 입력해주세요.";
+    String message() default Constant.DATE_NOT_VALID_MESSAGE;
 
     Class<?>[] groups() default {};
 

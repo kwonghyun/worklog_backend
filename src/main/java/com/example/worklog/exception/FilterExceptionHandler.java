@@ -12,7 +12,6 @@ public class FilterExceptionHandler {
         response.setStatus(error.getStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        log.info("필터 에러 커스텀");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.writeValue(response.getWriter(), ResponseDto.fromErrorCode(error));

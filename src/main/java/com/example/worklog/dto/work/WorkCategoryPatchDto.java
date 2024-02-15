@@ -1,6 +1,7 @@
 package com.example.worklog.dto.work;
 
 import com.example.worklog.entity.enums.Category;
+import com.example.worklog.utils.Constant;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.ToString;
@@ -8,6 +9,6 @@ import lombok.ToString;
 @Getter
 @ToString
 public class WorkCategoryPatchDto {
-    @NotNull(message = "올바른 업무 유형을 입력해주세요.")
+    @NotNull(message = Constant.CATEGORY_NOT_BLANK)
     private Category category;
 }

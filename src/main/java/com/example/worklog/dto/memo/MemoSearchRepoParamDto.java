@@ -1,6 +1,5 @@
 package com.example.worklog.dto.memo;
 
-import com.example.worklog.dto.enums.SortParam;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,11 +12,9 @@ import java.time.LocalDate;
 public class MemoSearchRepoParamDto {
     private LocalDate startDate;
     private LocalDate endDate;
-    private SortParam.Direction direction;
-    private SortParam.SortBy sortBy;
     private String keyword;
 
-    public static MemoSearchRepoParamDto fromGetRequestDto(
+    public static MemoSearchRepoParamDto from(
             MemoSearchParamDto requestParamDto
     ) {
         MemoSearchRepoParamDto dto = new MemoSearchRepoParamDto();
@@ -28,8 +25,6 @@ public class MemoSearchRepoParamDto {
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
         }
         dto.setKeyword(requestParamDto.getKeyword());
-        dto.setDirection(requestParamDto.getDirection());
-        dto.setSortBy(requestParamDto.getSortBy());
         return dto;
     }
 }
