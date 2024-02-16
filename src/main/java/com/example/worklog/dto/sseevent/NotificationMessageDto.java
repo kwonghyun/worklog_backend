@@ -1,4 +1,4 @@
-package com.example.worklog.dto.notification;
+package com.example.worklog.dto.sseevent;
 
 import com.example.worklog.entity.Notification;
 import com.example.worklog.entity.enums.EventType;
@@ -7,10 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
+
 @Setter
+@Getter
 @ToString
-public class NotificationDto {
+public class NotificationMessageDto implements SseMessageDto {
     private Long notificationId;
     private String message;
     private NotificationEntityType entityType;
@@ -18,14 +19,19 @@ public class NotificationDto {
     private String sender;
     private EventType eventType;
 
-    public static NotificationDto fromEntity(Notification notification) {
-        NotificationDto dto = new NotificationDto();
+    public static NotificationMessageDto fromEntity(Notification notification) {
+        NotificationMessageDto dto = new NotificationMessageDto();
         dto.setNotificationId(notification.getId());
         dto.setEntityType(notification.getEntityType());
         dto.setEntityId(notification.getEntityId());
         dto.setMessage(notification.getMessage());
         dto.setEventType(EventType.NOTIFICATION);
         return dto;
+    }
+
+    @Override
+    public Long getEventId() {
+        return notificationId;
     }
 
 }
