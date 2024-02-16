@@ -1,6 +1,8 @@
 package com.example.worklog.utils;
 
+import com.example.worklog.entity.Authority;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.enums.AuthorityType;
 import com.example.worklog.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,12 @@ public class Initializer {
                     .password(passwordEncoder.encode("1"))
                     .username("1")
                     .build();
+            user1.addAuthority(
+                    Authority.builder()
+                            .user(user1)
+                            .authorityType(AuthorityType.USER)
+                            .build()
+            );
             userRepository.save(user1);
         }
         if (!userRepository.existsByUsername("2")) {
@@ -30,6 +38,12 @@ public class Initializer {
                     .password(passwordEncoder.encode("2"))
                     .username("2")
                     .build();
+            user2.addAuthority(
+                    Authority.builder()
+                            .user(user2)
+                            .authorityType(AuthorityType.USER)
+                            .build()
+            );
             userRepository.save(user2);
         }
         if (!userRepository.existsByUsername("3")) {
@@ -38,6 +52,12 @@ public class Initializer {
                     .password(passwordEncoder.encode("3"))
                     .username("3")
                     .build();
+            user3.addAuthority(
+                    Authority.builder()
+                            .user(user3)
+                            .authorityType(AuthorityType.USER)
+                            .build()
+            );
             userRepository.save(user3);
         }
     }

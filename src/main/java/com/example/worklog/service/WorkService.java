@@ -1,7 +1,6 @@
 package com.example.worklog.service;
 
 import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.user.CustomUserDetails;
 import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
@@ -36,8 +35,7 @@ public class WorkService {
     private final WorkRepository workRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void createWork(WorkPostDto dto, CustomUserDetails userDetails) {
-        User user = userDetails.toEntity();
+    public void createWork(WorkPostDto dto, User user) {
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalDateTime deadline = dto.getDeadline() == null ?
                 null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));

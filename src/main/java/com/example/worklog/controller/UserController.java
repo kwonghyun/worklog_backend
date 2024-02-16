@@ -4,6 +4,7 @@ package com.example.worklog.controller;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.user.*;
+import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
@@ -67,9 +68,9 @@ public class UserController {
     public ResponseEntity<ResponseDto> updatePassword(
             @Valid @RequestBody
             UserPasswordUpdateDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
-        userService.updateUserPassword(dto, userDetails.getUsername());
+        userService.updateUserPassword(dto, user.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_PASSWORD_CHANGE_SUCCESS));
@@ -77,8 +78,8 @@ public class UserController {
 
     // 회원탈퇴
     @DeleteMapping("/me")
-    public ResponseEntity<ResponseDto> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.deleteUser(userDetails.getUsername());
+    public ResponseEntity<ResponseDto> deleteUser(@AuthenticationPrincipal User user) {
+        userService.deleteUser(user.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_DELETE_SUCCESS));

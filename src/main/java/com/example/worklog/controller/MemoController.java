@@ -4,7 +4,7 @@ import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.memo.*;
-import com.example.worklog.dto.user.CustomUserDetails;
+import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.MemoService;
 import jakarta.validation.Valid;
@@ -28,9 +28,9 @@ public class MemoController {
     @PostMapping
     public ResponseEntity<ResponseDto> createMemo(
             @Valid @RequestBody MemoPostDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
             ){
-        memoService.createMemo(dto, userDetails);
+        memoService.createMemo(dto, user);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_CREATED));
@@ -39,9 +39,9 @@ public class MemoController {
     @GetMapping
     public ResponseEntity<ResourceResponseDto> readMemos(
             @Valid @ModelAttribute MemoGetParamDto paramDto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
-        List<MemoGetDto> memos = memoService.readMemos(paramDto, userDetails.getId());
+        List<MemoGetDto> memos = memoService.readMemos(paramDto, user.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(memos, memos.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -52,9 +52,9 @@ public class MemoController {
     public ResponseEntity<ResourceResponseDto> searchMemos(
             @Valid @ModelAttribute MemoSearchParamDto paramDto,
             Pageable pageable,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
-        PageDto pageDto = memoService.searchMemos(paramDto, pageable, userDetails.getId());
+        PageDto pageDto = memoService.searchMemos(paramDto, pageable, user.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -65,10 +65,10 @@ public class MemoController {
     public ResponseEntity<ResponseDto> updateMemoContent(
             @PathVariable("memoId") Long memoId,
             @Valid @RequestBody MemoContentPatchDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoContent(dto, memoId, userDetails.getId());
+        memoService.updateMemoContent(dto, memoId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -78,10 +78,10 @@ public class MemoController {
     public ResponseEntity<ResponseDto> updateMemoOrder(
             @PathVariable("memoId") Long memoId,
             @Valid @RequestBody MemoDisplayOrderPatchDto dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoDisplayOrder(dto, memoId, userDetails.getId());
+        memoService.updateMemoDisplayOrder(dto, memoId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -90,9 +90,9 @@ public class MemoController {
     @DeleteMapping("/{memoId}")
     public ResponseEntity<ResponseDto> deleteMemo(
             @PathVariable("memoId") Long memoId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal User user
     ) {
-        memoService.deleteMemo(memoId, userDetails.getId());
+        memoService.deleteMemo(memoId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_DELETE_SUCCESS));

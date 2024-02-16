@@ -1,7 +1,7 @@
 package com.example.worklog.controller;
 
 import com.example.worklog.dto.ResponseDto;
-import com.example.worklog.dto.user.CustomUserDetails;
+import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @PostMapping("/trigger")
-    public ResponseEntity<ResponseDto> trigger(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        notificationService.checkNotificationAndSend(userDetails.getId());
+    public ResponseEntity<ResponseDto> trigger(@AuthenticationPrincipal User user) {
+        notificationService.checkNotificationAndSend(user.getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.fromSuccessCode(SuccessCode.SUCCESS));
     }
