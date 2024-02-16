@@ -7,8 +7,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
@@ -17,10 +15,18 @@ import org.hibernate.annotations.Where;
 public class Authority {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Enumerated(EnumType.STRING)
     private AuthorityType authorityType;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+
+    @Override
+    public String toString() {
+        return "Authority{" +
+                "id=" + id +
+                ", authorityType=" + authorityType +
+                '}';
+    }
 }

@@ -13,7 +13,9 @@ import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -71,5 +73,9 @@ public class User extends BaseTimeEntity {
                 ", lastNoticedAt=" + lastNoticedAt +
                 ", isDeleted=" + isDeleted +
                 '}';
+    }
+
+    public void addAuthority(Authority authority) {
+        this.authorities.add(authority);
     }
 }

@@ -1,6 +1,6 @@
 package com.example.worklog.repository;
 
-import com.example.worklog.jwt.RefreshToken;
+import com.example.worklog.entity.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;

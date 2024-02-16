@@ -1,6 +1,6 @@
 package com.example.worklog.jwt;
 
-import com.example.worklog.dto.user.CustomUserDetails;
+import com.example.worklog.entity.User;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContext;
@@ -65,14 +64,14 @@ public class AuthCreationFilter extends OncePerRequestFilter {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                 LocalDateTime lastNoticedAt = lastNoticedAtClaim != null ? LocalDateTime.parse((String) lastNoticedAtClaim, formatter) : null;
 
-                authentication = new UsernamePasswordAuthenticationToken(
-                        CustomUserDetails.builder()
+                authentication = new CustomAuthenticationToken(
+                        User.builder()
                                 .username(claims.getSubject())
                                 .id(Long.parseLong((String) claims.get("id")))
                                 .lastNoticedAt(lastNoticedAt)
                                 .build(),
                         token,
-                        jwtTokenUtils.getAuthoritiesFromClaims(claims)
+                        jwtTokenUtils.getGrantedAuthoritiesFromString((String) claims.get("authorities"))
                 );
 
             }

@@ -1,11 +1,13 @@
 package com.example.worklog.jwt;
 
 
-import com.example.worklog.dto.user.CustomUserDetails;
+import com.example.worklog.entity.Authority;
+import com.example.worklog.entity.enums.AuthorityType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 public class JwtTokenUtils {
     private final Key signingKey;
     private final JwtParser jwtParser;
+    @Getter
     private final int accessExpirationTime;
     private final int refreshExpirationTime;
 
@@ -41,22 +45,25 @@ public class JwtTokenUtils {
         this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    public JwtDto generateToken(CustomUserDetails userDetails) {
-        log.info("\"{}\" jwt 발급", userDetails.getUsername());
-        String authorities = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
-        String lastNoticedAt = userDetails.getLastNoticedAt() == null ?
-                null : userDetails.getLastNoticedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    public JwtDto generateToken(
+            Long userId,
+            String username,
+            LocalDateTime lastNoticedAt,
+            Collection<Authority> authorities
+    ) {
+        log.info("\"{}\" jwt 발급", username);
+
+        String lastNoticedAtStr = lastNoticedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         Claims accessTokenClaims = Jwts.claims()
-                .setSubject(userDetails.getUsername())
+                .setSubject(username)
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusSeconds(accessExpirationTime)));
         String accessToken = Jwts.builder()
                 .setClaims(accessTokenClaims)
-                .claim("authorities", authorities)
-                .claim("id", userDetails.getId().toString())
-                .claim("last-noticed-at", lastNoticedAt)
+                .claim("authorities", getStringFromAuthorities(authorities))
+                .claim("id", userId.toString())
+                .claim("last-noticed-at", lastNoticedAtStr)
                 .signWith(signingKey)
                 .compact();
 
@@ -82,13 +89,23 @@ public class JwtTokenUtils {
     }
 
     // 문자열로 저장된 authorities를 다시 Collection으로 변환
-    public Collection<? extends GrantedAuthority> getAuthoritiesFromClaims(Claims claims){
 
-    String authoritiesString = (String) claims.get("authorities"); // authorities 정보 가져오기
+    public String getStringFromAuthorities(Collection<Authority> authorities) {
+        String authoritiesString = authorities.stream()
+                .map(authority -> authority.getAuthorityType().name()).collect(Collectors.joining(","));
+        return authoritiesString;
+    }
 
-    return Arrays.stream(authoritiesString.split(","))
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
+    public Collection<? extends GrantedAuthority> getGrantedAuthoritiesFromString(String authoritiesString) {
+        return Arrays.stream(authoritiesString.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Authority> getAuthoritiesFromString(String authoritiesString) {
+        return Arrays.stream(authoritiesString.split(","))
+                .map(authStr -> Authority.builder().authorityType(AuthorityType.from(authStr)).build())
+                .collect(Collectors.toList());
     }
 
 }
