@@ -1,15 +1,15 @@
 package com.example.worklog.dto.user;
 
-import com.example.worklog.utils.Constant;
+import com.example.worklog.utils.ValidationConstant;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
 public class UserLoginDto {
-    @NotBlank(message = Constant.USERNAME_NOT_BLANK_MESSAGE)
+    @NotBlank(message = ValidationConstant.USERNAME_NOT_BLANK_MESSAGE)
     private String username;
 
-    @NotBlank(message = Constant.PASSWORD_NOT_BLANK_MESSAGE)
+    @NotBlank(message = ValidationConstant.PASSWORD_NOT_BLANK_MESSAGE)
     private String password;
 
     @Override

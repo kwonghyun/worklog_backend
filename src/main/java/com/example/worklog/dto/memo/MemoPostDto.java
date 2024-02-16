@@ -1,7 +1,7 @@
 package com.example.worklog.dto.memo;
 
 import com.example.worklog.exception.CustomDateValidation;
-import com.example.worklog.utils.Constant;
+import com.example.worklog.utils.ValidationConstant;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,10 +12,10 @@ import lombok.ToString;
 @Setter
 @ToString
 public class MemoPostDto {
-    @NotBlank(message = Constant.CONTENT_NOT_BLANK)
+    @NotBlank(message = ValidationConstant.CONTENT_NOT_BLANK)
     private String content;
 
     @CustomDateValidation
-    @NotNull(message = Constant.DATE_NOT_VALID_MESSAGE)
+    @NotNull(message = ValidationConstant.DATE_NOT_VALID_MESSAGE)
     private String  date;
 }

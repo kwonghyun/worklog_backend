@@ -1,6 +1,6 @@
 package com.example.worklog.utils;
 
-public class Constant {
+public class ValidationConstant {
     // 정규식
     public static final String EMAIL_REGEX = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     public static final String USERNAME_REGEX = "^[a-zA-Z0-9_.-]{5,20}$";
@@ -30,9 +30,5 @@ public class Constant {
     public static final String CATEGORY_NOT_BLANK = "올바른 업무 유형을 입력하세요.";
     public static final String WORK_STATE_NOT_BLANK = "올바른 업무 상태를 입력하세요.";
     public static final String DISPLAY_ORDER_NOT_VALID = "올바른 업무의 순번을 입력하세요.";
-
-    // 업무 알림 시간
-    public static final long WORK_DEADLINE_TRIGGER_HOURS = 24L;
-    public static final long SEARCH_FUTURE_NOTIFICATION_MINUTES = 60L;
 
 }
