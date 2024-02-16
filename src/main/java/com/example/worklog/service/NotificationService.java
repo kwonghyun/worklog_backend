@@ -1,12 +1,13 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.notification.NotificationDto;
+import com.example.worklog.dto.sseevent.NotificationMessageDto;
 import com.example.worklog.entity.Notification;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.NotificationEntityType;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.repository.NotificationFlagRedisRepository;
 import com.example.worklog.repository.NotificationRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
@@ -30,11 +31,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final NotificationFlagRedisRepository notificationFlagRedisRepository;
     private final WorkRepository workRepository;
     private final SseService sseService;
     private final Scheduler scheduler;
-
-
 
     public void checkNotificationAndSend(Long userId) {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
@@ -181,7 +181,7 @@ public class NotificationService {
         generateMessage(notification);
         EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
-            sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
+            sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
             notification.updateIsSent(true);
         } catch (Exception e) {
             notification.updateIsSent(false);
@@ -197,7 +197,7 @@ public class NotificationService {
                     .map(notification -> {
                                 generateMessage(notification);
                                 EmitterKey emitterKey = new EmitterKey(notification.getReceiver().getId(), SseRole.NOTIFICATION);
-                                sseService.sendToClient(emitterKey, NotificationDto.fromEntity(notification));
+                                sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
                                 notification.updateIsSent(true);
                                 return notification;
                     })
@@ -225,6 +225,12 @@ public class NotificationService {
     public Notification findOne(Long id) {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+    }
+    public void consumeNotificationFlag(Long userId) {
+        if (notificationFlagRedisRepository.existsByUserId(userId)) {
+            checkNotificationAndSend(userId);
+            notificationFlagRedisRepository.deleteByUserId(userId);
+        }
     }
 
     public boolean existsByWork(Work work) {
