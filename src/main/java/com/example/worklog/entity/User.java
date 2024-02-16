@@ -50,6 +50,10 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     private List<SavedWork> savedWorks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Authority> authorities = new ArrayList<>();
+
     public void updatePassword(String password) {
         this.password = password;
     }
