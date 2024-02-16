@@ -1,16 +1,16 @@
 package com.example.worklog.service;
 
 import com.example.worklog.dto.notification.NotificationDto;
-import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.EventType;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.repository.NotificationFlagRedisRepository;
 import com.example.worklog.repository.SseEmitterRepository;
-import com.example.worklog.repository.UserRepository;
 import com.example.worklog.utils.EmitterKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -25,8 +25,9 @@ public class SseService {
 
     private static final Long sseTimeout = 3 * 60L * 1000;;
 
-    private final UserRepository userRepository;
     private final SseEmitterRepository sseEmitterRepository;
+    private final ObjectProvider<NotificationService> notificationServiceObjectProvider;
+    private final NotificationFlagRedisRepository notificationFlagRedisRepository;
 
     public Boolean isSseConnected(Long userId, SseRole role) {
         return sseEmitterRepository.existsByKey(new EmitterKey(userId, role));
@@ -66,6 +67,11 @@ public class SseService {
             throw new CustomException(ErrorCode.SSE_CONNECTION_BROKEN);
         }
 
+        if (notificationFlagRedisRepository.existsByUserId(userId)) {
+            NotificationService notificationService = notificationServiceObjectProvider.getObject();
+            notificationService.checkNotificationAndSend(userId);
+            notificationFlagRedisRepository.deleteByUserId(userId);
+        }
         return emitter;
     }
 

@@ -2,21 +2,19 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.notification.NotificationDto;
 import com.example.worklog.entity.Notification;
-import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.NotificationEntityType;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.NotificationRepository;
-import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
-import com.example.worklog.utils.Constant;
 import com.example.worklog.utils.EmitterKey;
+import com.example.worklog.utils.EnvironmentVariable;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,45 +27,19 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
     private final WorkRepository workRepository;
     private final SseService sseService;
     private final Scheduler scheduler;
-    private final long accessExpirationTime;
 
-    public NotificationService(
-            NotificationRepository notificationRepository,
-            UserRepository userRepository,
-            WorkRepository workRepository,
-            SseService sseService,
-            Scheduler scheduler,
-            @Value("${jwt.accessExpirationTime}")
-            long accessExpirationTime
-            ) {
-        this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
-        this.workRepository = workRepository;
-        this.sseService = sseService;
-        this.scheduler = scheduler;
-        this.accessExpirationTime = accessExpirationTime;
-    }
 
-    public Boolean isTimeToNotice(LocalDateTime lastNoticedAt) {
-        return lastNoticedAt == null
-                || lastNoticedAt
-                    .plusHours(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES)
-                    .minusSeconds(accessExpirationTime)
-                    .isAfter(LocalDateTime.now());
-    }
 
-    public User checkNotificationAndSend(Long userId) {
+    public void checkNotificationAndSend(Long userId) {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         List<Work> worksToNotice = workRepository.readWorkByDeadlineBeforeAndUserAndNoticedFalse(
-                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES), userId
+                LocalDateTime.now().plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES), userId
         );
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링
@@ -85,9 +57,6 @@ public class NotificationService {
                 .collect(Collectors.toList());
         createNotificationFrom(worksToReserve).stream()
                     .forEach(notification -> reserveNotification(notification));
-        // 마지막으로 알림 보낸 시간 업데이트
-        user.updateLastNoticedAt(LocalDateTime.now());
-        return userRepository.save(user);
     }
 
     public Notification createNotificationFrom(Work work) {
@@ -96,7 +65,7 @@ public class NotificationService {
         return notificationRepository.save(Notification.builder()
                 .entityType(NotificationEntityType.WORK)
                 .entityId(work.getId())
-                .timeToSend(work.getDeadline().minusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS))
+                .timeToSend(work.getDeadline().minusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS))
                 .receiver(work.getUser())
                 .build());
     }
@@ -113,7 +82,7 @@ public class NotificationService {
                 .map(work -> Notification.builder()
                         .entityType(NotificationEntityType.WORK)
                         .entityId(work.getId())
-                        .timeToSend(work.getDeadline().minusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS))
+                        .timeToSend(work.getDeadline().minusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS))
                         .receiver(work.getUser())
                         .build())
                 .collect(Collectors.toList())
@@ -238,28 +207,23 @@ public class NotificationService {
 
     public Boolean isNeededSendingNow(LocalDateTime deadline) {
         return deadline.isBefore(
-                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
+                LocalDateTime.now().plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS)
         );
     }
 
     public Boolean isNeededReservation(LocalDateTime deadline) {
         return deadline.isAfter(
-                LocalDateTime.now().plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
+                LocalDateTime.now().plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS)
                 )
                 && deadline.isBefore(
                         LocalDateTime.now()
-                                .plusHours(Constant.WORK_DEADLINE_TRIGGER_HOURS)
-                                .plusHours(Constant.SEARCH_FUTURE_NOTIFICATION_MINUTES)
+                                .plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS)
+                                .plusHours(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES)
                 );
     }
 
     public Notification findOne(Long id) {
         return notificationRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
-    }
-
-    public Notification findOneWithReceiver(Long id) {
-        return notificationRepository.findByIdFetchReceiver(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
     }
 
