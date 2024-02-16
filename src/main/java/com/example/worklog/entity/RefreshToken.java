@@ -1,4 +1,4 @@
-package com.example.worklog.jwt;
+package com.example.worklog.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,9 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
-import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
@@ -20,11 +19,12 @@ import java.util.Collection;
 public class RefreshToken {
 
     @Id
-    private String id;
-
+    private Long userId;
+    private String username;
+    private LocalDateTime lastNoticedAt;
     private String ip;
 
-    private Collection<? extends GrantedAuthority> authorities;
+    private String authorities;
 
     @Indexed
     private String refreshToken;
