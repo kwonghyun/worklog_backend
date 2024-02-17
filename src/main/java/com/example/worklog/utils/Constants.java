@@ -1,10 +1,21 @@
 package com.example.worklog.utils;
 
-public class ValidationConstant {
+import java.time.format.DateTimeFormatter;
+
+public class Constants {
     // 정규식
     public static final String EMAIL_REGEX = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     public static final String USERNAME_REGEX = "^[a-zA-Z0-9_.-]{5,20}$";
     public static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*()_.=+~-])(?=\\S+$).{8,20}$";
+
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
+    public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm";
+    public static final String DATE_TIME_SEC_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(DATE_PATTERN);
+    public static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+    public static final DateTimeFormatter DATE_TIME_SEC_FORMAT = DateTimeFormatter.ofPattern(DATE_TIME_SEC_PATTERN);
+
 
     // 유효성 검사
     // 유저
@@ -23,6 +34,10 @@ public class ValidationConstant {
     public static final String DATE_TIME_NOT_VALID_MESSAGE = "날짜를 yyyy-MM-dd HH:mm 형식으로 입력하세요.";
     public static final String YEAR_NOT_VALID_MESSAGE = "년도를 yyyy 형식으로 입력하세요.";
     public static final String MONTH_NOT_VALID_MESSAGE = "월을 1~12 사이의 값을 입력하세요.";
+
+    // Enum
+    public static final String CATEGORY_NOT_VALID_MESSAGE = "업무 유형을 올바르게 입력하세요.";
+    public static final String WORK_STATE_NOT_VALID_MESSAGE = "업무 상태를 올바르게 입력하세요.";
 
     // work, memo
     public static final String TITLE_NOT_BLANK = "제목을 입력하세요.";
