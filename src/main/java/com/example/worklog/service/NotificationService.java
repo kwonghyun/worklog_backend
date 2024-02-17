@@ -2,6 +2,7 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.sseevent.NotificationMessageDto;
 import com.example.worklog.entity.Notification;
+import com.example.worklog.entity.NotificationFlag;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.NotificationEntityType;
 import com.example.worklog.entity.enums.SseRole;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationFlagRedisRepository notificationFlagRedisRepository;
@@ -36,10 +39,14 @@ public class NotificationService {
     private final SseService sseService;
     private final Scheduler scheduler;
 
+    @Transactional
     public void checkNotificationAndSend(Long userId) {
         // 알림 보낼 시간이 지났거나 1시간이내에 알림을 보내야하는 work찾기
         List<Work> worksToNotice = workRepository.readWorkByDeadlineBeforeAndUserAndNoticedFalse(
-                LocalDateTime.now().plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS).plusMinutes(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES), userId
+                LocalDateTime.now()
+                        .plusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS)
+                        .plusMinutes(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES),
+                userId
         );
 
         // 알림 보낼 시간이 지나 바로 보내야하는 work 필터링
@@ -59,6 +66,7 @@ public class NotificationService {
                     .forEach(notification -> reserveNotification(notification));
     }
 
+    @Transactional
     public Notification createNotificationFrom(Work work) {
         work.updateNoticed(true);
         workRepository.save(work);
@@ -70,6 +78,7 @@ public class NotificationService {
                 .build());
     }
 
+    @Transactional
     public List<Notification> createNotificationFrom(List<Work> works) {
         if (works.size() == 0) return new ArrayList<Notification>();
 
@@ -90,12 +99,15 @@ public class NotificationService {
     }
 
 
+    @Transactional
     public void sendAllNotificationsNotChecked(Long userId) {
         // isChecked가 false인 알림 모두 찾기
         List<Notification> notifications = notificationRepository.findAllByUserIdAndIsSentFalse(userId);
+        log.info("즉시 알림 보낼 알림 갯수 : {}", notifications.size());
         sendNotification(notifications);
     }
 
+    @Transactional
     public void reserveNotification(Notification notification) {
 
         JobDataMap jobDataMap = new JobDataMap();
@@ -140,6 +152,7 @@ public class NotificationService {
         }
     }
 
+    @Transactional
     public void cancelReservedNotification(Work work) {
         Long workId = work.getId();
         // "work_" + workId, "work_notification"
@@ -151,13 +164,13 @@ public class NotificationService {
         }
     }
 
+    @Transactional
     public void generateMessage(Notification notification) {
         String message = null;
         NotificationEntityType type = notification.getEntityType();
         switch (type) {
             case USER, MEMO -> throw new CustomException(ErrorCode.ERROR_NOT_FOUND);
             case WORK -> {
-                log.info("NotificationService.generateMessage: 여기서 entityId: {}", notification.getEntityId());
                 Work work = workRepository.findById(notification.getEntityId())
                         .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
                 String date = work.getDate().toString();
@@ -176,6 +189,7 @@ public class NotificationService {
         notification.setMessage(message);
     }
 
+    @Transactional
     public void sendNotification(Notification notification) {
         Long userId = notification.getReceiver().getId();
         generateMessage(notification);
@@ -189,9 +203,9 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    @Transactional
     public void sendNotification(List<Notification> notifications) {
         if (notifications.size() == 0) return;
-
         notificationRepository.saveAll(
                 notifications.stream()
                     .map(notification -> {
@@ -226,11 +240,22 @@ public class NotificationService {
         return notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
     }
+
+    @Transactional
     public void consumeNotificationFlag(Long userId) {
-        if (notificationFlagRedisRepository.existsByUserId(userId)) {
+        if (notificationFlagRedisRepository.existsById(userId)) {
+            log.info("NotificationFlagRedisRepository.existsById(userId) : true");
             checkNotificationAndSend(userId);
-            notificationFlagRedisRepository.deleteByUserId(userId);
+            notificationFlagRedisRepository.deleteById(userId);
         }
+    }
+
+    @Transactional
+    public void produceNotificationFlag(Long userId) {
+        notificationFlagRedisRepository.save(
+                NotificationFlag.builder()
+                        .userId(userId)
+                        .build());
     }
 
     public boolean existsByWork(Work work) {
@@ -240,7 +265,7 @@ public class NotificationService {
     public List<Notification> findAllByWork(Work work) {
         return notificationRepository.findByWorkId(work. getId());
     }
-
+    @Transactional
     public void deleteAll(List<Notification> notifications) {
         notificationRepository.deleteAll(notifications);
     }

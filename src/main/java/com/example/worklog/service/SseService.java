@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class SseService {
     private static final Long sseTimeout = 3 * 60L * 1000;;
 
@@ -29,7 +31,7 @@ public class SseService {
     public Boolean isSseConnected(Long userId, SseRole role) {
         return sseEmitterRepository.existsByKey(new EmitterKey(userId, role));
     }
-
+    @Transactional
     public SseEmitter subscribe(Long userId, SseRole role, String lastEventId) {
         SseEmitter emitter = new SseEmitter(sseTimeout);
         EmitterKey emitterKey = new EmitterKey(userId, role);
@@ -53,9 +55,8 @@ public class SseService {
         return emitter;
     }
 
+    @Transactional
     public void sendToClient(EmitterKey emitterKey, SseMessageDto event) {
-        log.info("전송시 emitter 있나요? {}", sseEmitterRepository.existsByKey(emitterKey));
-        log.info("emitter 몇개 있나요? {}", sseEmitterRepository.countAll());
         SseEmitter emitter = sseEmitterRepository.findByKey(emitterKey)
                 .orElseThrow(() -> new CustomException(ErrorCode.SSE_CONNECTION_BROKEN));
         try {
