@@ -75,7 +75,7 @@ public class UserService {
         User user = userRepository.findByUsernameWithAuthority(username)
                     .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
 
-        if (!passwordEncoder.matches(username, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             log.info("login: 비밀번호 불일치");
             throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
