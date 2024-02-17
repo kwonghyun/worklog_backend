@@ -35,6 +35,7 @@ public class UserService {
     private final JwtTokenUtils jwtTokenUtils;
 
     public void register(UserSignupDto dto) {
+        // TODO 이메일 인증 가입
         checkPassword(dto.getPassword());
         checkPasswordCheck(dto.getPassword(), dto.getPasswordCheck());
         checkEmail(dto.getEmail());

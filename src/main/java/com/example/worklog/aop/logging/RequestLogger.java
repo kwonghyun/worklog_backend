@@ -14,6 +14,7 @@ import java.util.UUID;
 @Getter
 @Slf4j
 @RequestScope
+// TODO request 밖에서 실행되는 메서드에서는 이 클래스 실행되지 않도록
 public class RequestLogger {
     private String uuid;
     @Setter
