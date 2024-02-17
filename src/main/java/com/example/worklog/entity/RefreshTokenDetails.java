@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "refresh",  timeToLive = 1000L)
-public class RefreshToken {
+public class RefreshTokenDetails {
 
     @Id
     private Long userId;
