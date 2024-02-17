@@ -5,6 +5,8 @@ import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.enums.Category;
+import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -40,7 +43,7 @@ public class WorkController {
             @Valid @ModelAttribute WorkGetParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        List<WorkGetDto> works = workService.readWorks(paramDto, user.getId());
+        List<WorkGetDto> works = workService.readWorks(LocalDate.parse(paramDto.getDate()), user.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(works, works.size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -53,7 +56,10 @@ public class WorkController {
             @Valid @ModelAttribute WorkSearchParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        PageDto pageDto = workService.searchWorks(paramDto, pageable, user.getId());
+        PageDto pageDto = workService.searchWorks(
+                WorkSearchServiceDto.from(paramDto),
+                pageable,
+                user.getId());
         ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -78,7 +84,7 @@ public class WorkController {
             @Valid @RequestBody WorkTitlePatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        workService.updateWorkTitle(dto, workId, user.getId());
+        workService.updateWorkTitle(dto.getTitle(), workId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -89,7 +95,7 @@ public class WorkController {
             @Valid @RequestBody WorkContentPatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        workService.updateWorkContent(dto, workId, user.getId());
+        workService.updateWorkContent(dto.getContent(), workId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -113,7 +119,7 @@ public class WorkController {
             @Valid @RequestBody WorkStatePatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        workService.updateWorkState(dto, workId, user.getId());
+        workService.updateWorkState(WorkState.from(dto.getState()), workId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
@@ -125,7 +131,7 @@ public class WorkController {
             @Valid @RequestBody WorkCategoryPatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        workService.updateWorkCategory(dto, workId, user.getId());
+        workService.updateWorkCategory(Category.from(dto.getCategory()), workId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));

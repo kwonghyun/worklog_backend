@@ -1,6 +1,6 @@
 package com.example.worklog.dto.work;
 
-import com.example.worklog.utils.ValidationConstant;
+import com.example.worklog.utils.Constants;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.ToString;
@@ -8,6 +8,6 @@ import lombok.ToString;
 @Getter
 @ToString
 public class WorkContentPatchDto {
-    @NotBlank(message = ValidationConstant.CONTENT_NOT_BLANK)
+    @NotBlank(message = Constants.CONTENT_NOT_BLANK)
     private String content;
 }

@@ -1,17 +1,23 @@
 package com.example.worklog.dto.memo;
 
-import com.example.worklog.exception.CustomDateValidation;
+import com.example.worklog.exception.DatePattern;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
 public class MemoSearchParamDto {
-    @CustomDateValidation
+    @DatePattern
     private String startDate;
-    @CustomDateValidation
+    @DatePattern
     private String endDate;
-    private String key;
+    private String keyword;
+
+    public MemoSearchParamDto(String start_date, String end_date, String key) {
+        this.startDate = start_date;
+        this.endDate = end_date;
+        this.keyword = key;
+    }
+
+
 }

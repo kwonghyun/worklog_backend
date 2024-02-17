@@ -11,26 +11,26 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
-public class WorkSearchRepoParamDto {
+public class WorkSearchServiceDto {
     private LocalDate startDate;
     private LocalDate endDate;
-    private String keyword;
     private WorkState state;
     private Category category;
+    private String keyword;
 
-    public static WorkSearchRepoParamDto from(
+    public static WorkSearchServiceDto from(
             WorkSearchParamDto requestParamDto
     ) {
-        WorkSearchRepoParamDto dto = new WorkSearchRepoParamDto();
+        WorkSearchServiceDto dto = new WorkSearchServiceDto();
         if (requestParamDto.getStartDate() != null) {
             dto.setStartDate(LocalDate.parse(requestParamDto.getStartDate()));
         }
         if (requestParamDto.getEndDate() != null) {
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
         }
-        dto.setKeyword(requestParamDto.getKey());
-        dto.setCategory(requestParamDto.getCategory());
-        dto.setState(requestParamDto.getState());
+        dto.setCategory(Category.from(requestParamDto.getCategory()));
+        dto.setState(WorkState.from(requestParamDto.getState()));
+        dto.setKeyword(requestParamDto.getKeyword());
         return dto;
     }
 }

@@ -9,22 +9,22 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
-public class MemoSearchRepoParamDto {
+public class MemoSearchServiceDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String keyword;
 
-    public static MemoSearchRepoParamDto from(
+    public static MemoSearchServiceDto from(
             MemoSearchParamDto requestParamDto
     ) {
-        MemoSearchRepoParamDto dto = new MemoSearchRepoParamDto();
+        MemoSearchServiceDto dto = new MemoSearchServiceDto();
         if (requestParamDto.getStartDate() != null) {
             dto.setStartDate(LocalDate.parse(requestParamDto.getStartDate()));
         }
         if (requestParamDto.getEndDate() != null) {
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
         }
-        dto.setKeyword(requestParamDto.getKey());
+        dto.setKeyword(requestParamDto.getKeyword());
         return dto;
     }
 }

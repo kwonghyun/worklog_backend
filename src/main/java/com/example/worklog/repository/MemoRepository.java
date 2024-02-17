@@ -1,7 +1,6 @@
 package com.example.worklog.repository;
 
-import com.example.worklog.dto.memo.MemoGetRepoParamDto;
-import com.example.worklog.dto.memo.MemoSearchRepoParamDto;
+import com.example.worklog.dto.memo.MemoSearchServiceDto;
 import com.example.worklog.entity.Memo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +16,11 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
     @Query(
             "SELECT m FROM Memo m " +
                 "WHERE " +
-                    "(m.date = :#{#dto.date}) " +
+                    "(m.date = :date) " +
                     "AND (m.user.id = :userId) " +
                 "ORDER BY m.displayOrder ASC "
     )
-    List<Memo> readMemosByParamsAndUser(@Param("dto") MemoGetRepoParamDto dto, @Param("userId") Long userId);
+    List<Memo> readMemosByParamsAndUser(@Param("date") LocalDate date, @Param("userId") Long userId);
 
     @Query(
             "SELECT m FROM Memo m " +
@@ -32,7 +31,7 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
                     "AND (m.user.id = :userId) " +
                     "ORDER BY m.date ASC, m.displayOrder ASC "
     )
-    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchRepoParamDto dto, Pageable pageable, @Param("userId") Long userId);
+    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchServiceDto dto, Pageable pageable, @Param("userId") Long userId);
 
     @Query(
             "SELECT COUNT(m) FROM Memo m " +

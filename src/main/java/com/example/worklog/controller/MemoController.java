@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -41,11 +42,13 @@ public class MemoController {
             @Valid @ModelAttribute MemoGetParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        List<MemoGetDto> memos = memoService.readMemos(paramDto, user.getId());
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(memos, memos.size());
+        List<MemoGetDto> memos = memoService.readMemos(
+                LocalDate.parse(paramDto.getDate()),
+                user.getId()
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(responseDto);
+                .body(ResourceResponseDto.fromData(memos, memos.size()));
     }
 
     @GetMapping("/search")
@@ -54,11 +57,16 @@ public class MemoController {
             Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        PageDto pageDto = memoService.searchMemos(paramDto, pageable, user.getId());
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
+        PageDto pageDto = memoService.searchMemos(
+                MemoSearchServiceDto.from(paramDto),
+                pageable,
+                user.getId()
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(responseDto);
+                .body(
+                        ResourceResponseDto.fromData(pageDto, pageDto.getContent().size())
+                );
     }
 
     @PatchMapping("/{memoId}/content")
@@ -67,8 +75,7 @@ public class MemoController {
             @Valid @RequestBody MemoContentPatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoContent(dto, memoId, user.getId());
+        memoService.updateMemoContent(dto.getContent(), memoId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));
@@ -81,7 +88,7 @@ public class MemoController {
             @AuthenticationPrincipal User user
     ) {
         log.info("memoId: {} 수정 요청", memoId);
-        memoService.updateMemoDisplayOrder(dto, memoId, user.getId());
+        memoService.updateMemoDisplayOrder(dto.getOrder(), memoId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));

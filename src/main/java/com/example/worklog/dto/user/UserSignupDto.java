@@ -1,6 +1,6 @@
 package com.example.worklog.dto.user;
 
-import com.example.worklog.utils.ValidationConstant;
+import com.example.worklog.utils.Constants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -10,19 +10,19 @@ import lombok.Getter;
 @Getter
 public class UserSignupDto {
 
-    @NotBlank(message = ValidationConstant.EMAIL_NOT_BLANK_MESSAGE)
-    @Email(regexp = ValidationConstant.EMAIL_REGEX, message = ValidationConstant.EMAIL_NOT_VALID_MESSAGE)
+    @NotBlank(message = Constants.EMAIL_NOT_BLANK_MESSAGE)
+    @Email(regexp = Constants.EMAIL_REGEX, message = Constants.EMAIL_NOT_VALID_MESSAGE)
     private String email;
 
-    @NotBlank(message = ValidationConstant.USERNAME_NOT_BLANK_MESSAGE)
-    @Pattern(regexp = ValidationConstant.USERNAME_REGEX, message = ValidationConstant.USERNAME_NOT_VALID_MESSAGE)
+    @NotBlank(message = Constants.USERNAME_NOT_BLANK_MESSAGE)
+    @Pattern(regexp = Constants.USERNAME_REGEX, message = Constants.USERNAME_NOT_VALID_MESSAGE)
     private String username;
 
-    @NotBlank(message = ValidationConstant.PASSWORD_NOT_BLANK_MESSAGE)
-    @Pattern(regexp= ValidationConstant.PASSWORD_REGEX, message = ValidationConstant.PASSWORD_NOT_VALID_MESSAGE)
+    @NotBlank(message = Constants.PASSWORD_NOT_BLANK_MESSAGE)
+    @Pattern(regexp= Constants.PASSWORD_REGEX, message = Constants.PASSWORD_NOT_VALID_MESSAGE)
     private String password;
 
-    @NotBlank(message = ValidationConstant.PASSWORD_CHECK_NOT_BLANK_MESSAGE)
+    @NotBlank(message = Constants.PASSWORD_CHECK_NOT_BLANK_MESSAGE)
     private String passwordCheck;
 
     @Override

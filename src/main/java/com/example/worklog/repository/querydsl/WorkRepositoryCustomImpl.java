@@ -1,6 +1,6 @@
 package com.example.worklog.repository.querydsl;
 
-import com.example.worklog.dto.work.WorkSearchRepoParamDto;
+import com.example.worklog.dto.work.WorkSearchServiceDto;
 import com.example.worklog.entity.QWork;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
@@ -23,7 +23,7 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Work> findBySearchParams(WorkSearchRepoParamDto dto, Pageable pageable, Long userId) {
+    public Page<Work> findBySearchParams(WorkSearchServiceDto dto, Pageable pageable, Long userId) {
         QWork qWork = QWork.work;
         List<Work> works = queryFactory.selectFrom(qWork)
                 .where(

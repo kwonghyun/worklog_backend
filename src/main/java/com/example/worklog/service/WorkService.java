@@ -4,12 +4,13 @@ import com.example.worklog.dto.PageDto;
 import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
+import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
-import com.example.worklog.repository.UserRepository;
 import com.example.worklog.repository.WorkRepository;
+import com.example.worklog.utils.Constants;
 import com.example.worklog.utils.WorkChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-// TODO AOP로 프로젝트 전체 로깅 설정하기
 // TODO 모니터링 툴 적용하기
 public class WorkService {
-
-    private final UserRepository userRepository;
     private final WorkRepository workRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
@@ -47,7 +45,7 @@ public class WorkService {
                         .deadline(deadline)
                         .displayOrder(workRepository.countDisplayOrder(date, user.getId()))
                         .importance(Importance.MID)
-                        .category(dto.getCategory())
+                        .category(Category.from(dto.getCategory()))
                         .state(WorkState.IN_PROGRESS)
                         .user(user)
                         .build()
@@ -58,11 +56,8 @@ public class WorkService {
         );
     }
 
-    public List<WorkGetDto> readWorks(WorkGetParamDto paramDto, Long userId) {
-        WorkGetRepoParamDto repoDto = WorkGetRepoParamDto.fromGetRequestDto(paramDto);
-        List<Work> works = workRepository.readWorksByParamsAndUser(
-                repoDto, userId
-        );
+    public List<WorkGetDto> readWorks(LocalDate date, Long userId) {
+        List<Work> works = workRepository.readWorksByParamsAndUser(date, userId);
 
         return works.stream()
                 .map(work -> WorkGetDto.fromEntity(work))
@@ -74,12 +69,9 @@ public class WorkService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
     }
 
-    public PageDto<WorkGetDto> searchWorks(WorkSearchParamDto paramDto, Pageable pageable, Long userId) {
-        WorkSearchRepoParamDto repoDto = WorkSearchRepoParamDto.from(paramDto);
-        log.info("category : {}",repoDto.getCategory() == null ? "null" : repoDto.getCategory().toString());
-        log.info("state : {}",repoDto.getState() == null ? "null" : repoDto.getState().toString());
+    public PageDto<WorkGetDto> searchWorks(WorkSearchServiceDto paramDto, Pageable pageable, Long userId) {
         Page<Work> pagedWorks = workRepository.findBySearchParams(
-                repoDto, pageable, userId
+                paramDto, pageable, userId
         );
 
         Page<WorkGetDto> pageDto
@@ -94,13 +86,13 @@ public class WorkService {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
         LocalDateTime deadline = dto.getDeadline() == null ?
-                null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                null : LocalDateTime.parse(dto.getDeadline(), Constants.DATE_TIME_FORMAT);
 
         work.updateTitle(dto.getTitle());
         work.updateContent(dto.getContent());
         work.updateDeadline(deadline);
-        work.updateCategory(dto.getCategory());
-        work.updateState(dto.getState());
+        work.updateCategory(Category.from(dto.getCategory()));
+        work.updateState(WorkState.from(dto.getState()));
         work.updateNoticed(false);
 
         Work updatedWork = workRepository.save(work);
@@ -110,27 +102,27 @@ public class WorkService {
         );
     }
 
-    public void updateWorkTitle(WorkTitlePatchDto dto, Long workId, Long userId) {
+    public void updateWorkTitle(String newTitle, Long workId, Long userId) {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
-        work.updateTitle(dto.getTitle());
+        work.updateTitle(newTitle);
         workRepository.save(work);
     }
 
-    public void updateWorkContent(WorkContentPatchDto dto, Long workId, Long userId) {
+    public void updateWorkContent(String newContent, Long workId, Long userId) {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
-        work.updateContent(dto.getContent());
+        work.updateContent(newContent);
         workRepository.save(work);
     }
 
-    public void updateWorkState(WorkStatePatchDto dto, Long workId, Long userId) {
+    public void updateWorkState(WorkState newState, Long workId, Long userId) {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
-        work.updateState(dto.getState());
+        work.updateState(newState);
         workRepository.save(work);
     }
 
-    public void updateWorkCategory(WorkCategoryPatchDto dto, Long workId, Long userId) {
+    public void updateWorkCategory(Category newCategory, Long workId, Long userId) {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
-        work.updateCategory(dto.getCategory());
+        work.updateCategory(newCategory);
         workRepository.save(work);
     }
 

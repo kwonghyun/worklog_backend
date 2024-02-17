@@ -1,8 +1,6 @@
 package com.example.worklog.repository;
 
-import com.example.worklog.dto.work.WorkGetRepoParamDto;
-import com.example.worklog.dto.work.WorkSearchRepoParamDto;
-import com.example.worklog.entity.User;
+import com.example.worklog.dto.work.WorkSearchServiceDto;
 import com.example.worklog.entity.Work;
 import com.example.worklog.repository.querydsl.WorkRepositoryCustom;
 import org.springframework.data.domain.Page;
@@ -22,11 +20,11 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
     @Query(
             "SELECT w FROM Work w " +
                     "WHERE " +
-                        "(w.date = :#{#dto.date}) " +
+                        "(w.date = :date) " +
                         "AND (w.user.id = :userId) " +
                     "ORDER BY w.displayOrder ASC "
     )
-    List<Work> readWorksByParamsAndUser(@Param("dto") WorkGetRepoParamDto repoDto, @Param("userId") Long userId);
+    List<Work> readWorksByParamsAndUser(@Param("date") LocalDate date, @Param("userId") Long userId);
 
 //    IS NULL 에 enum이 들어오면
 //    java.lang.NullPointerException: Cannot invoke "org.hibernate.metamodel.mapping.JdbcMapping.getJdbcValueBinder()" because "jdbcMapping" is null
@@ -42,7 +40,7 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
                     "AND (w.user.id = :userId) " +
                     "ORDER BY w.date ASC, w.displayOrder ASC "
     )
-    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchRepoParamDto repoDto, @Param("userId") Long userId, Pageable pageable);
+    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchServiceDto repoDto, @Param("userId") Long userId, Pageable pageable);
 
     @Query(
             "SELECT w FROM Work w " +

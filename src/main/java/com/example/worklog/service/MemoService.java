@@ -35,31 +35,28 @@ public class MemoService {
         );
     }
 
-    public List<MemoGetDto> readMemos(MemoGetParamDto paramDto, Long userId) {
-        MemoGetRepoParamDto repoDto = MemoGetRepoParamDto.fromGetRequestDto(paramDto);
-        List<Memo> memos= memoRepository.readMemosByParamsAndUser(repoDto, userId);
+    public List<MemoGetDto> readMemos(LocalDate date, Long userId) {
+        List<Memo> memos= memoRepository.readMemosByParamsAndUser(date, userId);
 
         return memos.stream()
                 .map(memo -> MemoGetDto.fromEntity(memo))
                 .collect(Collectors.toList());
     }
 
-    public PageDto<MemoGetDto> searchMemos(MemoSearchParamDto paramDto, Pageable pageable, Long userId) {
-        MemoSearchRepoParamDto repoDto = MemoSearchRepoParamDto.from(paramDto);
-
+    public PageDto<MemoGetDto> searchMemos(MemoSearchServiceDto serviceDto, Pageable pageable, Long userId) {
         Page<Memo> pagedMemos = memoRepository.searchMemosByParamsAndUser(
-                repoDto, pageable, userId
+                serviceDto, pageable, userId
         );
+
         Page<MemoGetDto> pageDto
                 = pagedMemos.map(memo -> MemoGetDto.fromEntity(memo));
 
         return PageDto.fromPage(pageDto);
     }
 
-    public void updateMemoContent(MemoContentPatchDto dto, Long memoId, Long userId) {
+    public void updateMemoContent(String content, Long memoId, Long userId) {
         Memo memo = getValidatedMemoByUserAndMemoId(userId, memoId);
-
-        memo.updateContent(dto.getContent());
+        memo.updateContent(content);
         memoRepository.save(memo);
     }
 
@@ -80,11 +77,10 @@ public class MemoService {
     }
 
 
-    public void updateMemoDisplayOrder(MemoDisplayOrderPatchDto dto, Long memoId, Long userId) {
+    public void updateMemoDisplayOrder(Integer targetOrder, Long memoId, Long userId) {
         Memo memo = getValidatedMemoByUserAndMemoId(userId, memoId);
 
         Integer currentOrder = memo.getDisplayOrder();
-        Integer targetOrder = dto.getOrder();
         if (currentOrder.equals(targetOrder)) {
             return;
         }
