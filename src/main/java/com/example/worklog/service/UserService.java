@@ -54,6 +54,7 @@ public class UserService {
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .username(dto.getUsername())
+                .lastNoticedAt(LocalDateTime.now().minusDays(1L))
                 .build();
         user.addAuthority(Authority.builder()
                 .user(user)

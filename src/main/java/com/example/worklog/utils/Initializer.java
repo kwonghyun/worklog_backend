@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class Initializer {
@@ -23,6 +25,7 @@ public class Initializer {
                     .email("a@a.a")
                     .password(passwordEncoder.encode("1"))
                     .username("1")
+                    .lastNoticedAt(LocalDateTime.now().minusYears(1L))
                     .build();
             user1.addAuthority(
                     Authority.builder()
@@ -37,6 +40,7 @@ public class Initializer {
                     .email("b@b.b")
                     .password(passwordEncoder.encode("2"))
                     .username("2")
+                    .lastNoticedAt(LocalDateTime.now().minusYears(1L))
                     .build();
             user2.addAuthority(
                     Authority.builder()
@@ -51,6 +55,7 @@ public class Initializer {
                     .email("c@c.c")
                     .password(passwordEncoder.encode("3"))
                     .username("3")
+                    .lastNoticedAt(LocalDateTime.now().minusYears(1L))
                     .build();
             user3.addAuthority(
                     Authority.builder()
