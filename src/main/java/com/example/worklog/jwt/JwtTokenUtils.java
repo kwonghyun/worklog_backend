@@ -1,8 +1,7 @@
 package com.example.worklog.jwt;
 
 
-import com.example.worklog.entity.Authority;
-import com.example.worklog.entity.enums.AuthorityType;
+import com.example.worklog.utils.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -18,7 +17,6 @@ import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -49,11 +47,12 @@ public class JwtTokenUtils {
             Long userId,
             String username,
             LocalDateTime lastNoticedAt,
-            Collection<Authority> authorities
+            String authoritiesString
     ) {
-        log.info("\"{}\" jwt 발급", username);
+        log.info("username: \"{}\" jwt 발급 시작", username);
 
-        String lastNoticedAtStr = lastNoticedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        // "yyyy-MM-dd HH:mm:ss"
+        String lastNoticedAtStr = lastNoticedAt.format(Constants.DATE_TIME_SEC_FORMAT);
 
         Claims accessTokenClaims = Jwts.claims()
                 .setSubject(username)
@@ -61,7 +60,7 @@ public class JwtTokenUtils {
                 .setExpiration(Date.from(Instant.now().plusSeconds(accessExpirationTime)));
         String accessToken = Jwts.builder()
                 .setClaims(accessTokenClaims)
-                .claim("authorities", getStringFromAuthorities(authorities))
+                .claim("authorities", authoritiesString)
                 .claim("id", userId.toString())
                 .claim("last-noticed-at", lastNoticedAtStr)
                 .signWith(signingKey)
@@ -88,24 +87,12 @@ public class JwtTokenUtils {
                 .getBody();
     }
 
-    // 문자열로 저장된 authorities를 다시 Collection으로 변환
-
-    public String getStringFromAuthorities(Collection<Authority> authorities) {
-        String authoritiesString = authorities.stream()
-                .map(authority -> authority.getAuthorityType().name()).collect(Collectors.joining(","));
-        return authoritiesString;
-    }
-
     public Collection<? extends GrantedAuthority> getGrantedAuthoritiesFromString(String authoritiesString) {
         return Arrays.stream(authoritiesString.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 
-    public Collection<Authority> getAuthoritiesFromString(String authoritiesString) {
-        return Arrays.stream(authoritiesString.split(","))
-                .map(authStr -> Authority.builder().authorityType(AuthorityType.from(authStr)).build())
-                .collect(Collectors.toList());
-    }
+
 
 }

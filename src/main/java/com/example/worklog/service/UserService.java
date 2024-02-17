@@ -262,4 +262,10 @@ public class UserService {
                 .minusSeconds(jwtTokenUtils.getAccessExpirationTime())
                 .isAfter(LocalDateTime.now());
     }
+
+    private String getStringFromAuthorities(Collection<Authority> authorities) {
+        String authoritiesString = authorities.stream()
+                .map(authority -> authority.getAuthorityType().name()).collect(Collectors.joining(","));
+        return authoritiesString;
+    }
 }
