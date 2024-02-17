@@ -79,7 +79,7 @@ public class UserService {
             }
         }
 
-        User user = userRepository.findByUsername(dto.getUsername())
+        User user = userRepository.findByUsernameWithAuthority(dto.getUsername())
                     .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
 
         log.info("\"{}\" 로그인", dto.getUsername());
@@ -153,7 +153,7 @@ public class UserService {
         LocalDateTime lastNoticedAt = refreshToken.getLastNoticedAt();
         JwtDto jwtDto;
         if (isTimeToNotice(lastNoticedAt)) {
-            User user = userRepository.findById(refreshToken.getUserId())
+            User user = userRepository.findByIdWithAuthority(refreshTokenDetails.getUserId())
                     .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
             user.updateLastNoticedAt(LocalDateTime.now());
             notificationFlagRedisRepository.save(
