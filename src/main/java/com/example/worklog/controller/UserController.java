@@ -8,12 +8,13 @@ import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
+import com.example.worklog.utils.IpUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,30 +35,31 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<ResourceResponseDto> login(
             @RequestBody UserLoginDto dto,
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request
     ) {
-        JwtDto jwtDto = userService.login(dto, request);
+
+        JwtDto jwtDto = userService.login(
+                dto.getUsername(), dto.getPassword(), IpUtil.getClientIp(request)
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResourceResponseDto.fromData(jwtDto, 2));
     }
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto> logout(
-            HttpServletRequest request
-
+            Authentication authentication
     ) {
-        userService.logout(request);
+        userService.logout((String) authentication.getCredentials());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
     }
     @PostMapping("/reissue")
     public ResponseEntity<ResourceResponseDto> reissue(
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request
     ) {
-        JwtDto jwtDto = userService.reissue(request);
+        String refreshToken = request.getHeader("Authorization").split(" ")[1];
+        JwtDto jwtDto = userService.reissue(refreshToken, IpUtil.getClientIp(request));
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResourceResponseDto.fromData(jwtDto, 2));
@@ -70,7 +72,12 @@ public class UserController {
             UserPasswordUpdateDto dto,
             @AuthenticationPrincipal User user
     ) {
-        userService.updateUserPassword(dto, user.getUsername());
+        userService.updateUserPassword(
+                dto.getCurrentPassword(),
+                dto.getPassword(),
+                dto.getPasswordCheck(),
+                user.getUsername()
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_PASSWORD_CHANGE_SUCCESS));
@@ -113,7 +120,7 @@ public class UserController {
 
     @GetMapping("/password-check/check")
     public ResponseEntity<ResponseDto> checkUsername(@RequestBody UserPasswordCheckDto dto) {
-        userService.checkPasswordCheck(dto);
+        userService.checkPasswordCheck(dto.getPassword(), dto.getPasswordCheck());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_PASSWORD_CHECK));
