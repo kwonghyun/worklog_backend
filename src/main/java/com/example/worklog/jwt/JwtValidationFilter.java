@@ -51,9 +51,11 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         // Header 검증, 비어있지 않고, "Bearer "로 시작하는 경우
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.split(" ")[1];
+
             log.info("token 검증 시작: {}", token);
+            Claims claims = null;
             try {
-                jwtTokenUtils.parseClaims(token);
+                claims = jwtTokenUtils.parseClaims(token);
             } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
                 log.info("JWT 서명이 잘못되었습니다.");
                 FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
@@ -68,9 +70,8 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.TOKEN_INVALID);
             }
 
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            log.info("인증 객체 생성 시작");
             Authentication authentication;
-
             if (request.getServletPath().equals("/users/reissue")) {
                 RefreshTokenDetails refreshTokenDetails;
                 Optional<RefreshTokenDetails> optionalRefreshTokenDetails
@@ -83,17 +84,20 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                     log.info("RefreshToken IP 불일치");
                     FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.WRONG_REFRESH_TOKEN);
                 }
+
                 refreshTokenDetails = optionalRefreshTokenDetails.get();
-                authentication = new AnonymousAuthenticationToken(
-                        "key",
+                authentication = new CustomAuthenticationToken(
+                        User.builder()
+                                .username(refreshTokenDetails.getUsername())
+                                .id(refreshTokenDetails.getUserId())
+                                .lastNoticedAt(refreshTokenDetails.getLastNoticedAt())
+                                .build(),
                         refreshTokenDetails,
-                        AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+                        jwtTokenUtils.getGrantedAuthoritiesFromString(refreshTokenDetails.getAuthorities())
                 );
             } else {
                 log.info("사용자 인증 객체 생성 시작");
-                Claims claims = jwtTokenUtils.parseClaims(token);
                 Object lastNoticedAtClaim = claims.get("last-noticed-at");
-
                 LocalDateTime lastNoticedAt = LocalDateTime.parse(lastNoticedAtClaim.toString(), Constants.DATE_TIME_SEC_FORMAT);
 
                 authentication = new CustomAuthenticationToken(
@@ -107,6 +111,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 );
             }
 
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);
             log.info("{} 인증 객체 생성 완료", context.getAuthentication().getName());

@@ -1,6 +1,7 @@
 package com.example.worklog.jwt;
 
 
+import com.example.worklog.entity.User;
 import com.example.worklog.utils.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -43,25 +43,19 @@ public class JwtTokenUtils {
         this.refreshExpirationTime = refreshExpirationTime;
     }
 
-    public JwtDto generateToken(
-            Long userId,
-            String username,
-            LocalDateTime lastNoticedAt,
-            String authoritiesString
-    ) {
-        log.info("username: \"{}\" jwt 발급 시작", username);
+    public JwtDto generateToken(User user) {
+        log.info("{} jwt 발급 시작", user);
 
         // "yyyy-MM-dd HH:mm:ss"
-        String lastNoticedAtStr = lastNoticedAt.format(Constants.DATE_TIME_SEC_FORMAT);
-
+        String lastNoticedAtStr = user.getLastNoticedAt().format(Constants.DATE_TIME_SEC_FORMAT);
         Claims accessTokenClaims = Jwts.claims()
-                .setSubject(username)
+                .setSubject(user.getUsername())
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusSeconds(accessExpirationTime)));
         String accessToken = Jwts.builder()
                 .setClaims(accessTokenClaims)
-                .claim("authorities", authoritiesString)
-                .claim("id", userId.toString())
+                .claim("authorities", user.getStringFromAuthorities())
+                .claim("id", String.valueOf(user.getId()))
                 .claim("last-noticed-at", lastNoticedAtStr)
                 .signWith(signingKey)
                 .compact();
@@ -92,7 +86,5 @@ public class JwtTokenUtils {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
-
-
 
 }

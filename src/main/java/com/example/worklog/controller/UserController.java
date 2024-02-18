@@ -4,6 +4,7 @@ package com.example.worklog.controller;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.user.*;
+import com.example.worklog.entity.RefreshTokenDetails;
 import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.jwt.JwtDto;
@@ -26,7 +27,12 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> register(@Valid @RequestBody UserSignupDto dto) {
-        userService.register(dto);
+        userService.register(
+                dto.getEmail(),
+                dto.getUsername(),
+                dto.getPassword(),
+                dto.getPasswordCheck()
+        );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_CREATED));
@@ -34,12 +40,13 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<ResourceResponseDto> login(
-            @RequestBody UserLoginDto dto,
+            @Valid @RequestBody UserLoginDto dto,
             HttpServletRequest request
     ) {
-
         JwtDto jwtDto = userService.login(
-                dto.getUsername(), dto.getPassword(), IpUtil.getClientIp(request)
+                dto.getUsername(),
+                dto.getPassword(),
+                IpUtil.getClientIp(request)
         );
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -49,17 +56,21 @@ public class UserController {
     public ResponseEntity<ResponseDto> logout(
             Authentication authentication
     ) {
-        userService.logout((String) authentication.getCredentials());
+        userService.logout(
+                (String) authentication.getCredentials()
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
     }
     @PostMapping("/reissue")
     public ResponseEntity<ResourceResponseDto> reissue(
-            HttpServletRequest request
+            Authentication authentication
     ) {
-        String refreshToken = request.getHeader("Authorization").split(" ")[1];
-        JwtDto jwtDto = userService.reissue(refreshToken, IpUtil.getClientIp(request));
+        JwtDto jwtDto = userService.reissue(
+                (User) authentication.getPrincipal(),
+                (RefreshTokenDetails) authentication.getCredentials()
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResourceResponseDto.fromData(jwtDto, 2));

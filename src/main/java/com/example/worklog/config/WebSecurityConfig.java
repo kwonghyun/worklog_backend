@@ -63,8 +63,7 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/users",
-                                "/users/login",
-                                "/users/reissue"
+                                "/users/login"
                         )
                         .anonymous()
                         .requestMatchers(

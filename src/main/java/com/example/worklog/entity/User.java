@@ -12,10 +12,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -39,6 +37,7 @@ public class User extends BaseTimeEntity {
     private String password;
 
     // 알림 보낸 마지막 시간
+    @NotNull
     private LocalDateTime lastNoticedAt;
 
     @Builder.Default
@@ -62,7 +61,11 @@ public class User extends BaseTimeEntity {
     public void updateLastNoticedAt(LocalDateTime lastNoticedAt) {
         this.lastNoticedAt = lastNoticedAt;
     }
-
+    public String getStringFromAuthorities() {
+        String authoritiesString = authorities.stream()
+                .map(authority -> authority.getAuthorityType().name()).collect(Collectors.joining(","));
+        return authoritiesString;
+    }
     @Override
     public String toString() {
         return "User{" +

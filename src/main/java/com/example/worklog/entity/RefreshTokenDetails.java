@@ -23,9 +23,7 @@ public class RefreshTokenDetails {
     private String username;
     private LocalDateTime lastNoticedAt;
     private String ip;
-
     private String authorities;
-
     @Indexed
     private String refreshToken;
 

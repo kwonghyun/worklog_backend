@@ -84,13 +84,7 @@ public class UserService {
             log.info("마지막 알림 보낸 시간 업데이트, NotificationFlag 생성");
         }
 
-        String authoritiesString = getStringFromAuthorities(user.getAuthorities());
-        JwtDto jwtDto = jwtTokenUtils.generateToken(
-                user.getId(),
-                user.getUsername(),
-                user.getLastNoticedAt(),
-                authoritiesString
-        );
+        JwtDto jwtDto = jwtTokenUtils.generateToken(user);
 
         // 유효기간 초단위 설정 후 redis에 timeToLive 설정
         Claims refreshTokenClaims = jwtTokenUtils.parseClaims(jwtDto.getRefreshToken());
@@ -99,7 +93,7 @@ public class UserService {
                         .userId(user.getId())
                         .username(user.getUsername())
                         .lastNoticedAt(user.getLastNoticedAt())
-                        .authorities(authoritiesString)
+                        .authorities(user.getStringFromAuthorities())
                         .ip(clientIp)
                         .ttl(getTokenValidSeconds(refreshTokenClaims))
                         .refreshToken(jwtDto.getRefreshToken())
@@ -110,48 +104,24 @@ public class UserService {
 
     public void logout(String accessToken) {
         String username = jwtTokenUtils.parseClaims(accessToken).getSubject();
-        if (refreshTokenRedisRepository.existsById(username)) {
-            refreshTokenRedisRepository.deleteById(username);
+        if (refreshTokenRedisRepository.existsByUsername(username)) {
+            refreshTokenRedisRepository.deleteByUsername(username);
             log.info("레디스에서 리프레시 토큰 삭제 완료");
         } else {
             new CustomException(ErrorCode.WRONG_REFRESH_TOKEN);
         }
     }
 
-    public JwtDto reissue(String refreshToken, String clientIp) {
-        // 1. 레디스에 해당 토큰 있는 지 확인
-        RefreshTokenDetails refreshTokenDetails = refreshTokenRedisRepository
-                .findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new CustomException(ErrorCode.WRONG_REFRESH_TOKEN));
-
-        LocalDateTime lastNoticedAt = refreshTokenDetails.getLastNoticedAt();
-        JwtDto jwtDto;
-        if (isTimeToNotice(lastNoticedAt)) {
-            User user = userRepository.findByIdWithAuthority(refreshTokenDetails.getUserId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public JwtDto reissue(User user, RefreshTokenDetails refreshTokenDetails) {
+        if (isTimeToNotice(user.getLastNoticedAt())) {
             user.updateLastNoticedAt(LocalDateTime.now());
             notificationService.produceNotificationFlag(user.getId());
-            log.info("뭐가 문제고");
-            String authoritiesString = getStringFromAuthorities(user.getAuthorities());
-            jwtDto = jwtTokenUtils.generateToken(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getLastNoticedAt(),
-                    authoritiesString
-            );
-        } else {
-            jwtDto = jwtTokenUtils.generateToken(
-                    refreshTokenDetails.getUserId(),
-                    refreshTokenDetails.getUsername(),
-                    refreshTokenDetails.getLastNoticedAt(),
-                    refreshTokenDetails.getAuthorities()
-            );
         }
-
+        JwtDto jwtDto = jwtTokenUtils.generateToken(user);
         refreshTokenDetails.updateRefreshToken(jwtDto.getRefreshToken());
+
         // 유효기간 초단위 설정 후 redis에 timeToLive 설정
         Claims refreshTokenClaims = jwtTokenUtils.parseClaims(jwtDto.getRefreshToken());
-
         refreshTokenDetails.updateTtl(
                 getTokenValidSeconds(refreshTokenClaims)
         );
