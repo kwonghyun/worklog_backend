@@ -1,6 +1,5 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.user.UserSignupDto;
 import com.example.worklog.entity.Authority;
 import com.example.worklog.entity.RefreshTokenDetails;
 import com.example.worklog.entity.User;
@@ -20,9 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -34,17 +31,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
 
-    public void register(UserSignupDto dto) {
+    public void register(String email, String username, String password, String passwordCheck) {
         // TODO 이메일 인증 가입
-        checkPassword(dto.getPassword());
-        checkPasswordCheck(dto.getPassword(), dto.getPasswordCheck());
-        checkEmail(dto.getEmail());
-        checkUsername(dto.getUsername());
+        checkEmail(email);
+        checkUsername(username);
+        checkPassword(password);
+        checkPasswordCheck(password, passwordCheck);
 
         User user = User.builder()
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .username(dto.getUsername())
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .username(username)
                 .lastNoticedAt(LocalDateTime.now().minusDays(1L))
                 .build();
         user.addAuthority(Authority.builder()
@@ -84,6 +81,7 @@ public class UserService {
         if (isTimeToNotice(user.getLastNoticedAt())) {
             user.updateLastNoticedAt(LocalDateTime.now());
             notificationService.produceNotificationFlag(user.getId());
+            log.info("마지막 알림 보낸 시간 업데이트, NotificationFlag 생성");
         }
 
         String authoritiesString = getStringFromAuthorities(user.getAuthorities());
@@ -202,8 +200,8 @@ public class UserService {
         log.info("{} 회원 탈퇴 시작", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        if (refreshTokenRedisRepository.existsById(username)) {
-            refreshTokenRedisRepository.deleteById(username);
+        if (refreshTokenRedisRepository.existsByUsername(username)) {
+            refreshTokenRedisRepository.deleteByUsername(username);
             log.info("레디스에서 리프레시 토큰 삭제 완료");
         }
         userRepository.delete(user);
@@ -238,16 +236,10 @@ public class UserService {
         log.info("비밀번호 수정 완료");
     }
     private Boolean isTimeToNotice(LocalDateTime lastNoticedAt) {
-        return lastNoticedAt == null
-                || lastNoticedAt
-                .plusHours(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES)
+        return lastNoticedAt
+                .plusMinutes(EnvironmentVariable.SEARCH_FUTURE_NOTIFICATION_MINUTES)
                 .minusSeconds(jwtTokenUtils.getAccessExpirationTime())
-                .isAfter(LocalDateTime.now());
+                .isBefore(LocalDateTime.now());
     }
 
-    private String getStringFromAuthorities(Collection<Authority> authorities) {
-        String authoritiesString = authorities.stream()
-                .map(authority -> authority.getAuthorityType().name()).collect(Collectors.joining(","));
-        return authoritiesString;
-    }
 }
