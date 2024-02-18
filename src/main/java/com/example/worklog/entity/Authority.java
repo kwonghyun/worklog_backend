@@ -7,12 +7,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Authority {
+public class Authority implements GrantedAuthority {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Enumerated(EnumType.STRING)
@@ -28,5 +29,9 @@ public class Authority {
                 "id=" + id +
                 ", authorityType=" + authorityType +
                 '}';
+    }
+    @Override
+    public String getAuthority() {
+        return authorityType.name();
     }
 }
