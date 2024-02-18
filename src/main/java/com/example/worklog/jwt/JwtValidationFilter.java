@@ -5,7 +5,6 @@ import com.example.worklog.entity.User;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.exception.FilterExceptionHandler;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
-import com.example.worklog.utils.Constants;
 import com.example.worklog.utils.IpUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -56,35 +54,20 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             Authentication authentication;
             // reissue 요청일 때
             if (request.getServletPath().equals("/users/reissue")) {
-                log.info("redis에서 인증 객체 생성 시작");
+                log.info("redis에서 RefreshTokenDetails 찾아 인증 객체 생성 시작");
 
                 RefreshTokenDetails refreshTokenDetails
                         = getValidatedRefreshTokenDetails(token, request, response);
+                User user = refreshTokenDetails.toUser();
 
-                authentication = new CustomAuthenticationToken(
-                        User.builder()
-                                .username(refreshTokenDetails.getUsername())
-                                .id(refreshTokenDetails.getUserId())
-                                .lastNoticedAt(refreshTokenDetails.getLastNoticedAt())
-                                .build(),
-                        refreshTokenDetails,
-                        jwtTokenUtils.getGrantedAuthoritiesFromString(refreshTokenDetails.getAuthorities())
-                );
+                authentication = new CustomAuthenticationToken(user, refreshTokenDetails, user.getAuthorities());
             } else { // 보통 요청일 때
                 log.info("access token에서 인증 객체 생성 시작");
-                Claims claims = jwtTokenUtils.parseClaims(token);
-                Object lastNoticedAtClaim = claims.get("last-noticed-at");
-                LocalDateTime lastNoticedAt = LocalDateTime.parse(lastNoticedAtClaim.toString(), Constants.DATE_TIME_SEC_FORMAT);
 
-                authentication = new CustomAuthenticationToken(
-                        User.builder()
-                                .username(claims.getSubject())
-                                .id(Long.parseLong((String) claims.get("id")))
-                                .lastNoticedAt(lastNoticedAt)
-                                .build(),
-                        token,
-                        jwtTokenUtils.getGrantedAuthoritiesFromString((String) claims.get("authorities"))
-                );
+                Claims claims = jwtTokenUtils.parseClaims(token);
+                User user = jwtTokenUtils.generateUserFromClaims(claims);
+
+                authentication = new CustomAuthenticationToken(user, token, user.getAuthorities());
             }
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();

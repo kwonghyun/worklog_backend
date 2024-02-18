@@ -1,7 +1,9 @@
 package com.example.worklog.jwt;
 
 
+import com.example.worklog.entity.Authority;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.enums.AuthorityType;
 import com.example.worklog.utils.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
@@ -10,15 +12,14 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -45,7 +46,6 @@ public class JwtTokenUtils {
 
     public JwtDto generateToken(User user) {
         log.info("{} jwt 발급 시작", user);
-
         // "yyyy-MM-dd HH:mm:ss"
         String lastNoticedAtStr = user.getLastNoticedAt().format(Constants.DATE_TIME_SEC_FORMAT);
         Claims accessTokenClaims = Jwts.claims()
@@ -81,10 +81,32 @@ public class JwtTokenUtils {
                 .getBody();
     }
 
-    public Collection<? extends GrantedAuthority> getGrantedAuthoritiesFromString(String authoritiesString) {
-        return Arrays.stream(authoritiesString.split(","))
-                .map(SimpleGrantedAuthority::new)
+    public User generateUserFromClaims(Claims claims) {
+        Long userId = Long.parseLong(claims.get("id").toString());
+
+        String username = claims.getSubject();
+
+        LocalDateTime lastNoticedAt = LocalDateTime.parse(
+                claims.get("last-noticed-at").toString(),
+                Constants.DATE_TIME_SEC_FORMAT
+        );
+
+        List<Authority> authorities = Arrays.stream(
+                claims.get("authorities").toString()
+                        .split(","))
+                .map(
+                        authString -> Authority.builder().
+                                authorityType(AuthorityType.from(authString))
+                                .build()
+                )
                 .collect(Collectors.toList());
+
+        return User.builder()
+                .id(userId)
+                .username(username)
+                .lastNoticedAt(lastNoticedAt)
+                .authorities(authorities)
+                .build();
     }
 
 }

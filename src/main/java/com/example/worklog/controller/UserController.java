@@ -54,11 +54,9 @@ public class UserController {
     }
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto> logout(
-            Authentication authentication
+            @AuthenticationPrincipal User user
     ) {
-        userService.logout(
-                (String) authentication.getCredentials()
-        );
+        userService.logout(user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
@@ -87,7 +85,7 @@ public class UserController {
                 dto.getCurrentPassword(),
                 dto.getPassword(),
                 dto.getPasswordCheck(),
-                user.getUsername()
+                user.getId()
         );
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -97,7 +95,7 @@ public class UserController {
     // 회원탈퇴
     @DeleteMapping("/me")
     public ResponseEntity<ResponseDto> deleteUser(@AuthenticationPrincipal User user) {
-        userService.deleteUser(user.getUsername());
+        userService.deleteUser(user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.USER_DELETE_SUCCESS));

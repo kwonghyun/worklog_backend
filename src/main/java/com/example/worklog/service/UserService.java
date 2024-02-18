@@ -71,6 +71,7 @@ public class UserService {
 
         User user = userRepository.findByUsernameWithAuthority(username)
                     .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
+        log.info("로그인 시도: {}", user.toString());
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.info("login: 비밀번호 불일치");
@@ -99,17 +100,12 @@ public class UserService {
                         .refreshToken(jwtDto.getRefreshToken())
                         .build()
         );
+        log.info("사용자 권한: {}", user.getStringFromAuthorities());
         return jwtDto;
     }
 
-    public void logout(String accessToken) {
-        String username = jwtTokenUtils.parseClaims(accessToken).getSubject();
-        if (refreshTokenRedisRepository.existsByUsername(username)) {
-            refreshTokenRedisRepository.deleteByUsername(username);
-            log.info("레디스에서 리프레시 토큰 삭제 완료");
-        } else {
-            new CustomException(ErrorCode.WRONG_REFRESH_TOKEN);
-        }
+    public void logout(Long userId) {
+        refreshTokenRedisRepository.deleteById(userId);
     }
 
     public JwtDto reissue(User user, RefreshTokenDetails refreshTokenDetails) {
@@ -126,8 +122,10 @@ public class UserService {
                 getTokenValidSeconds(refreshTokenClaims)
         );
         refreshTokenRedisRepository.save(refreshTokenDetails);
+        log.info("refreshTokenDetails: {}", refreshTokenDetails);
         return jwtDto;
     }
+
     private Long getTokenValidSeconds(Claims tokenClaims) {
         return tokenClaims.getExpiration().toInstant().getEpochSecond()
                 - tokenClaims.getIssuedAt().toInstant().getEpochSecond();
@@ -166,19 +164,12 @@ public class UserService {
         }
     }
 
-    public void deleteUser(String username) {
-        log.info("{} 회원 탈퇴 시작", username);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        if (refreshTokenRedisRepository.existsByUsername(username)) {
-            refreshTokenRedisRepository.deleteByUsername(username);
-            log.info("레디스에서 리프레시 토큰 삭제 완료");
-        }
-        userRepository.delete(user);
-        log.info("{} 회원 탈퇴 완료", username);
+    public void deleteUser(Long userId) {
+        logout(userId);
+        userRepository.deleteById(userId);
     }
 
-    public void updateUserPassword(String currentPassword, String newPassword, String newPasswordCheck, String username) {
+    public void updateUserPassword(String currentPassword, String newPassword, String newPasswordCheck, Long userId) {
         Pattern passwordPattern = Pattern.compile(Constants.PASSWORD_REGEX);
         if (!passwordPattern.matcher(currentPassword).matches()) {
             log.info("비밀번호 패턴 유효하지 않음.");
@@ -190,7 +181,7 @@ public class UserService {
             throw new CustomException(ErrorCode.UNMATCHED_PASSWORD);
         }
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {

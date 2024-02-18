@@ -1,18 +1,20 @@
 package com.example.worklog.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.example.worklog.entity.enums.AuthorityType;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Builder
 @Getter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "refresh",  timeToLive = 1000L)
@@ -36,4 +38,22 @@ public class RefreshTokenDetails {
     public void updateTtl(Long ttl) {
         this.ttl = ttl;
     }
+
+    public User toUser() {
+        List<Authority> authorities =
+                Arrays.stream(this.authorities.split(","))
+                .map(
+                        authString -> Authority.builder().authorityType(AuthorityType.from(authString)).build()
+                )
+                .collect(Collectors.toList());
+
+        return User.builder()
+                .id(this.userId)
+                .username(this.username)
+                .lastNoticedAt(lastNoticedAt)
+                .authorities(authorities)
+                .build();
+    }
+
+
 }
