@@ -107,7 +107,7 @@ public class WorkController {
             @Valid @RequestBody WorkDisplayOrderPatchDto dto,
             @AuthenticationPrincipal User user
     ) {
-        workService.updateWorkDisplayOrder(dto, workId, user.getId());
+        workService.updateWorkDisplayOrder(dto.getOrder(), workId, user.getId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.MEMO_EDIT_SUCCESS));

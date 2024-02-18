@@ -36,7 +36,7 @@ public class WorkService {
     public void createWork(WorkPostDto dto, User user) {
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalDateTime deadline = dto.getDeadline() == null ?
-                null : LocalDateTime.parse(dto.getDeadline(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+                null : LocalDateTime.parse(dto.getDeadline(), Constants.DATE_TIME_FORMAT);
         Work work = workRepository.save(
                 Work.builder()
                         .title(dto.getTitle())
@@ -146,14 +146,11 @@ public class WorkService {
         );
     }
 
-    public void updateWorkDisplayOrder(WorkDisplayOrderPatchDto dto, Long workId, Long userId) {
+    public void updateWorkDisplayOrder(Integer targetOrder, Long workId, Long userId) {
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
         Integer currentOrder = work.getDisplayOrder();
-        Integer targetOrder = dto.getOrder();
-        if (currentOrder.equals(targetOrder)) {
-            return;
-        }
+        if (currentOrder.equals(targetOrder)) return;
 
         Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), userId) - 1;
         if (targetOrder > lastOrder) {
