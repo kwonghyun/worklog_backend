@@ -54,7 +54,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             validateToken(token, response);
 
             Authentication authentication;
-            // reissu 요청일 때
+            // reissue 요청일 때
             if (request.getServletPath().equals("/users/reissue")) {
                 log.info("redis에서 인증 객체 생성 시작");
 
