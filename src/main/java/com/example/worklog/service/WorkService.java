@@ -1,7 +1,10 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.work.*;
+import com.example.worklog.dto.CustomPage;
+import com.example.worklog.dto.CustomPageable;
+import com.example.worklog.dto.work.WorkPostDto;
+import com.example.worklog.dto.work.WorkPutDto;
+import com.example.worklog.dto.work.WorkSearchServiceDto;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
@@ -15,15 +18,11 @@ import com.example.worklog.utils.WorkChangeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,30 +55,15 @@ public class WorkService {
         );
     }
 
-    public List<WorkGetDto> readWorks(LocalDate date, Long userId) {
-        List<Work> works = workRepository.readWorksByParamsAndUser(date, userId);
-
-        return works.stream()
-                .map(work -> WorkGetDto.fromEntity(work))
-                .collect(Collectors.toList());
+    public List<Work> readWorks(LocalDate date, Long userId) {
+        return workRepository.readWorksByParamsAndUser(date, userId);
     }
 
-    public Work findOne(Long id) {
-        return workRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-    }
-
-    public PageDto<WorkGetDto> searchWorks(WorkSearchServiceDto paramDto, Pageable pageable, Long userId) {
-        Page<Work> pagedWorks = workRepository.findBySearchParams(
+    public CustomPage<Work> searchWorks(WorkSearchServiceDto paramDto, CustomPageable pageable, Long userId) {
+        return workRepository.findBySearchParams(
                 paramDto, pageable, userId
         );
-
-        Page<WorkGetDto> pageDto
-                = pagedWorks.map(work -> WorkGetDto.fromEntity(work));
-
-        return PageDto.fromPage(pageDto);
     }
-
 
     public void updateWork(WorkPutDto dto, Long workId, Long userId) {
 
@@ -172,6 +156,39 @@ public class WorkService {
         }
         workRepository.saveAll(worksToUpdateOrder);
     }
+
+//    public void updateWorkDisplayOrder(Integer targetOrder, Long workId, Long userId) {
+//        Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
+//
+//        Integer currentOrder = work.getDisplayOrder();
+//        if (currentOrder.equals(targetOrder)) return;
+//        Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), userId) - 1;
+//        if (targetOrder > lastOrder) throw new CustomException(ErrorCode.WORK_ORDER_INVALID);
+//
+//
+//        interface WorkUpdateOperation { void update(Work workToUpdate, int newDisplayOrder);}
+//        WorkUpdateOperation updateOperation;
+//        if (currentOrder > targetOrder) {
+//            updateOperation = (workToUpdate, newDisplayOrder) -> workToUpdate.updateOrder(newDisplayOrder + 1);
+//        } else {
+//            updateOperation = (workToUpdate, newDisplayOrder) -> workToUpdate.updateOrder(newDisplayOrder - 1);
+//        }
+//
+//        List<Work> worksToUpdateOrder = workRepository.readWorksToUpdateDisplayOrder(
+//                work.getDate(),
+//                userId,
+//                currentOrder > targetOrder ? targetOrder : currentOrder + 1,
+//                currentOrder > targetOrder ? currentOrder - 1 : targetOrder
+//        );
+//
+//        int newOrder = currentOrder > targetOrder ? targetOrder : targetOrder - 1;
+//        for (Work workToUpdate : worksToUpdateOrder) {
+//            updateOperation.update(workToUpdate, newOrder);
+//            newOrder += (currentOrder > targetOrder ? 1 : -1);
+//        }
+//
+//        workRepository.saveAll(worksToUpdateOrder);
+//    }
 
     private Work getValidatedWorkByUserIdAndWorkId(Long userId, Long workId) {
         Work work = workRepository.findById(workId)

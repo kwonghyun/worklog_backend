@@ -1,16 +1,15 @@
 package com.example.worklog.controller;
 
-import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.ResourceResponseDto;
-import com.example.worklog.dto.ResponseDto;
+import com.example.worklog.dto.*;
 import com.example.worklog.dto.memo.*;
+import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.exception.SuccessCode;
 import com.example.worklog.service.MemoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,31 +42,36 @@ public class MemoController {
             @Valid @ModelAttribute MemoGetParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        List<MemoGetDto> memos = memoService.readMemos(
+        List<Memo> memos = memoService.readMemos(
                 LocalDate.parse(paramDto.getDate()),
                 user.getId()
         );
+        List<MemoGetDto> dtos = memos.stream()
+                .map(MemoGetDto::fromEntity)
+                .collect(Collectors.toList());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(memos, memos.size()));
+                .body(ResourceResponseDto.fromData(dtos, dtos.size()));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ResourceResponseDto> searchMemos(
             @Valid @ModelAttribute MemoSearchParamDto paramDto,
-            Pageable pageable,
+            CustomPageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        PageDto pageDto = memoService.searchMemos(
+        CustomPage<Memo> pagedMemos = memoService.searchMemos(
                 MemoSearchServiceDto.from(paramDto),
                 pageable,
                 user.getId()
         );
+        Page<MemoGetDto> pagedDtos
+                = pagedMemos.map(MemoGetDto::fromEntity);
+        PageDto<MemoGetDto> pageDto = PageDto.fromPage(pagedDtos);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(
-                        ResourceResponseDto.fromData(pageDto, pageDto.getContent().size())
-                );
+                .body(ResourceResponseDto.fromData(pageDto, pageDto.getContent().size()));
     }
 
     @PatchMapping("/{memoId}/content")

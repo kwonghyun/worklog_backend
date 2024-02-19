@@ -1,10 +1,9 @@
 package com.example.worklog.controller;
 
-import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.ResourceResponseDto;
-import com.example.worklog.dto.ResponseDto;
+import com.example.worklog.dto.*;
 import com.example.worklog.dto.work.*;
 import com.example.worklog.entity.User;
+import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
 import com.example.worklog.exception.SuccessCode;
@@ -12,7 +11,6 @@ import com.example.worklog.service.WorkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,27 +42,32 @@ public class WorkController {
             @Valid @ModelAttribute WorkGetParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        List<WorkGetDto> works = workService.readWorks(LocalDate.parse(paramDto.getDate()), user.getId());
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(works, works.size());
+        List<Work> works = workService.readWorks(LocalDate.parse(paramDto.getDate()), user.getId());
+        List<WorkGetDto> workGetDtos = works.stream()
+                .map(WorkGetDto::fromEntity)
+                .collect(Collectors.toList());
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(responseDto);
+                .body(ResourceResponseDto.fromData(workGetDtos, workGetDtos.size()));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ResourceResponseDto> searchWorks(
-            Pageable pageable,
+            CustomPageable pageable,
             @Valid @ModelAttribute WorkSearchParamDto paramDto,
             @AuthenticationPrincipal User user
     ) {
-        PageDto pageDto = workService.searchWorks(
+        CustomPage<Work> pagedWorks = workService.searchWorks(
                 WorkSearchServiceDto.from(paramDto),
                 pageable,
-                user.getId());
-        ResourceResponseDto responseDto = ResourceResponseDto.fromData(pageDto, pageDto.getContent().size());
+                user.getId()
+        );
+        PageDto<WorkGetDto> pageDto = PageDto.fromPage(
+                pagedWorks.map(WorkGetDto::fromEntity)
+        );
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(responseDto);
+                .body(ResourceResponseDto.fromData(pageDto, pageDto.getContent().size()));
     }
 
     @PutMapping("/{workId}")
@@ -136,8 +140,6 @@ public class WorkController {
                 .status(HttpStatus.OK)
                 .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
     }
-
-
 
     @DeleteMapping("/{workId}")
     public ResponseEntity<ResponseDto> deleteWork(

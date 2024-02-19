@@ -1,7 +1,9 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.PageDto;
-import com.example.worklog.dto.memo.*;
+import com.example.worklog.dto.CustomPage;
+import com.example.worklog.dto.CustomPageable;
+import com.example.worklog.dto.memo.MemoPostDto;
+import com.example.worklog.dto.memo.MemoSearchServiceDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.Importance;
@@ -9,13 +11,10 @@ import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,23 +34,14 @@ public class MemoService {
         );
     }
 
-    public List<MemoGetDto> readMemos(LocalDate date, Long userId) {
-        List<Memo> memos= memoRepository.readMemosByParamsAndUser(date, userId);
-
-        return memos.stream()
-                .map(memo -> MemoGetDto.fromEntity(memo))
-                .collect(Collectors.toList());
+    public List<Memo> readMemos(LocalDate date, Long userId) {
+        return memoRepository.readMemosByParamsAndUser(date, userId);
     }
 
-    public PageDto<MemoGetDto> searchMemos(MemoSearchServiceDto serviceDto, Pageable pageable, Long userId) {
-        Page<Memo> pagedMemos = memoRepository.searchMemosByParamsAndUser(
+    public CustomPage<Memo> searchMemos(MemoSearchServiceDto serviceDto, CustomPageable pageable, Long userId) {
+        return memoRepository.findBySearchParams(
                 serviceDto, pageable, userId
         );
-
-        Page<MemoGetDto> pageDto
-                = pagedMemos.map(memo -> MemoGetDto.fromEntity(memo));
-
-        return PageDto.fromPage(pageDto);
     }
 
     public void updateMemoContent(String content, Long memoId, Long userId) {

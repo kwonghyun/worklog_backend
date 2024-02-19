@@ -1,5 +1,6 @@
 package com.example.worklog.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,14 +14,24 @@ public class PageDto<T> {
     private List<T> content;
     private int pageNumber;
     private int pageSize;
-    private int lastPage;
+    private int numberOfElements;
+    private long totalElements;
+    private int totalPages;
+    @JsonProperty("isFirstPage")
+    private boolean isFirstPage;
+    @JsonProperty("isLastPage")
+    private boolean isLastPage;
 
     public static <T> PageDto<T> fromPage(Page<T> page) {
         PageDto<T> pageDto = new PageDto<>();
         pageDto.setContent(page.getContent());
-        pageDto.setPageNumber(page.getNumber() + 1); // 페이지 번호 1부터 시작
+        pageDto.setPageNumber(page.getNumber());
         pageDto.setPageSize(page.getSize());
-        pageDto.setLastPage(page.getTotalPages()); // 마지막 페이지 번호 = 총 페이지 수
+        pageDto.setNumberOfElements(page.getNumberOfElements());
+        pageDto.setTotalElements(page.getTotalElements());
+        pageDto.setTotalPages(page.getTotalPages());
+        pageDto.setFirstPage(page.isFirst());
+        pageDto.setLastPage(page.isLast());
         return pageDto;
     }
 }

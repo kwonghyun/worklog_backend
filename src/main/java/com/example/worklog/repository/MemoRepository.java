@@ -1,9 +1,7 @@
 package com.example.worklog.repository;
 
-import com.example.worklog.dto.memo.MemoSearchServiceDto;
 import com.example.worklog.entity.Memo;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.example.worklog.repository.querydsl.MemoRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface MemoRepository extends JpaRepository<Memo, Long> {
+public interface MemoRepository extends JpaRepository<Memo, Long>, MemoRepositoryCustom {
 
     @Query(
             "SELECT m FROM Memo m " +
@@ -23,24 +21,12 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
     List<Memo> readMemosByParamsAndUser(@Param("date") LocalDate date, @Param("userId") Long userId);
 
     @Query(
-            "SELECT m FROM Memo m " +
-                    "WHERE " +
-                    "(:#{#dto.startDate} IS NULL OR m.date >= :#{#dto.startDate}) " +
-                    "AND (:#{#dto.endDate} IS NULL OR m.date <= :#{#dto.endDate}) " +
-                    "AND (:#{#dto.keyword} IS NULL OR m.content LIKE :#{#dto.keyword}) " +
-                    "AND (m.user.id = :userId) " +
-                    "ORDER BY m.date ASC, m.displayOrder ASC "
-    )
-    Page<Memo> searchMemosByParamsAndUser(@Param("dto") MemoSearchServiceDto dto, Pageable pageable, @Param("userId") Long userId);
-
-    @Query(
             "SELECT COUNT(m) FROM Memo m " +
                     "WHERE " +
                         "(m.date = :targetDate) " +
                         "AND (m.user.id = :userId)"
     )
     Integer countDisplayOrder(@Param("targetDate") LocalDate targetDate, @Param("userId") Long userId);
-
 
     @Query(
             "SELECT m FROM Memo m " +

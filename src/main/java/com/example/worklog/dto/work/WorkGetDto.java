@@ -3,11 +3,10 @@ package com.example.worklog.dto.work;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
+import com.example.worklog.utils.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -27,9 +26,9 @@ public class WorkGetDto {
         dto.setId(work.getId());
         dto.setTitle(work.getTitle());
         dto.setContent(work.getContent());
-        dto.setDate(work.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        dto.setDate(work.getDate().format(Constants.DATE_FORMAT));
         if (work.getDeadline() != null) {
-            dto.setDeadline(work.getDeadline().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            dto.setDeadline(work.getDeadline().format(Constants.DATE_TIME_FORMAT));
         }
         dto.setCategory(work.getCategory());
         dto.setState(work.getState());
