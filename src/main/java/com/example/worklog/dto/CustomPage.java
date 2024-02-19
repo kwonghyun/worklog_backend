@@ -110,4 +110,13 @@ public class CustomPage<T> implements Page<T> {
     public Iterator<T> iterator() {
         return this.content.iterator();
     }
+
+    @Override
+    public String toString() {
+        return "CustomPage{" +
+                "total=" + total +
+                ", pageable=" + pageable +
+                ", content=" + content +
+                '}';
+    }
 }

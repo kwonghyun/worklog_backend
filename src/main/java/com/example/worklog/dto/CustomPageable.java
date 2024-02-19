@@ -74,4 +74,13 @@ public class CustomPageable implements Pageable {
     public boolean hasPrevious() {
         return pageNumber > firstPage;
     }
+
+    @Override
+    public String toString() {
+        return "CustomPageable{" +
+                "pageNumber=" + pageNumber +
+                ", pageSize=" + pageSize +
+                ", sort=" + sort +
+                '}';
+    }
 }

@@ -22,14 +22,18 @@ public class WorkSearchServiceDto {
             WorkSearchParamDto requestParamDto
     ) {
         WorkSearchServiceDto dto = new WorkSearchServiceDto();
-        if (requestParamDto.getStartDate() != null) {
+        if (requestParamDto.getStartDate() != null)
             dto.setStartDate(LocalDate.parse(requestParamDto.getStartDate()));
-        }
-        if (requestParamDto.getEndDate() != null) {
+
+        if (requestParamDto.getEndDate() != null)
             dto.setEndDate(LocalDate.parse(requestParamDto.getEndDate()));
-        }
-        dto.setCategory(Category.from(requestParamDto.getCategory()));
-        dto.setState(WorkState.from(requestParamDto.getState()));
+
+        if (requestParamDto.getCategory() != null)
+            dto.setCategory(Category.from(requestParamDto.getCategory()));
+
+        if (requestParamDto.getState() != null)
+            dto.setState(WorkState.from(requestParamDto.getState()));
+
         dto.setKeyword(requestParamDto.getKeyword());
         return dto;
     }
