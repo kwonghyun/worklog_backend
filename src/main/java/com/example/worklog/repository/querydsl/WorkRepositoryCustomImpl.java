@@ -43,7 +43,7 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
                 .orderBy(qWork.date.asc(), qWork.displayOrder.asc())
                 .fetch();
 
-        Long count = selectFromWhere.fetchCount();
+        Long count = selectFromWhere.stream().count();
 
         return new CustomPage<Work>(works, pageable, count);
     }
