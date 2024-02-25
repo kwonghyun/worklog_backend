@@ -28,6 +28,10 @@ public class RequestLogger {
     @Setter
     private long endTimeMillis;
 
+    public void log(String message) {
+        log.info("{}{}", this.toString(), message);
+    }
+
     public long getExecutionTime() {
         return endTimeMillis - startTimeMillis;
     }

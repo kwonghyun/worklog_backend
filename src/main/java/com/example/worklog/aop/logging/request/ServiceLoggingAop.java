@@ -17,7 +17,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ServiceLoggingAop {
     private final RequestLogger logger;
-    @Pointcut("execution(* com.example.worklog.service..*.*(..))")
+    @Pointcut("execution(* com.example.worklog.service..*.*(..)) " +
+            "&& !@target(com.example.worklog.aop.logging.request.ExcludeAop)")
     private void cut(){}
 
     @Before("cut()")

@@ -15,7 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class RequestLoggingInterceptor implements HandlerInterceptor {
     private final RequestLogger logger;
     private final JwtTokenUtils jwtTokenUtils;
-    private static final String QUERY_COUNT_LOG_FORMAT = "{}STATUS_CODE: {}, QUERY_COUNT: {}, EXECUTION_TIME: {}ms";
+    private static final String QUERY_COUNT_LOG_FORMAT = "STATUS_CODE: %d, QUERY_COUNT: %d, EXECUTION_TIME: %dms";
     private final ApiQueryCounter apiQueryCounter;
 
 
@@ -41,7 +41,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                                 final Object handler, final Exception ex) {
         final int queryCount = apiQueryCounter.getCount();
         logger.setEndTimeMillis(System.currentTimeMillis());
-        log.info(QUERY_COUNT_LOG_FORMAT, logger, response.getStatus(),
-                queryCount, logger.getExecutionTime());
+        logger.log(String.format(QUERY_COUNT_LOG_FORMAT, response.getStatus(), queryCount, logger.getExecutionTime()));
     }
 }
