@@ -4,6 +4,7 @@ import com.example.worklog.entity.base.BaseTimeEntity;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.entity.enums.WorkState;
+import com.example.worklog.utils.Constants;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -16,8 +17,6 @@ import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -94,6 +93,15 @@ public class Work extends BaseTimeEntity {
 
     public void updateImportance(Importance importance) {
         this.importance = importance;
+    }
+
+    public String toTempNotificationMessage() {
+
+        String date = this.getDate().toString();
+        String title = this.getTitle();
+        String  deadline = this.getDeadline().format(Constants.DATE_TIME_FORMAT);
+
+        return String.format("%s에 작성된 업무 : %s의 마감기한이 %s까지 ", date, title, deadline);
     }
 
     @Override

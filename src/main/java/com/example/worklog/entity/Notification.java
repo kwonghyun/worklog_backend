@@ -4,10 +4,7 @@ import com.example.worklog.entity.base.BaseTimeEntity;
 import com.example.worklog.entity.enums.NotificationEntityType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -15,6 +12,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE notification SET is_deleted = TRUE WHERE id = ?")
 @Where(clause = "is_deleted = FALSE")
@@ -26,7 +25,9 @@ public class Notification extends BaseTimeEntity {
     private Long entityId;
     private String message;
     private LocalDateTime timeToSend;
+    @Builder.Default
     private Boolean isSent = false;
+    @Builder.Default
     private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,24 +37,7 @@ public class Notification extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User sender;
 
-    @Builder // 생성시 message는 입력하지 못하기 위함
-    protected Notification(
-            Long id,
-            NotificationEntityType entityType,
-            Long entityId,
-            LocalDateTime timeToSend,
-            User receiver,
-            User sender
-    ) {
-        this.id = id;
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.timeToSend = timeToSend;
-        this.receiver = receiver;
-        this.sender = sender;
-    }
-
-    public void setMessage(String message) {
+    public void updateMessage(String message) {
         this.message = message;
     }
     public void updateIsSent(Boolean isSent) {

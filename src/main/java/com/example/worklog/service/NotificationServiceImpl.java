@@ -93,6 +93,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .entityId(work.getId())
                         .timeToSend(work.getDeadline().minusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS))
                         .receiver(work.getUser())
+                        .message(work.toTempNotificationMessage())
                         .build())
                 .collect(Collectors.toList())
         );
@@ -111,8 +112,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void reserveNotification(Notification notification) {
 
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put("notificationService", this);
-        jobDataMap.put("notificationId", notification.getId());
+        jobDataMap.put("sseService", this.sseService);
+        jobDataMap.put("notificationRepository", this.notificationRepository);
+        jobDataMap.put("notification", notification);
 
         JobDetail jobDetail = JobBuilder.newJob(NotificationJob.class)
                 .setJobData(jobDataMap)
@@ -148,7 +150,7 @@ public class NotificationServiceImpl implements NotificationService {
             return scheduler.checkExists(TriggerKey.triggerKey("work_" + workId, "work_notification"));
         } catch (SchedulerException e) {
             log.error(e.getMessage());
-            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
+            return false;
         }
     }
 
@@ -160,39 +162,13 @@ public class NotificationServiceImpl implements NotificationService {
             scheduler.unscheduleJob(TriggerKey.triggerKey("work_" + workId, "work_notification"));
         } catch (SchedulerException e) {
             log.error(e.getMessage());
-            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
         }
     }
-
-    @Transactional
-    public void generateMessage(Notification notification) {
-        String message = null;
-        NotificationEntityType type = notification.getEntityType();
-        switch (type) {
-            case USER, MEMO -> throw new CustomException(ErrorCode.ERROR_NOT_FOUND);
-            case WORK -> {
-                Work work = workRepository.findById(notification.getEntityId())
-                        .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
-                String date = work.getDate().toString();
-                String title = work.getTitle();
-                LocalDateTime deadline = work.getDeadline();
-                LocalDateTime now = LocalDateTime.now();
-                long minDiff = Math.abs(ChronoUnit.MINUTES.between(deadline, now));
-                long hour = minDiff / 60;
-                long minute = minDiff % 60;
-                String timeDiff = hour == 0
-                        ? String.format("%d분", minute) : String.format("%d시간 %d분", hour, minute);
-                String isExpired = deadline.isBefore(now) ? "지났습니다." : "남았습니다";
-                message = String.format("%s에 작성된 업무 : %s의 마감기한이 %s %s.", date, title, timeDiff, isExpired);
-            }
-        };
-        notification.setMessage(message);
-    }
-
     @Transactional
     public void sendNotification(Notification notification) {
         Long userId = notification.getReceiver().getId();
-        generateMessage(notification);
+        notification.updateMessage(
+                StringConverter.completeWorkNotificationMessage(notification.getMessage()));
         EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
             sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
@@ -209,7 +185,8 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.saveAll(
                 notifications.stream()
                     .map(notification -> {
-                                generateMessage(notification);
+                                notification.updateMessage(
+                                        StringConverter.completeWorkNotificationMessage(notification.getMessage()));
                                 EmitterKey emitterKey = new EmitterKey(notification.getReceiver().getId(), SseRole.NOTIFICATION);
                                 sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
                                 notification.updateIsSent(true);
