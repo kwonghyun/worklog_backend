@@ -14,7 +14,6 @@ public interface NotificationService {
     public void reserveNotification(Notification notification);
     public boolean existsReservedNotification(Work work);
     public void cancelReservedNotification(Work work);
-    public void generateMessage(Notification notification);
     public void sendNotification(Notification notification);
     public void sendNotification(List<Notification> notifications);
     public Boolean isNeededSendingNow(LocalDateTime deadline);
