@@ -14,6 +14,7 @@ import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.scheduler.NotificationJob;
 import com.example.worklog.utils.EmitterKey;
 import com.example.worklog.utils.EnvironmentVariable;
+import com.example.worklog.utils.StringConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,6 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .entityType(NotificationEntityType.WORK)
                 .entityId(work.getId())
                 .timeToSend(work.getDeadline().minusHours(EnvironmentVariable.WORK_DEADLINE_TRIGGER_HOURS))
+                .message(work.toTempNotificationMessage())
                 .receiver(work.getUser())
                 .build());
     }
