@@ -1,5 +1,6 @@
 package com.example.worklog.service;
 
+import com.example.worklog.aop.logging.request.ExcludeAop;
 import com.example.worklog.dto.sseevent.ConnectionMessageDto;
 import com.example.worklog.dto.sseevent.SseMessageDto;
 import com.example.worklog.entity.enums.SseRole;
@@ -22,6 +23,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
+@ExcludeAop
 public class SseServiceImpl implements SseService {
     private static final Long sseTimeout = 3 * 60L * 1000;;
 
@@ -47,6 +49,7 @@ public class SseServiceImpl implements SseService {
 
         sseEmitterRepository.put(emitterKey, emitter);
         sendToClient(emitterKey, ConnectionMessageDto.builder().userId(userId).build());
+        log.info("SSE : userId={}에게 연결", userId);
 
         applicationEventPublisher.publishEvent(
                 SseSubscribeEvent.builder().userId(userId).build()
@@ -67,10 +70,10 @@ public class SseServiceImpl implements SseService {
                             .data(event, MediaType.APPLICATION_JSON)
                             .build()
             );
-            log.info("SSE : userId: {} 에게 sse message : {} 전송", emitterKey.toString().split("_")[1], event);
+            log.info("SSE : userId={} 에게 message 전송 {}", emitterKey.toString().split("_")[1], event);
         } catch (IOException exception) {
             sseEmitterRepository.remove(emitterKey);
-            log.info("SSE Exception: {}", exception.getMessage());
+            log.info("SSE Exception : {}", exception.getMessage());
             throw new CustomException(ErrorCode.SSE_CONNECTION_BROKEN);
         }
     }

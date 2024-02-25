@@ -1,26 +1,28 @@
-package com.example.worklog.exception;
+package com.example.worklog.exception.validation;
 
 import com.example.worklog.utils.Constants;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
 @Slf4j
-public class DateValidator implements ConstraintValidator<DatePattern, String> {
+public class DateTimeValidator implements ConstraintValidator<DateTimePattern, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) {
             return true;
         }
         try {
-            LocalDate.parse(value, Constants.DATE_FORMAT);
+            LocalDateTime.parse(value, Constants.DATE_TIME_FORMAT);
         } catch (DateTimeParseException e) {
-            log.error("DateValidator : {}", e.getMessage());
+            log.error("DateTimeValidator : {}", e.getMessage());
             return false;
         }
         return true;
     }
+
+
 }

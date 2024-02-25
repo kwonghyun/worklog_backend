@@ -8,6 +8,6 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-public class WorkChangeEvent {
+public class WorkUpdateEvent {
     private Work work;
 }

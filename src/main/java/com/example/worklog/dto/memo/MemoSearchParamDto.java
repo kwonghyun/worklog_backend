@@ -1,6 +1,6 @@
 package com.example.worklog.dto.memo;
 
-import com.example.worklog.exception.DatePattern;
+import com.example.worklog.exception.validation.DatePattern;
 import lombok.Getter;
 import lombok.ToString;
 

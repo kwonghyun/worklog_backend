@@ -14,7 +14,8 @@ import com.example.worklog.exception.CustomException;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.utils.Constants;
-import com.example.worklog.utils.WorkChangeEvent;
+import com.example.worklog.utils.WorkCreateEvent;
+import com.example.worklog.utils.WorkUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -51,7 +52,7 @@ public class WorkServiceImpl implements WorkService {
         );
 
         applicationEventPublisher.publishEvent(
-                WorkChangeEvent.builder().work(work).build()
+                WorkCreateEvent.builder().work(work).build()
         );
     }
 
@@ -82,7 +83,7 @@ public class WorkServiceImpl implements WorkService {
         Work updatedWork = workRepository.save(work);
 
         applicationEventPublisher.publishEvent(
-                    WorkChangeEvent.builder().work(updatedWork).build()
+                    WorkUpdateEvent.builder().work(updatedWork).build()
         );
     }
 
@@ -126,7 +127,7 @@ public class WorkServiceImpl implements WorkService {
         workRepository.delete(work);
 
         applicationEventPublisher.publishEvent(
-                WorkChangeEvent.builder().work(work).build()
+                WorkUpdateEvent.builder().work(work).build()
         );
     }
 
