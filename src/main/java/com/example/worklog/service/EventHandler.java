@@ -4,6 +4,7 @@ import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.utils.SseSubscribeEvent;
 import com.example.worklog.utils.WorkCreateEvent;
+import com.example.worklog.utils.WorkDeleteEvent;
 import com.example.worklog.utils.WorkUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,12 @@ public class EventHandler {
     public void onWorkCreated(WorkCreateEvent event) {
         Work work = event.getWork();
         checkConnectionAndNotice(work);
+    }
+
+    @EventListener
+    public void onWorkDeleted(WorkDeleteEvent event) {
+        Work work = event.getWork();
+        deleteNotificationIfExists(work);
     }
 
     @TransactionalEventListener

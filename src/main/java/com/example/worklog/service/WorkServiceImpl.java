@@ -15,6 +15,7 @@ import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.utils.Constants;
 import com.example.worklog.utils.WorkCreateEvent;
+import com.example.worklog.utils.WorkDeleteEvent;
 import com.example.worklog.utils.WorkUpdateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,7 +128,7 @@ public class WorkServiceImpl implements WorkService {
         workRepository.delete(work);
 
         applicationEventPublisher.publishEvent(
-                WorkUpdateEvent.builder().work(work).build()
+                WorkDeleteEvent.builder().work(work).build()
         );
     }
 
