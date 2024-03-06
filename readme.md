@@ -1,11 +1,8 @@
 ## 업무의 기록과 일정 관리를 하는 메모 웹, 워크로그
 
-
-![image-20240207001441527](C:\Users\Gwanghyun\AppData\Roaming\Typora\typora-user-images\image-20240207001441527.png)
+<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/031f1149-7c12-48d5-9522-e8d7346a596e" alt="image-20240207001441527" width="80%"/>
 
 last updated at: 2024.02.12
-
-
 
 
 
@@ -17,16 +14,13 @@ last updated at: 2024.02.12
 - [실행 방법](#실행-방법)
 - [사용 방법](#사용-방법)
 - [요구 사항](#요구-사항)
-- [중점 구현 사항](#중점-구현-사항)
-
-
-
-
-
-
-
-
-
+- [★중점 구현 사항★](#중점-구현-사항)
+  - [빈틈없이, 낭비없이 보내는 알림](#빈틈없이,-낭비없이-보내는-알림)
+  - [기존 기능과 느슨하게 결합된 알림](#기존 기능과-느슨하게-결합된-알림)
+  - [DB 접근 최소화](#DB-접근-최소화)
+  - [Spring Security와 결합도 분리](#Spring Security와-결합도-분리)
+  - [String, Wrapper 타입이 아닌 필드의 유효성 검사](#String,-Wrapper-타입이-아닌-필드의-유효성-검사)
+  - [응답 통일](#응답-통일)
 
 
 
@@ -56,30 +50,22 @@ last updated at: 2024.02.12
 - ORM : JPA
 - DB: MySQL
 - 프록시서버: nginx
-- 캐시 서버(리프레시 토큰): Redis
+- 캐시 서버(리프레시 토큰, 알림 확인 Flag): Redis
 - Infra Structure: AWS(EC2, RDS, CodeDeploy, S3), GIthub Actions
 
 #### ERD
 
-<img src="C:\Users\Gwanghyun\AppData\Roaming\Typora\typora-user-images\image-20240206235827465.png" alt="image-20240206235827465" style="zoom:35%;" />
+<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/ddeddec0-fc75-4e12-8d12-7e1537f7feea" alt="image" width="50%" />
 
 #### 프로젝트 구조
 
-![image-20240206200557127](C:\Users\Gwanghyun\AppData\Roaming\Typora\typora-user-images\image-20240206200557127.png)
+<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/9c5dbb99-aeca-4deb-a078-4e49ac28fddd" alt="image-20240206200557127" width="70%"/>
 
 #### 배포 구조
 
-![image-20240206200639822](C:\Users\Gwanghyun\AppData\Roaming\Typora\typora-user-images\image-20240206200639822.png)
+<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/1a68df4e-515e-4bae-bb23-f25fee53e458" alt="image-20240206200639822" width="70%"/>
 
 [목차](#목차)
-
-
-
-
-
-
-
-
 
 
 
@@ -141,23 +127,104 @@ last updated at: 2024.02.12
 
 #### 알림 기능
 
-![업무생성수정삭제시](C:\Users\Gwanghyun\Desktop\worklog 다이어그램\업무생성수정삭제시.png)
-
-![토큰발급시](C:\Users\Gwanghyun\Desktop\worklog 다이어그램\토큰발급시.PNG)
-
-![SSE연결시](C:\Users\Gwanghyun\Desktop\worklog 다이어그램\SSE연결시.PNG)
+##### 빈틈없이, 낭비없이 보내는 알림
 
 
+
+##### 기존 기능과 느슨하게 결합된 알림
+
+- Redis를 인터페이스로 활용해 DB의 접근을 줄이고 기능간 결합도 낮추기
+
+  - 토큰 발급시(로그인, 토큰 재발급)에는 Flag만 발급
+    <img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/bcac7006-0f87-488b-b3d6-8e58ff527ea2" width="70%"/>
+  - SSE 연결시 Flag 있는지 여부에 따라 알림 검색<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/9472ae56-654f-48e9-8963-c6c50c0bccc4" width="70%"/>
+
+- EventPublisher/Listener를 이용해 트랜젝션 분리 및 기능간 결합도 낮추기
+
+  - 업무 생성·수정·삭제 시 알림 조건 확인 및 전송 로직에 EventPublisher·Listener 적용
+
+    ```java
+    public class WorkService{   
+        // ...
+        @Transactional
+        public void createWork(WorkPostDto dto, CustomUserDetails userDetails) {
+            Work work = workRepository.save(
+                    Work.builder()//...
+                            .build()
+            );
+            // JPA에서 Flush 후 이벤트 발행
+            applicationEventPublisher.publishEvent(
+                    WorkChangeEvent.builder().work(work).build()
+            );
+        }
+        // ...
+    }
+    ```
+    
+    ```java
+    public class EventHandler {
+        private final NotificationService notificationService;
+        @TransactionalEventListener
+        // 이벤트 받아 로직 실행
+        public void onWorkChanged(WorkChangeEvent workChangeEvent) {
+            Work work = workChangeEvent.getWork();
+            Long userId = work.getUser().getId();
+            //... 조건 확인 후 전송하거나 알림 예약
+    		Notification notification = notificationService.createNotificationFrom(work);
+    		notificationService.sendNotification(notification);
+    }
+    ```
+
+  - 업무 생성 후 로직
+    	<img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/bb8789db-55ce-4be6-89c2-9ca9b99624bb" width="70%"/>
+  - 업무 삭제 후 로직
+    <img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/8a5b472c-0e75-468c-9c14-5a56cef595a9" width="60%" height="70%"/>
+  - 업무 수정 후 로직
+    <img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/ab24fe9a-b09c-44f7-ab5e-274136b3d6f8"  width="70%" height="100%"/>
+
+[목차](#목차)
 
 #### DB 접근 최소화
 
 - Refresh Token을 Redis에 저장해 Access Token 재발급시 DB접근 불필요
+  <img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/43612254-1ca1-4d3c-9e16-df632f50588e"  width="60%" height="100%"/>
 
-- JWT에 userId를 담아 user 테이블과 조인하는 모든 쿼리 FK로만 조회
+- JWT에 userId를 담아 user 테이블과 조인하는 모든 쿼리 FK(userId)로만 조회
+
+  ```java
+  public class WorkServiceImpl {
+      // ... 생략
+  	private Work getValidatedWorkByUserIdAndWorkId(Long userId, Long workId) {
+              Work work = workRepository.findById(workId)
+                      .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
+      		// Work Select 쿼리 발생 
+              if (!work.getUser().getId().equals(userId)) { 
+      		// userId는 Work의 FK이므로 추가 조회 불필요
+  			// 만약 getId() 대신 getUsername() 호출시 지연로딩에 의해 User SELECT 쿼리 발생
+                  throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
+              } else {
+                  return work;
+              }
+          }
+  }
+  ```
+
+- 연관된 엔티티의 필드가 함께 사용되는 경우 지연로딩에 의한 추가 쿼리 방지를 위해 Fetch Join 적용
+
+  ```java
+  public interface NotificationRepository extends JpaRepository<Notification, Long> {
+      // ... 생략
+      @Query(
+              "SELECT n FROM Notification n " +
+                      "JOIN FETCH n.receiver " + // Notification의 User receiver; 필드
+                      "WHERE n.id = :id"
+      ) // 이미 receiver가 로딩된 상태이므로 notification.getReceiver().getUsername()을 호출해도 추가 쿼리 미발생
+      Optional<Notification> findByIdFetchReceiver(@Param("id") Long id);
+  ```
 
 - 로그인, 회원가입, 비밀번호 변경 시 ID/PW가 형식에 맞지 않으면 DB 조회하지 않고 로그인 실패 처리
   ```java
-  public class UserService {
+  public class UserServiceImpl {
   	// ...
   	public JwtDto login(UserLoginDto dto, HttpServletRequest request) {
           Pattern usernamePattern = Pattern.compile(Constant.USERNAME_REGEX);
@@ -174,45 +241,98 @@ last updated at: 2024.02.12
   }
   ```
 
-  
+[목차](#목차)
 
-#### 느슨한 결합
+#### Spring Security와 결합도 분리
 
-- 업무 생성·수정·삭제 시 알림 조건 확인 및 전송 로직에 EventPublisher·Listener 적용
+- Spring Security에서 인증 객체를 Controller계층에 전달, 요청별 권한 설정, PasswordEncoder의 기능만 제한적으로 사용
+- Login, Logout, 엑세스 토큰 재발급 등의 API를 다른 API와 통일성을 위해 Controller, Service 레이어에서 구현
+- UserDetails와 UserDetailsService를 구현하지 않고 기존의 User 엔티티와 UserService만 사용하도록 구현
+  ```java
+  public class CustomAuthenticationToken extends AbstractAuthenticationToken {
+      private final User user;
+      private final Object credentials;
+      // ...
+  }
+  ```
 
   ```java
-  public class WorkService{   
+  public class JwtValidationFilter extends OncePerRequestFilter {
+  	// ...
+      @Override
+      protected void doFilterInternal(*/ ... */) throws ServletException, IOException {
+          // ...
+          Claims claims = jwtTokenUtils.parseClaims(token); // request header에서 token 찾아 파싱
+          User user = jwtTokenUtils.generateUserFromClaims(claims); // 파싱한 정보로 User 객체 생성
+          Authentication authentication // 인증 객체에 User 저장
+              = new CustomAuthenticationToken(user, token, user.getAuthorities());
+          SecurityContext context = SecurityContextHolder.createEmptyContext();
+          context.setAuthentication(authentication);
+          SecurityContextHolder.setContext(context);
+          filterChain.doFilter(request, response); // 다음 필터 실행
+      }
+  ```
+
+[목차](#목차)
+
+#### String, Wrapper 타입이 아닌 필드의 유효성 검사
+
+- 특정 타입으로 역직렬화가 불가능한 형식의 값이 요청으로 오면 유효성 검사 이전인 객체가 생성 전에 예외가 발생,
+  어떤 상황에서도 유효성 검사가 가능하도록 DTO에 String으로 1차 저장 후 검사
+
+  ```java
+  public class WorkCategoryPatchDto {
+      @NotNull(message = Constants.CATEGORY_NOT_BLANK)
+      @EnumValueCheck(enumClass = Category.class) // Enum으로 변환시 예외 발생여부 확인
+      private String category;
+  }
+  ```
+
+  ```java
+  public class ValueOfEnumValidator implements ConstraintValidator<EnumValueCheck, String> {
+      private EnumValueCheck enumValueCheck;
+      
+      @Override
+      public void initialize(EnumValueCheck constraintAnnotation) {
+          this.enumValueCheck = constraintAnnotation;
+      }
+  
+      @Override
+      public boolean isValid(String value, ConstraintValidatorContext context) {
+          try {
+              Method fromMethod = this.enumValueCheck.enumClass().getMethod("from", String.class);
+              fromMethod.invoke(null, value);
+          } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+              log.error("Error validating enum value: {}", e.getMessage());
+              return false;
+          }
+          return true;
+      }
+  }
+  ```
+
+- 유효성 검사 후 Controller -> Service 계층 이동시 필요한 타입으로 변환
+
+  ```java
+  public class WorkController{
       // ...
-      public void createWork(WorkPostDto dto, CustomUserDetails userDetails) {
-          Work work = workRepository.save(
-                  Work.builder()
-                         //...
-                          .build()
-          );
-          // JPA에서 Flush 후 이벤트 발행
-          applicationEventPublisher.publishEvent(
-                  WorkChangeEvent.builder().work(work).build()
-          );
+  	@PatchMapping("/{workId}/category")
+      public ResponseEntity<ResponseDto> updateWorkCategory(
+              @PathVariable("workId") Long workId,
+              @Valid @RequestBody WorkCategoryPatchDto dto, // DTO 내부에서 유효성 검사
+              @AuthenticationPrincipal User user
+      ) {
+      	// 원하는 타입으로 변환 후 Service 계층 전달
+          workService.updateWorkCategory(Category.from(dto.getCategory()), workId, user.getId());
+          return ResponseEntity
+                  .status(HttpStatus.OK)
+                  .body(ResponseDto.fromSuccessCode(SuccessCode.WORK_EDIT_SUCCESS));
       }
       // ...
   }
   ```
 
-  ```java
-  public class EventHandler {
-      private final NotificationService notificationService;
-      @EventListener
-      // 이벤트 받아 로직 실행
-      public void onWorkChanged(WorkChangeEvent workChangeEvent) {
-          Work work = workChangeEvent.getWork();
-          Long userId = work.getUser().getId();
-          //... 조건 확인 후 전송하거나 알림 예약
-  		Notification notification = notificationService.createNotificationFrom(work);
-  		notificationService.sendNotification(notification);
-  }
-  ```
-
-  
+[목차](#목차)
 
 #### 응답 통일
 
@@ -220,24 +340,24 @@ last updated at: 2024.02.12
 
   - 자원을 반환하는 응답
     ```json
-    {"status": 200,
-     "count": 0,
-     "data": []}
+    "status": 200,
+    "count": 0,
+    "data": []
     ```
 
   - 자원을 반환하지 않는 모든 응답(예외 포함)
 
     ```json
-    {"status": 201,
-     "code": "CREATED",
-     "message": "업무일지가 생성되었습니다."}
+    "status": 201,
+    "code": "CREATED",
+    "message": "업무일지가 생성되었습니다."
     ```
 
 
 
-- 응답 처리 방식
+- 예외 처리
 
-  - 스프링 안에서 발생하는 예외 : @RestControllerAdvice으로 처리
+  - DispatcherSevlet 안에서 발생하는 예외 : @RestControllerAdvice으로 처리
 
     - 사용자 지정 예외 : CustomException 클래스 생성해 사용
       ```java
@@ -273,7 +393,7 @@ last updated at: 2024.02.12
 
       
 
-  - 스프링 밖에서 발생하는 예외
+  - DispatcherServlet 밖에서 발생하는 예외
 
     - 필터 실행중 발생하는 예외: ObjectMapper 사용
       ex) JWT 파싱중 예외 응답해 401 응답시 프론트에서 토큰 재발급 요청
