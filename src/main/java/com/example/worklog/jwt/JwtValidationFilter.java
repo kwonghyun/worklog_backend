@@ -111,10 +111,10 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         }
 
         RefreshTokenDetails refreshTokenDetails = optionalRefreshTokenDetails.get();
-        if (!IpUtil.getClientIp(request).equals(refreshTokenDetails.getIp())) {
-            log.info("refresh token IP 불일치");
-            FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.WRONG_REFRESH_TOKEN);
-        }
+//        if (!IpUtil.getClientIp(request).equals(refreshTokenDetails.getIp())) {
+//            log.info("refresh token IP 불일치");
+//            FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.WRONG_REFRESH_TOKEN);
+//        }
         return refreshTokenDetails;
     }
 }
