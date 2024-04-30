@@ -14,9 +14,9 @@ on:
     branches: [ "main" ]
 env:
   AWS_REGION: ap-northeast-2
-  AWS_S3_BUCKET: worklogcicdbucket
-  AWS_CODE_DEPLOY_APPLICATION: worklog-cicd
-  AWS_CODE_DEPLOY_GROUP: worklog
+  AWS_S3_BUCKET: ghcicdbucket
+  AWS_CODE_DEPLOY_APPLICATION: cicd
+  AWS_CODE_DEPLOY_GROUP: cicd-group
 permissions:
   contents: read
 
@@ -72,6 +72,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     - name: S3에 업로드
-      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://${{ env.AWS_S3_BUCKET }}/${{ env.AWS_CODE_DEPLOY_APPLICATION }}/$GITHUB_SHA.zip --source .
+      run: aws deploy push --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --ignore-hidden-files --s3-location s3://${{ env.AWS_S3_BUCKET }}/${{ env.AWS_CODE_DEPLOY_APPLICATION }}/worklog_${CURRENT_TIME}.zip --source .
     - name: EC2에 배포
-      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=${{ env.AWS_S3_BUCKET }},key=${{ env.AWS_CODE_DEPLOY_APPLICATION }}/$GITHUB_SHA.zip,bundleType=zip
+      run: aws deploy create-deployment --application-name ${{ env.AWS_CODE_DEPLOY_APPLICATION }} --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name ${{ env.AWS_CODE_DEPLOY_GROUP }} --s3-location bucket=${{ env.AWS_S3_BUCKET }},key=${{ env.AWS_CODE_DEPLOY_APPLICATION }}/worklog_${CURRENT_TIME}.zip,bundleType=zip
