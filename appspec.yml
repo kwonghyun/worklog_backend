@@ -14,8 +14,8 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: stop.sh
+    - location: scripts/stop.sh
       timeout: 60
   ApplicationStart:
-    - location: start.sh
+    - location: scripts/start.sh
       timeout: 60
