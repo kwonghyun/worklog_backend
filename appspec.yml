@@ -13,8 +13,8 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: /home/ubuntu/worklog_backend/scripts/stop.sh
+    - location: /scripts/stop.sh
       timeout: 60
   ApplicationStart:
-    - location: /home/ubuntu/worklog_backend/scripts/start.sh
+    - location: /scripts/start.sh
       timeout: 60
