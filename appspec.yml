@@ -5,7 +5,6 @@ files:
   - source:  /
     destination: /home/ubuntu/worklog_backend
     overwrite: yes
-    file_exists_behavior: OVERWRITE
 
 permissions:
   - object: /
@@ -14,8 +13,8 @@ permissions:
 
 hooks:
   AfterInstall:
-    - location: scripts/stop.sh
+    - location: /home/ubuntu/worklog_backend/scripts/stop.sh
       timeout: 60
   ApplicationStart:
-    - location: scripts/start.sh
+    - location: /home/ubuntu/worklog_backend/scripts/start.sh
       timeout: 60
