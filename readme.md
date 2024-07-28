@@ -387,7 +387,7 @@ last updated at: 2024.02.12
       protected ResponseEntity handleServerException(Exception ex) {
           return new ResponseEntity(
           	ResponseDto.fromErrorCode(INTERNAL_SERVER_ERROR), 		
-          	HttpStatus.INTERNAL_SERVER_ERROR);
+          	HttpStatus.INTERNAL_SERVER_ERROR); 
           }
       ```
 
