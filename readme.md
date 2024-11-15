@@ -387,7 +387,7 @@ last updated at: 2024.02.12
       protected ResponseEntity handleServerException(Exception ex) {
           return new ResponseEntity(
           	ResponseDto.fromErrorCode(INTERNAL_SERVER_ERROR), 		
-          	HttpStatus.INTERNAL_SERVER_ERROR);
+          	HttpStatus.INTERNAL_SERVER_ERROR); 
           }
       ```
 
@@ -416,8 +416,8 @@ last updated at: 2024.02.12
       }
       ```
 
-    - 그 외의 예외 : DefaultErrorAttributes 상속
-      ex) 맵핑되지 않은 Request URI
+    - 그 외의 예외 : DefaultErrorAttributes
+      ex) 맵핑되지 않은 Request URI 
 
       ```java
       @Component
