@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,7 +47,16 @@ public class WebSecurityConfig {
                                 "https://today.worklog.shop",
                                 "http://localhost:63342"
                         ));
-                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowedMethods(
+                                List.of(
+                                    HttpMethod.GET.name(),
+                                    HttpMethod.HEAD.name(),
+                                    HttpMethod.POST.name(),
+                                    HttpMethod.PUT.name(),
+                                    HttpMethod.DELETE.name(),
+                                    HttpMethod.OPTIONS.name()
+                                )
+                        );
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
                         config.setMaxAge(3600L); //1시간
