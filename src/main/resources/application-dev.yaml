@@ -8,11 +8,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-      database-platform: org.hibernate.dialect.MySQL57Dialect
-      properties:
-        hibernate:
-          show_sql: false
-          format_sql: false
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
 
 
 logging:
