@@ -13,13 +13,16 @@ spring:
         show_sql: false
         format_sql: false
 
-
 logging:
   level:
     org:
       springframework: info
+
 decorator:
   datasource:
     p6spy:
       enable-logging: true
 
+springdoc:
+  api-docs:
+    enabled: true

@@ -5,11 +5,11 @@ import com.example.worklog.entity.User;
 import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.exception.FilterExceptionHandler;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
-import com.example.worklog.utils.IpUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,13 +17,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -36,14 +38,15 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         // request Header에서 jwt 찾기
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         log.info("request url : {}", request.getServletPath());
         log.info("authHeader 확인: " + authHeader);
 
+        Authentication authentication;
         // Header 검증, 비어있지 않고, "Bearer "로 시작하는 경우
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
@@ -51,7 +54,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             // 토큰 유효성 검시
             validateToken(token, response);
 
-            Authentication authentication;
+
             // reissue 요청일 때
             if (request.getServletPath().equals("/users/reissue")) {
                 log.info("redis에서 RefreshTokenDetails 찾아 인증 객체 생성 시작");
@@ -70,11 +73,11 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 authentication = new CustomAuthenticationToken(user, token, user.getAuthorities());
             }
 
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(authentication);
-            SecurityContextHolder.setContext(context);
-            log.info("{} 인증 객체 생성 완료", context.getAuthentication().getName());
+        } else {
+            authentication = new AnonymousAuthenticationToken("key", "anonymousUser", List.of(new SimpleGrantedAuthority("ANONYMOUS_USER")));
         }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("{} 인증 객체 생성 완료", authentication.getName());
         filterChain.doFilter(request, response);
     }
 
@@ -110,11 +113,12 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.WRONG_REFRESH_TOKEN);
         }
 
-        RefreshTokenDetails refreshTokenDetails = optionalRefreshTokenDetails.get();
+//        RefreshTokenDetails refreshTokenDetails = optionalRefreshTokenDetails.get();
 //        if (!IpUtil.getClientIp(request).equals(refreshTokenDetails.getIp())) {
 //            log.info("refresh token IP 불일치");
 //            FilterExceptionHandler.jwtExceptionHandler(response, ErrorCode.WRONG_REFRESH_TOKEN);
 //        }
-        return refreshTokenDetails;
+//        return refreshTokenDetails;
+        return optionalRefreshTokenDetails.get();
     }
 }
