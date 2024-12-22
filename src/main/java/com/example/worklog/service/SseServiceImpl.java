@@ -25,7 +25,7 @@ import java.io.IOException;
 @Transactional(readOnly = true)
 @ExcludeAop
 public class SseServiceImpl implements SseService {
-    private static final Long sseTimeout = 3 * 60L * 1000;;
+    private static final Long SSE_TIMEOUT = 3 * 60L * 1000;
 
     private final SseEmitterRepository sseEmitterRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -35,7 +35,7 @@ public class SseServiceImpl implements SseService {
     }
     @Transactional
     public SseEmitter subscribe(Long userId, SseRole role, String lastEventId) {
-        SseEmitter emitter = new SseEmitter(sseTimeout);
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
         EmitterKey emitterKey = new EmitterKey(userId, role);
 
         emitter.onCompletion(() -> {
@@ -58,7 +58,6 @@ public class SseServiceImpl implements SseService {
         return emitter;
     }
 
-    @Transactional
     public void sendToClient(EmitterKey emitterKey, SseMessageDto event) {
         SseEmitter emitter = sseEmitterRepository.findByKey(emitterKey)
                 .orElseThrow(() -> new CustomException(ErrorCode.SSE_CONNECTION_BROKEN));
@@ -66,7 +65,7 @@ public class SseServiceImpl implements SseService {
             emitter.send(
                     SseEmitter.event()
                             .id(emitterKey + "_" + event.getEventId())
-                            .reconnectTime(sseTimeout)
+                            .reconnectTime(SSE_TIMEOUT)
                             .data(event, MediaType.APPLICATION_JSON)
                             .build()
             );
