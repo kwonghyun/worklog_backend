@@ -3,7 +3,13 @@ package com.example.worklog.controller;
 import com.example.worklog.dto.ResourceResponseDto;
 import com.example.worklog.dto.calendar.*;
 import com.example.worklog.entity.User;
+import com.example.worklog.exception.ErrorCode;
 import com.example.worklog.service.CalendarService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class CalendarController {
     private final CalendarService calendarService;
 
+    @Operation(summary = "유효한 년도 조회", description = "업무 혹은 메모가 존재하는 년도를 조회합니다..", tags = { "calendar-controller" })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(schema = @Schema(implementation = YearResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "BAD REQUEST",
+                    content = @Content(schema = @Schema(implementation = ErrorCode.class))),
+            @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR")
+    })
     @GetMapping("/years")
     public ResponseEntity<ResourceResponseDto<YearResponseDto>> readYears(@AuthenticationPrincipal User user) {
         YearResponseDto dto = calendarService.readYears(user.getId());
