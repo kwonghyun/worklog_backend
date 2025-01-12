@@ -1,12 +1,10 @@
 package com.example.worklog.controller;
 
 
-import com.example.worklog.dto.ResourceResponseDto;
-import com.example.worklog.dto.ResponseDto;
 import com.example.worklog.dto.user.*;
 import com.example.worklog.entity.RefreshTokenDetails;
 import com.example.worklog.entity.User;
-import com.example.worklog.exception.SuccessCode;
+import com.example.worklog.dto.SuccessMessage;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
 import com.example.worklog.utils.IpUtil;
@@ -26,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ResponseDto> register(@Valid @RequestBody UserSignupDto dto) {
+    public ResponseEntity<SuccessMessage> register(@Valid @RequestBody UserSignupDto dto) {
         userService.register(
                 dto.getEmail(),
                 dto.getUsername(),
@@ -35,11 +33,11 @@ public class UserController {
         );
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.USER_CREATED));
+                .body(SuccessMessage.USER_CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ResourceResponseDto> login(
+    public ResponseEntity<JwtDto> login(
             @Valid @RequestBody UserLoginDto dto,
             HttpServletRequest request
     ) {
@@ -48,35 +46,31 @@ public class UserController {
                 dto.getPassword(),
                 IpUtil.getClientIp(request)
         );
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(jwtDto, 2));
+        return ResponseEntity.ok(jwtDto);
     }
+
     @PostMapping("/logout")
-    public ResponseEntity<ResponseDto> logout(
+    public ResponseEntity<SuccessMessage> logout(
             @AuthenticationPrincipal User user
     ) {
         userService.logout(user.getId());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.LOGOUT_SUCCESS));
+        return ResponseEntity.ok(SuccessMessage.USER_LOGOUT_SUCCESS);
     }
+
     @PostMapping("/reissue")
-    public ResponseEntity<ResourceResponseDto> reissue(
+    public ResponseEntity<JwtDto> reissue(
             Authentication authentication
     ) {
         JwtDto jwtDto = userService.reissue(
                 (User) authentication.getPrincipal(),
                 (RefreshTokenDetails) authentication.getCredentials()
         );
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResourceResponseDto.fromData(jwtDto, 2));
+        return ResponseEntity.ok(jwtDto);
     }
 
     // 비밀번호 수정
     @PatchMapping("/me/password")
-    public ResponseEntity<ResponseDto> updatePassword(
+    public ResponseEntity<SuccessMessage> updatePassword(
             @Valid @RequestBody
             UserPasswordUpdateDto dto,
             @AuthenticationPrincipal User user
@@ -87,51 +81,39 @@ public class UserController {
                 dto.getPasswordCheck(),
                 user.getId()
         );
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.USER_PASSWORD_CHANGE_SUCCESS));
+        return ResponseEntity.ok(SuccessMessage.USER_PASSWORD_CHANGE_SUCCESS);
     }
 
     // 회원탈퇴
     @DeleteMapping("/me")
-    public ResponseEntity<ResponseDto> deleteUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SuccessMessage> deleteUser(@AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.USER_DELETE_SUCCESS));
+        return ResponseEntity.ok(SuccessMessage.USER_DELETE_SUCCESS);
     }
 
     // email 중복확인
     @GetMapping("/email/check")
-    public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
+    public ResponseEntity<SuccessMessage> checkEmail(@RequestParam String email) {
         userService.checkEmail(email);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_EMAIL));
+        return ResponseEntity.ok(SuccessMessage.VALID_EMAIL);
     }
 
     // username 중복확인
     @GetMapping("/username/check")
-    public ResponseEntity<ResponseDto> checkUsername(@RequestParam String username) {
+    public ResponseEntity<SuccessMessage> checkUsername(@RequestParam String username) {
         userService.checkUsername(username);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_USERNAME));
+        return ResponseEntity.ok(SuccessMessage.VALID_USERNAME);
     }
 
     @GetMapping("/password/check")
-    public ResponseEntity<ResponseDto> checkUsername(@RequestBody UserPasswordDto dto) {
+    public ResponseEntity<SuccessMessage> checkUsername(@RequestBody UserPasswordDto dto) {
         userService.checkPassword(dto.getPassword());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_PASSWORD));
+        return ResponseEntity.ok(SuccessMessage.VALID_PASSWORD);
     }
 
     @GetMapping("/password-check/check")
-    public ResponseEntity<ResponseDto> checkUsername(@RequestBody UserPasswordCheckDto dto) {
+    public ResponseEntity<SuccessMessage> checkUsername(@RequestBody UserPasswordCheckDto dto) {
         userService.checkPasswordCheck(dto.getPassword(), dto.getPasswordCheck());
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ResponseDto.fromSuccessCode(SuccessCode.VALID_PASSWORD_CHECK));
+        return ResponseEntity.ok(SuccessMessage.VALID_PASSWORD_CHECK);
     }
 }
