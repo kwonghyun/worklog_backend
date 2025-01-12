@@ -44,13 +44,15 @@ public class GlobalExceptionHandler {
 
     // 커스텀 예외 응답
     @ExceptionHandler(CustomResponseException.class)
-    protected ResponseEntity<ErrorMessageRes> handleCustomException(CustomResponseException exception) {
-        return ResponseEntity.status(exception.getHttpStatus()).body(new ErrorMessageRes(exception.getMessage()));
+    protected ResponseEntity<SimpleMessageRes> handleCustomException(CustomResponseException exception) {
+        return ResponseEntity
+                .status(exception.getHttpStatus())
+                .body(SimpleMessageRes.from(exception.getErrorMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorMessageRes> handleServerException(Exception exception) {
+    protected ResponseEntity<SimpleMessageRes> handleServerException(Exception exception) {
         return ResponseEntity.internalServerError()
-                .body(new ErrorMessageRes(exception.getMessage()));
+                .body(new SimpleMessageRes(exception.getMessage()));
     }
 }

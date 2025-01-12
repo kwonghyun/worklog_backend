@@ -8,7 +8,7 @@ import lombok.Getter;
 
 
 @Getter
-public class UserSignupDto {
+public class UserSignupReq {
 
     @NotBlank(message = Constants.EMAIL_NOT_BLANK_MESSAGE)
     @Email(regexp = Constants.EMAIL_REGEX, message = Constants.EMAIL_NOT_VALID_MESSAGE)

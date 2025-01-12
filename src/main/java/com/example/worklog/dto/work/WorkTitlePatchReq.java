@@ -7,7 +7,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class WorkTitlePatchDto {
+public class WorkTitlePatchReq {
     @NotBlank(message = Constants.TITLE_NOT_BLANK)
     private String title;
 }

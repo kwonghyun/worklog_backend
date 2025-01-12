@@ -1,20 +1,16 @@
 package com.example.worklog.scheduler;
 
-import com.example.worklog.dto.sseevent.NotificationMessageDto;
+import com.example.worklog.dto.sseevent.NotificationMessageRes;
 import com.example.worklog.entity.Notification;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.repository.NotificationRepository;
-import com.example.worklog.service.NotificationService;
 import com.example.worklog.service.SseService;
 import com.example.worklog.utils.EmitterKey;
 import com.example.worklog.utils.StringConverter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +34,7 @@ public class NotificationJob extends QuartzJobBean {
         Long userId = notification.getReceiver().getId();
         EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
-            sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
+            sseService.sendToClient(emitterKey, NotificationMessageRes.from(notification));
             log.info("예약된 알림 notificationId: {} 전송됨.", notification.getId());
         } catch (Exception e) {
             Optional<Notification> optionalNotification = notificationRepository.findById(notification.getId());

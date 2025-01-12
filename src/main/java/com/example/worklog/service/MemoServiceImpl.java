@@ -21,7 +21,7 @@ import java.util.List;
 public class MemoServiceImpl implements MemoService {
     private final MemoRepository memoRepository;
 
-    public void createMemo(MemoPostDto dto, User user) {
+    public void createMemo(MemoPostReq dto, User user) {
         LocalDate date = LocalDate.parse(dto.getDate());
         memoRepository.save(
                 Memo.builder()

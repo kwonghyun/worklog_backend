@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @Builder
 @ToString
-public class ConnectionMessageDto implements SseMessageDto {
+public class ConnectionMessageRes implements SseMessageRes {
     @JsonIgnore
     private Long userId;
     @Builder.Default

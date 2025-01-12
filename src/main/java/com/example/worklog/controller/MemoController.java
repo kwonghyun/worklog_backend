@@ -1,12 +1,9 @@
 package com.example.worklog.controller;
 
-import com.example.worklog.dto.CustomPage;
-import com.example.worklog.dto.CustomPageable;
-import com.example.worklog.dto.PageDto;
+import com.example.worklog.dto.*;
 import com.example.worklog.dto.memo.*;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
-import com.example.worklog.dto.SuccessMessage;
 import com.example.worklog.service.MemoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,73 +25,77 @@ public class MemoController {
     private final MemoService memoService;
 
     @PostMapping
-    public ResponseEntity<SuccessMessage> createMemo(
-            @Valid @RequestBody MemoPostDto dto,
+    public ResponseEntity<SimpleMessageRes> createMemo(
+            @Valid @RequestBody MemoPostReq dto,
             @AuthenticationPrincipal User user
             ){
         memoService.createMemo(dto, user);
-        return ResponseEntity.ok(SuccessMessage.MEMO_CREATED);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.MEMO_CREATED));
     }
 
     @GetMapping
-    public ResponseEntity<List<MemoGetDto>> readMemos(
-            @Valid @ModelAttribute MemoGetParamDto paramDto,
+    public ResponseEntity<List<MemoGetRes>> readMemos(
+            @Valid @ModelAttribute MemoGetReqParam paramDto,
             @AuthenticationPrincipal User user
     ) {
         List<Memo> memos = memoService.readMemos(
                 LocalDate.parse(paramDto.getDate()),
                 user.getId()
         );
-        List<MemoGetDto> dtos = memos.stream()
-                .map(MemoGetDto::fromEntity)
+        List<MemoGetRes> dtos = memos.stream()
+                .map(MemoGetRes::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PageDto<MemoGetDto>> searchMemos(
-            @Valid @ModelAttribute MemoSearchParamDto paramDto,
+    public ResponseEntity<PageDto<MemoGetRes>> searchMemos(
+            @Valid @ModelAttribute MemoSearchReqParam paramDto,
             CustomPageable pageable,
             @AuthenticationPrincipal User user
     ) {
         CustomPage<Memo> pagedMemos = memoService.searchMemos(
-                MemoSearchServiceDto.from(paramDto),
+                paramDto,
                 pageable,
                 user.getId()
         );
-        Page<MemoGetDto> pagedDtos
-                = pagedMemos.map(MemoGetDto::fromEntity);
-        PageDto<MemoGetDto> pageDto = PageDto.fromPage(pagedDtos);
+        Page<MemoGetRes> pagedDtos
+                = pagedMemos.map(MemoGetRes::fromEntity);
+        PageDto<MemoGetRes> pageDto = PageDto.from(pagedDtos);
         return ResponseEntity.ok(pageDto);
     }
 
     @PatchMapping("/{memoId}/content")
-    public ResponseEntity<SuccessMessage> updateMemoContent(
+    public ResponseEntity<SimpleMessageRes> updateMemoContent(
             @PathVariable("memoId") Long memoId,
-            @Valid @RequestBody MemoContentPatchDto dto,
+            @Valid @RequestBody MemoContentPatchReq dto,
             @AuthenticationPrincipal User user
     ) {
         memoService.updateMemoContent(dto.getContent(), memoId, user.getId());
-        return ResponseEntity.ok(SuccessMessage.MEMO_EDIT_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.MEMO_EDIT_SUCCESS));
     }
 
     @PatchMapping("/{memoId}/order")
-    public ResponseEntity<SuccessMessage> updateMemoOrder(
+    public ResponseEntity<SimpleMessageRes> updateMemoOrder(
             @PathVariable("memoId") Long memoId,
-            @Valid @RequestBody MemoDisplayOrderPatchDto dto,
+            @Valid @RequestBody MemoDisplayOrderPatchReq dto,
             @AuthenticationPrincipal User user
     ) {
         log.info("memoId: {} 수정 요청", memoId);
         memoService.updateMemoDisplayOrder(dto.getOrder(), memoId, user.getId());
-        return ResponseEntity.ok(SuccessMessage.MEMO_EDIT_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.MEMO_EDIT_SUCCESS));
     }
 
     @DeleteMapping("/{memoId}")
-    public ResponseEntity<SuccessMessage> deleteMemo(
+    public ResponseEntity<SimpleMessageRes> deleteMemo(
             @PathVariable("memoId") Long memoId,
             @AuthenticationPrincipal User user
     ) {
         memoService.deleteMemo(memoId, user.getId());
-        return ResponseEntity.ok(SuccessMessage.MEMO_DELETE_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.MEMO_DELETE_SUCCESS));
     }
 }

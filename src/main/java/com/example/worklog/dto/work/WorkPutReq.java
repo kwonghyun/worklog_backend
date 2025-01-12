@@ -2,9 +2,9 @@ package com.example.worklog.dto.work;
 
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
+import com.example.worklog.utils.Constants;
 import com.example.worklog.validation.DateTimePattern;
 import com.example.worklog.validation.EnumValueCheck;
-import com.example.worklog.utils.Constants;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class WorkPutDto {
+public class WorkPutReq {
     @NotBlank(message = Constants.TITLE_NOT_BLANK)
     private String title;
 

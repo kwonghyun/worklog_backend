@@ -1,6 +1,6 @@
 package com.example.worklog.service;
 
-import com.example.worklog.dto.sseevent.NotificationMessageDto;
+import com.example.worklog.dto.sseevent.NotificationMessageRes;
 import com.example.worklog.entity.Notification;
 import com.example.worklog.entity.NotificationFlag;
 import com.example.worklog.entity.Work;
@@ -172,7 +172,7 @@ public class NotificationServiceImpl implements NotificationService {
                 StringConverter.completeWorkNotificationMessage(notification.getMessage()));
         EmitterKey emitterKey = new EmitterKey(userId, SseRole.NOTIFICATION);
         try {
-            sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
+            sseService.sendToClient(emitterKey, NotificationMessageRes.from(notification));
             notification.updateIsSent(true);
         } catch (Exception e) {
             notification.updateIsSent(false);
@@ -189,7 +189,7 @@ public class NotificationServiceImpl implements NotificationService {
                                 notification.updateMessage(
                                         StringConverter.completeWorkNotificationMessage(notification.getMessage()));
                                 EmitterKey emitterKey = new EmitterKey(notification.getReceiver().getId(), SseRole.NOTIFICATION);
-                                sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
+                                sseService.sendToClient(emitterKey, NotificationMessageRes.from(notification));
                                 notification.updateIsSent(true);
                     })
                     .collect(Collectors.toList())

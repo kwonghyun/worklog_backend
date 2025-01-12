@@ -11,7 +11,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class NotificationMessageDto implements SseMessageDto {
+public class NotificationMessageRes implements SseMessageRes {
     private Long notificationId;
     private String message;
     private NotificationEntityType entityType;
@@ -19,8 +19,8 @@ public class NotificationMessageDto implements SseMessageDto {
     private String sender;
     private EventType eventType;
 
-    public static NotificationMessageDto fromEntity(Notification notification) {
-        NotificationMessageDto dto = new NotificationMessageDto();
+    public static NotificationMessageRes from(Notification notification) {
+        NotificationMessageRes dto = new NotificationMessageRes();
         dto.setNotificationId(notification.getId());
         dto.setEntityType(notification.getEntityType());
         dto.setEntityId(notification.getEntityId());

@@ -12,7 +12,7 @@ import java.util.List;
 
 
 public interface MemoService {
-    public void createMemo(MemoPostDto dto, User user);
+    public void createMemo(MemoPostReq dto, User user);
     public List<Memo> readMemos(LocalDate date, Long userId);
     public CustomPage<Memo> searchMemos(MemoSearchReqParam serviceDto, CustomPageable pageable, Long userId);
     public void updateMemoContent(String content, Long memoId, Long userId);

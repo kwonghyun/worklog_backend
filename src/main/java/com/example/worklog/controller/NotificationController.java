@@ -1,7 +1,8 @@
 package com.example.worklog.controller;
 
-import com.example.worklog.entity.User;
+import com.example.worklog.dto.SimpleMessageRes;
 import com.example.worklog.dto.SuccessMessage;
+import com.example.worklog.entity.User;
 import com.example.worklog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,10 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @PostMapping("/trigger")
-    public ResponseEntity<SuccessMessage> trigger(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SimpleMessageRes> trigger(@AuthenticationPrincipal User user) {
         notificationService.checkNotificationAndSend(user.getId());
 
-        return ResponseEntity.ok(SuccessMessage.SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.SUCCESS));
     }
 }

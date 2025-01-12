@@ -3,7 +3,6 @@ package com.example.worklog.dto.user;
 import lombok.Getter;
 
 @Getter
-public class UserPasswordCheckDto {
+public class UserPasswordReq {
     private String password;
-    private String passwordCheck;
 }

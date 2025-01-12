@@ -4,7 +4,7 @@ import com.example.worklog.dto.calendar.*;
 
 
 public interface CalendarService {
-    public YearResponseDto readYears(Long userId);
-    public MonthResponseDto readMonths(MonthRequestDto dto, Long userId);
-    public DayResponseDto readDays(DayRequestDto dto, Long userId);
+    public YearRes readYears(Long userId);
+    public MonthRes readMonths(MonthReq dto, Long userId);
+    public DayRes readDays(DayReq dto, Long userId);
 }

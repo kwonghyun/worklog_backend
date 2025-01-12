@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class UserLoginDto {
+public class UserLoginReq {
     @NotBlank(message = Constants.USERNAME_NOT_BLANK_MESSAGE)
     private String username;
 

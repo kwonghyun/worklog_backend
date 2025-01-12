@@ -1,5 +1,5 @@
 package com.example.worklog.dto.sseevent;
 
-public interface SseMessageDto {
+public interface SseMessageRes {
     Long getEventId();
 }

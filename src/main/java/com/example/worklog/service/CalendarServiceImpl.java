@@ -13,18 +13,18 @@ import java.util.List;
 @Slf4j
 public class CalendarServiceImpl implements CalendarService {
     private final CalendarRepository calendarRepository;
-    public YearResponseDto readYears(Long userId) {
+    public YearRes readYears(Long userId) {
         List<Integer> yearsFromMemoAndWork = calendarRepository.readDistinctYear(userId);
-        return YearResponseDto.fromList(yearsFromMemoAndWork);
+        return new YearRes(yearsFromMemoAndWork);
     }
 
-    public MonthResponseDto readMonths(MonthRequestDto dto, Long userId) {
+    public MonthRes readMonths(MonthReq dto, Long userId) {
         List<Integer> monthsFromMemoAndWork = calendarRepository.readDistinctMonthsByYear(dto.getYear(), userId);
-        return MonthResponseDto.fromList(monthsFromMemoAndWork);
+        return new MonthRes(monthsFromMemoAndWork);
     }
 
-    public DayResponseDto readDays(DayRequestDto dto, Long userId) {
+    public DayRes readDays(DayReq dto, Long userId) {
         List<Integer> daysFromMemoAndWork = calendarRepository.readDistinctDaysByYearAndMonth(dto.getYear(), dto.getMonth(), userId);
-        return DayResponseDto.fromList(daysFromMemoAndWork);
+        return new DayRes(daysFromMemoAndWork);
     }
 }

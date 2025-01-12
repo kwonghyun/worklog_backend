@@ -1,37 +1,32 @@
 package com.example.worklog.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-@Getter
-@Setter
-@ToString
-public class PageDto<T> {
-    private List<T> content;
-    private int pageNumber;
-    private int pageSize;
-    private int numberOfElements;
-    private long totalElements;
-    private int totalPages;
-    @JsonProperty("isFirstPage")
-    private boolean isFirstPage;
-    @JsonProperty("isLastPage")
-    private boolean isLastPage;
 
-    public static <T> PageDto<T> fromPage(Page<T> page) {
-        PageDto<T> pageDto = new PageDto<>();
-        pageDto.setContent(page.getContent());
-        pageDto.setPageNumber(page.getNumber());
-        pageDto.setPageSize(page.getSize());
-        pageDto.setNumberOfElements(page.getNumberOfElements());
-        pageDto.setTotalElements(page.getTotalElements());
-        pageDto.setTotalPages(page.getTotalPages());
-        pageDto.setFirstPage(page.isFirst());
-        pageDto.setLastPage(page.isLast());
-        return pageDto;
+public record PageDto<T>(
+        List<T> content,
+        int pageNumber,
+        int pageSize,
+        int numberOfElements,
+        long totalElements,
+        int totalPages,
+        @JsonProperty("isFirstPage")
+        boolean isFirstPage,
+        @JsonProperty("isLastPage")
+        boolean isLastPage
+) {
+    public static <T> PageDto<T> from(Page<T> page) {
+        return new PageDto<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getNumberOfElements(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast()
+        );
     }
 }

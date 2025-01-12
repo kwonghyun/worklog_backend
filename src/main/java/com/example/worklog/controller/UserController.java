@@ -1,17 +1,17 @@
 package com.example.worklog.controller;
 
 
+import com.example.worklog.dto.SimpleMessageRes;
+import com.example.worklog.dto.SuccessMessage;
 import com.example.worklog.dto.user.*;
 import com.example.worklog.entity.RefreshTokenDetails;
 import com.example.worklog.entity.User;
-import com.example.worklog.dto.SuccessMessage;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.service.UserService;
 import com.example.worklog.utils.IpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,21 +24,20 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<SuccessMessage> register(@Valid @RequestBody UserSignupDto dto) {
+    public ResponseEntity<SimpleMessageRes> register(@Valid @RequestBody UserSignupReq dto) {
         userService.register(
                 dto.getEmail(),
                 dto.getUsername(),
                 dto.getPassword(),
                 dto.getPasswordCheck()
         );
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(SuccessMessage.USER_CREATED);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.USER_CREATED));
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtDto> login(
-            @Valid @RequestBody UserLoginDto dto,
+            @Valid @RequestBody UserLoginReq dto,
             HttpServletRequest request
     ) {
         JwtDto jwtDto = userService.login(
@@ -50,11 +49,12 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<SuccessMessage> logout(
+    public ResponseEntity<SimpleMessageRes> logout(
             @AuthenticationPrincipal User user
     ) {
         userService.logout(user.getId());
-        return ResponseEntity.ok(SuccessMessage.USER_LOGOUT_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.USER_LOGOUT_SUCCESS));
     }
 
     @PostMapping("/reissue")
@@ -70,9 +70,9 @@ public class UserController {
 
     // 비밀번호 수정
     @PatchMapping("/me/password")
-    public ResponseEntity<SuccessMessage> updatePassword(
+    public ResponseEntity<SimpleMessageRes> updatePassword(
             @Valid @RequestBody
-            UserPasswordUpdateDto dto,
+            UserPasswordUpdateReq dto,
             @AuthenticationPrincipal User user
     ) {
         userService.updateUserPassword(
@@ -81,39 +81,45 @@ public class UserController {
                 dto.getPasswordCheck(),
                 user.getId()
         );
-        return ResponseEntity.ok(SuccessMessage.USER_PASSWORD_CHANGE_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.USER_PASSWORD_CHANGE_SUCCESS));
     }
 
     // 회원탈퇴
     @DeleteMapping("/me")
-    public ResponseEntity<SuccessMessage> deleteUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<SimpleMessageRes> deleteUser(@AuthenticationPrincipal User user) {
         userService.deleteUser(user.getId());
-        return ResponseEntity.ok(SuccessMessage.USER_DELETE_SUCCESS);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.USER_DELETE_SUCCESS));
     }
 
     // email 중복확인
     @GetMapping("/email/check")
-    public ResponseEntity<SuccessMessage> checkEmail(@RequestParam String email) {
+    public ResponseEntity<SimpleMessageRes> checkEmail(@RequestParam String email) {
         userService.checkEmail(email);
-        return ResponseEntity.ok(SuccessMessage.VALID_EMAIL);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.VALID_EMAIL));
     }
 
     // username 중복확인
     @GetMapping("/username/check")
-    public ResponseEntity<SuccessMessage> checkUsername(@RequestParam String username) {
+    public ResponseEntity<SimpleMessageRes> checkUsername(@RequestParam String username) {
         userService.checkUsername(username);
-        return ResponseEntity.ok(SuccessMessage.VALID_USERNAME);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.VALID_USERNAME));
     }
 
     @GetMapping("/password/check")
-    public ResponseEntity<SuccessMessage> checkUsername(@RequestBody UserPasswordDto dto) {
+    public ResponseEntity<SimpleMessageRes> checkUsername(@RequestBody UserPasswordReq dto) {
         userService.checkPassword(dto.getPassword());
-        return ResponseEntity.ok(SuccessMessage.VALID_PASSWORD);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.VALID_PASSWORD));
     }
 
     @GetMapping("/password-check/check")
-    public ResponseEntity<SuccessMessage> checkUsername(@RequestBody UserPasswordCheckDto dto) {
+    public ResponseEntity<SimpleMessageRes> checkUsername(@RequestBody UserPasswordCheckReq dto) {
         userService.checkPasswordCheck(dto.getPassword(), dto.getPasswordCheck());
-        return ResponseEntity.ok(SuccessMessage.VALID_PASSWORD_CHECK);
+        return ResponseEntity.ok(
+                SimpleMessageRes.from(SuccessMessage.VALID_PASSWORD_CHECK));
     }
 }

@@ -1,8 +1,8 @@
 package com.example.worklog.service;
 
 import com.example.worklog.aop.logging.request.ExcludeAop;
-import com.example.worklog.dto.sseevent.ConnectionMessageDto;
-import com.example.worklog.dto.sseevent.SseMessageDto;
+import com.example.worklog.dto.sseevent.ConnectionMessageRes;
+import com.example.worklog.dto.sseevent.SseMessageRes;
 import com.example.worklog.entity.enums.SseRole;
 import com.example.worklog.exception.response.status404.SseConnectionNotExistException;
 import com.example.worklog.exception.response.status410.SseConnectionBrokenException;
@@ -48,7 +48,7 @@ public class SseServiceImpl implements SseService {
         });
 
         sseEmitterRepository.put(emitterKey, emitter);
-        sendToClient(emitterKey, ConnectionMessageDto.builder().userId(userId).build());
+        sendToClient(emitterKey, ConnectionMessageRes.builder().userId(userId).build());
         log.info("SSE : userId={}에게 연결", userId);
 
         applicationEventPublisher.publishEvent(
@@ -58,7 +58,7 @@ public class SseServiceImpl implements SseService {
         return emitter;
     }
 
-    public void sendToClient(EmitterKey emitterKey, SseMessageDto event) {
+    public void sendToClient(EmitterKey emitterKey, SseMessageRes event) {
         SseEmitter emitter = sseEmitterRepository.findByKey(emitterKey)
                 .orElseThrow(SseConnectionNotExistException::new);
         try {

@@ -8,7 +8,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class MemoDisplayOrderPatchDto {
+public class MemoDisplayOrderPatchReq {
     @PositiveOrZero(message = Constants.DISPLAY_ORDER_NOT_VALID)
     @NotNull(message = Constants.DISPLAY_ORDER_NOT_VALID)
     private Integer order;

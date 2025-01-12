@@ -1,10 +1,7 @@
 package com.example.worklog.repository;
 
-import com.example.worklog.dto.work.WorkSearchServiceDto;
 import com.example.worklog.entity.Work;
 import com.example.worklog.repository.querydsl.WorkRepositoryCustom;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,22 +22,6 @@ public interface WorkRepository extends JpaRepository<Work, Long>, WorkRepositor
                     "ORDER BY w.displayOrder ASC "
     )
     List<Work> readWorksByParamsAndUser(@Param("date") LocalDate date, @Param("userId") Long userId);
-
-//    IS NULL 에 enum이 들어오면
-//    java.lang.NullPointerException: Cannot invoke "org.hibernate.metamodel.mapping.JdbcMapping.getJdbcValueBinder()" because "jdbcMapping" is null
-//    Querydsl로 동적쿼리 만들 예정
-    @Query(
-            "SELECT w FROM Work w " +
-                    "WHERE " +
-                    "(:#{#dto.startDate} IS NULL OR w.date >= :#{#dto.startDate}) " +
-                    "AND (:#{#dto.endDate} IS NULL OR w.date <= :#{#dto.endDate}) " +
-                    "AND (:#{#dto.keyword} IS NULL OR w.content LIKE :#{#dto.keyword}) " +
-                    "AND (:#{#dto.category} IS NULL OR w.category = :#{#dto.category}) " +
-                    "AND (:#{#dto.state} IS NULL OR w.state = :#{#dto.state}) " +
-                    "AND (w.user.id = :userId) " +
-                    "ORDER BY w.date ASC, w.displayOrder ASC "
-    )
-    Page<Work> searchWorksByParamsAndUser(@Param("dto") WorkSearchServiceDto repoDto, @Param("userId") Long userId, Pageable pageable);
 
     @Query(
             "SELECT w FROM Work w " +

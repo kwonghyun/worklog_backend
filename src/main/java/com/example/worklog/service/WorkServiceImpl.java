@@ -34,7 +34,7 @@ public class WorkServiceImpl implements WorkService {
     private final WorkRepository workRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void createWork(WorkPostDto dto, User user) {
+    public void createWork(WorkPostReq dto, User user) {
         LocalDate date = LocalDate.parse(dto.getDate());
         LocalDateTime deadline = dto.getDeadline() == null ?
                 null : LocalDateTime.parse(dto.getDeadline(), Constants.DATE_TIME_FORMAT);
@@ -67,7 +67,7 @@ public class WorkServiceImpl implements WorkService {
         );
     }
 
-    public void updateWork(WorkPutDto dto, Long workId, Long userId) {
+    public void updateWork(WorkPutReq dto, Long workId, Long userId) {
 
         Work work = getValidatedWorkByUserIdAndWorkId(userId, workId);
 
