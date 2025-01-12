@@ -2,7 +2,7 @@ package com.example.worklog.repository.querydsl;
 
 import com.example.worklog.dto.CustomPage;
 import com.example.worklog.dto.CustomPageable;
-import com.example.worklog.dto.memo.MemoSearchServiceDto;
+import com.example.worklog.dto.memo.MemoSearchReqParam;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.QMemo;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -21,7 +21,7 @@ public class MemoRepositoryCustomImpl implements MemoRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QMemo qMemo = QMemo.memo;
     @Override
-    public CustomPage<Memo> findBySearchParams(MemoSearchServiceDto dto, CustomPageable pageable, Long userId) {
+    public CustomPage<Memo> findBySearchParams(MemoSearchReqParam dto, CustomPageable pageable, Long userId) {
 
         JPAQuery<Memo> selectFromWhere = queryFactory.selectFrom(qMemo)
                 .where(

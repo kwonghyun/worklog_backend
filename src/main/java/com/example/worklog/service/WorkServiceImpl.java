@@ -2,9 +2,9 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.CustomPage;
 import com.example.worklog.dto.CustomPageable;
-import com.example.worklog.dto.work.WorkPostDto;
-import com.example.worklog.dto.work.WorkPutDto;
-import com.example.worklog.dto.work.WorkSearchServiceDto;
+import com.example.worklog.dto.work.WorkPostReq;
+import com.example.worklog.dto.work.WorkPutReq;
+import com.example.worklog.dto.work.WorkSearchReqParam;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
@@ -61,7 +61,7 @@ public class WorkServiceImpl implements WorkService {
         return workRepository.readWorksByParamsAndUser(date, userId);
     }
 
-    public CustomPage<Work> searchWorks(WorkSearchServiceDto paramDto, CustomPageable pageable, Long userId) {
+    public CustomPage<Work> searchWorks(WorkSearchReqParam paramDto, CustomPageable pageable, Long userId) {
         return workRepository.findBySearchParams(
                 paramDto, pageable, userId
         );

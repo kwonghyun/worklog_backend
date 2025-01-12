@@ -2,8 +2,8 @@ package com.example.worklog.service;
 
 import com.example.worklog.dto.CustomPage;
 import com.example.worklog.dto.CustomPageable;
-import com.example.worklog.dto.memo.MemoPostDto;
-import com.example.worklog.dto.memo.MemoSearchServiceDto;
+import com.example.worklog.dto.memo.MemoPostReq;
+import com.example.worklog.dto.memo.MemoSearchReqParam;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.Importance;
@@ -38,7 +38,7 @@ public class MemoServiceImpl implements MemoService {
         return memoRepository.readMemosByParamsAndUser(date, userId);
     }
 
-    public CustomPage<Memo> searchMemos(MemoSearchServiceDto serviceDto, CustomPageable pageable, Long userId) {
+    public CustomPage<Memo> searchMemos(MemoSearchReqParam serviceDto, CustomPageable pageable, Long userId) {
         return memoRepository.findBySearchParams(
                 serviceDto, pageable, userId
         );
