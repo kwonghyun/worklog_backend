@@ -1,12 +1,11 @@
 package com.example.worklog.exception;
 
-import com.example.worklog.dto.ResponseDto;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
-import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Component
@@ -14,10 +13,11 @@ public class CustomErrorAttributes extends DefaultErrorAttributes {
 
     @Override
     public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+        Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, options);
+        errorAttributes.remove("error");
+        errorAttributes.remove("path");
+        errorAttributes.remove("timestamp");
 
-        ResponseDto responseDto = ResponseDto.fromErrorAttributes(
-                super.getErrorAttributes(webRequest, options)
-        );
-        return BeanMap.create(responseDto);
+        return new LinkedHashMap<>(errorAttributes);
     }
 }
