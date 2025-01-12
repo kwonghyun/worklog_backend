@@ -8,7 +8,6 @@ import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.WorkState;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -27,25 +27,31 @@ public class WorkRepositoryCustomImpl implements WorkRepositoryCustom{
     @Override
     public CustomPage<Work> findBySearchParams(WorkSearchReqParam dto, CustomPageable pageable, Long userId) {
 
-        JPAQuery<Work> selectFromWhere = queryFactory.selectFrom(qWork)
-                .where(
-                        qWork.user.id.eq(userId),
-                        startDateGoe(dto.getStartDate()),
-                        endDateLoe(dto.getEndDate()),
-                        keywordLike(dto.getKeyword()),
-                        categoryEq(dto.getCategory()),
-                        stateEq(dto.getState())
-                );
+        // 조건 정의
+        BooleanExpression conditions = qWork.user.id.eq(userId)
+                .and(startDateGoe(dto.getStartDate()))
+                .and(endDateLoe(dto.getEndDate()))
+                .and(keywordLike(dto.getKeyword()))
+                .and(categoryEq(dto.getCategory()))
+                .and(stateEq(dto.getState()));
 
-        List<Work> works = selectFromWhere
+        // 데이터 쿼리
+        List<Work> works = queryFactory.selectFrom(qWork)
+                .where(conditions)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(qWork.date.asc(), qWork.displayOrder.asc())
                 .fetch();
 
-        Long count = selectFromWhere.stream().count();
+        // 카운트 쿼리
+        Long count = Optional.ofNullable(
+                queryFactory.select(qWork.id.count())
+                        .from(qWork)
+                        .where(conditions)
+                        .fetchOne()
+                ).orElse(0L);
 
-        return new CustomPage<Work>(works, pageable, count);
+        return new CustomPage<>(works, pageable, count);
     }
 
     private BooleanExpression startDateGoe(LocalDate startDate) {
