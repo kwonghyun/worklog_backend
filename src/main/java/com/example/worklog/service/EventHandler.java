@@ -50,7 +50,7 @@ public class EventHandler {
     public void onSseSubscription(SseSubscribeEvent event) throws InterruptedException {
         Long userId = event.getUserId();
         if (!sseService.isSseConnected(userId, SseRole.NOTIFICATION)) {
-            log.info("EventHandler.onSseSubscription: sse연결 없어서 종료");
+            log.info("EventHandler.onSseSubscription: userId: {} sse연결 없어서 종료", userId);
             return;
         }
         notificationService.consumeNotificationFlag(userId);
