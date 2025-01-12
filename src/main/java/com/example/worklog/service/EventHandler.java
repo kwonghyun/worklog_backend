@@ -24,6 +24,7 @@ public class EventHandler {
     private final SseService sseService;
 
     @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 이미 한번 커밋된 트랜젝션이라 다시 커밋할 수 없어 새로 트랜젝션 만듬
     public void onWorkUpdated(WorkUpdateEvent event) {
         Work work = event.getWork();
         deleteNotificationIfExists(work);
@@ -31,12 +32,14 @@ public class EventHandler {
     }
 
     @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 이미 한번 커밋된 트랜젝션이라 다시 커밋할 수 없어 새로 트랜젝션 만듬
     public void onWorkCreated(WorkCreateEvent event) {
         Work work = event.getWork();
         checkConnectionAndNotice(work);
     }
 
     @EventListener
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 이미 한번 커밋된 트랜젝션이라 다시 커밋할 수 없어 새로 트랜젝션 만듬
     public void onWorkDeleted(WorkDeleteEvent event) {
         Work work = event.getWork();
         deleteNotificationIfExists(work);
