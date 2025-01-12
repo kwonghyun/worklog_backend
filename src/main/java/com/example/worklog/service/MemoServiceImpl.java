@@ -7,8 +7,8 @@ import com.example.worklog.dto.memo.MemoSearchServiceDto;
 import com.example.worklog.entity.Memo;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.Importance;
-import com.example.worklog.exception.CustomException;
-import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.exception.response.status400.InvalidMemoOrderException;
+import com.example.worklog.exception.response.status404.MemoNotExistException;
 import com.example.worklog.repository.MemoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -77,7 +77,7 @@ public class MemoServiceImpl implements MemoService {
 
         Integer lastOrder = memoRepository.countDisplayOrder(memo.getDate(), userId) - 1;
         if (targetOrder > lastOrder) {
-            throw new CustomException(ErrorCode.MEMO_ORDER_INVALID);
+            throw new InvalidMemoOrderException();
         }
 
         List<Memo> memosToUpdateOrder;
@@ -98,10 +98,11 @@ public class MemoServiceImpl implements MemoService {
 
     private Memo getValidatedMemoByUserAndMemoId(Long userId, Long memoId) {
         Memo memo = memoRepository.findById(memoId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMO_NOT_FOUND));
+                .orElseThrow(MemoNotExistException::new);
 
         if (!memo.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.MEMO_USER_NOT_MATCHED);
+            // TODO 이거 ID 포함해서 예외 기록할 수 있도록
+            throw new MemoNotExistException();
         } else {
             return memo;
         }

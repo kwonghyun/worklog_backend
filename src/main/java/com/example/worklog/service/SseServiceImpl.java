@@ -4,8 +4,8 @@ import com.example.worklog.aop.logging.request.ExcludeAop;
 import com.example.worklog.dto.sseevent.ConnectionMessageDto;
 import com.example.worklog.dto.sseevent.SseMessageDto;
 import com.example.worklog.entity.enums.SseRole;
-import com.example.worklog.exception.CustomException;
-import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.exception.response.status404.SseConnectionNotExistException;
+import com.example.worklog.exception.response.status410.SseConnectionBrokenException;
 import com.example.worklog.repository.SseEmitterRepository;
 import com.example.worklog.utils.EmitterKey;
 import com.example.worklog.utils.SseSubscribeEvent;
@@ -60,7 +60,7 @@ public class SseServiceImpl implements SseService {
 
     public void sendToClient(EmitterKey emitterKey, SseMessageDto event) {
         SseEmitter emitter = sseEmitterRepository.findByKey(emitterKey)
-                .orElseThrow(() -> new CustomException(ErrorCode.SSE_CONNECTION_BROKEN));
+                .orElseThrow(SseConnectionNotExistException::new);
         try {
             emitter.send(
                     SseEmitter.event()
@@ -73,7 +73,8 @@ public class SseServiceImpl implements SseService {
         } catch (IOException exception) {
             sseEmitterRepository.remove(emitterKey);
             log.info("SSE Exception : {}", exception.getMessage());
-            throw new CustomException(ErrorCode.SSE_CONNECTION_BROKEN);
+            // TODO 어느 유저의 연결이 끊어진 건지 표시하도록
+            throw new SseConnectionBrokenException();
         }
     }
 }

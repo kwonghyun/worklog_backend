@@ -6,8 +6,8 @@ import com.example.worklog.entity.NotificationFlag;
 import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.NotificationEntityType;
 import com.example.worklog.entity.enums.SseRole;
-import com.example.worklog.exception.CustomException;
-import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.exception.response.status404.NotificationNotExistException;
+import com.example.worklog.exception.response.status5xx.SchedulerNotWorkingException;
 import com.example.worklog.repository.NotificationFlagRedisRepository;
 import com.example.worklog.repository.NotificationRepository;
 import com.example.worklog.repository.WorkRepository;
@@ -62,8 +62,8 @@ public class NotificationServiceImpl implements NotificationService {
         List<Work> worksToReserve = worksToNotice.stream()
                 .filter(work -> isNeededReservation(work.getDeadline()))
                 .collect(Collectors.toList());
-        createNotificationFrom(worksToReserve).stream()
-                    .forEach(notification -> reserveNotification(notification));
+        createNotificationFrom(worksToReserve)
+                    .forEach(this::reserveNotification);
     }
 
     @Transactional
@@ -81,11 +81,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     public List<Notification> createNotificationFrom(List<Work> works) {
-        if (works.size() == 0) return new ArrayList<Notification>();
+        if (works.isEmpty()) return new ArrayList<>();
 
         workRepository.saveAll(
                 works.stream()
-                        .map(work -> {work.updateNoticed(true); return work;})
+                        .peek(work -> work.updateNoticed(true))
                         .collect(Collectors.toList())
         );
         return notificationRepository.saveAll(works.stream()
@@ -140,7 +140,7 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("스케줄링 완료 workId: {}, notificationId: {}", notification.getEntityId(), notification.getId());
         } catch (SchedulerException e) {
             log.error(e.getMessage());
-            throw new CustomException(ErrorCode.SCHEDULER_FAILED);
+            throw new SchedulerNotWorkingException();
         }
     }
 
@@ -182,16 +182,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     public void sendNotification(List<Notification> notifications) {
-        if (notifications.size() == 0) return;
+        if (notifications.isEmpty()) return;
         notificationRepository.saveAll(
                 notifications.stream()
-                    .map(notification -> {
+                    .peek(notification -> {
                                 notification.updateMessage(
                                         StringConverter.completeWorkNotificationMessage(notification.getMessage()));
                                 EmitterKey emitterKey = new EmitterKey(notification.getReceiver().getId(), SseRole.NOTIFICATION);
                                 sseService.sendToClient(emitterKey, NotificationMessageDto.fromEntity(notification));
                                 notification.updateIsSent(true);
-                                return notification;
                     })
                     .collect(Collectors.toList())
         );
@@ -216,7 +215,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     public Notification findOne(Long id) {
         return notificationRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(NotificationNotExistException::new);
     }
 
     @Transactional

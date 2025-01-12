@@ -10,8 +10,8 @@ import com.example.worklog.entity.Work;
 import com.example.worklog.entity.enums.Category;
 import com.example.worklog.entity.enums.Importance;
 import com.example.worklog.entity.enums.WorkState;
-import com.example.worklog.exception.CustomException;
-import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.exception.response.status400.InvalidWorkOrderException;
+import com.example.worklog.exception.response.status404.WorkNotExistException;
 import com.example.worklog.repository.WorkRepository;
 import com.example.worklog.utils.Constants;
 import com.example.worklog.utils.WorkCreateEvent;
@@ -140,7 +140,7 @@ public class WorkServiceImpl implements WorkService {
 
         Integer lastOrder = workRepository.countDisplayOrder(work.getDate(), userId) - 1;
         if (targetOrder > lastOrder) {
-            throw new CustomException(ErrorCode.WORK_ORDER_INVALID);
+            throw new InvalidWorkOrderException();
         }
 
         List<Work> worksToUpdateOrder;
@@ -193,11 +193,12 @@ public class WorkServiceImpl implements WorkService {
 //    }
 
     private Work getValidatedWorkByUserIdAndWorkId(Long userId, Long workId) {
+        // TODO 왜 발생 한건지 기록
         Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORK_NOT_FOUND));
+                .orElseThrow(WorkNotExistException::new);
 
         if (!work.getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.WORK_USER_NOT_MATCHED);
+            throw new WorkNotExistException();
         } else {
             return work;
         }

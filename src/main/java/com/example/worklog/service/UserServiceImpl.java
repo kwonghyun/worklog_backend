@@ -4,8 +4,16 @@ import com.example.worklog.entity.Authority;
 import com.example.worklog.entity.RefreshTokenDetails;
 import com.example.worklog.entity.User;
 import com.example.worklog.entity.enums.AuthorityType;
-import com.example.worklog.exception.CustomException;
-import com.example.worklog.exception.ErrorCode;
+import com.example.worklog.exception.response.status400.EmailFormatException;
+import com.example.worklog.exception.response.status400.PasswordFormatException;
+import com.example.worklog.exception.response.status400.PasswordNotSameException;
+import com.example.worklog.exception.response.status400.UsernameFormatException;
+import com.example.worklog.exception.response.status401.LoginFailureException;
+import com.example.worklog.exception.response.status403.WrongPasswordException;
+import com.example.worklog.exception.response.status404.UserNotExistException;
+import com.example.worklog.exception.response.status409.DuplicatedEmailException;
+import com.example.worklog.exception.response.status409.DuplicatedUsernameException;
+import com.example.worklog.exception.response.status409.PasswordReuseException;
 import com.example.worklog.jwt.JwtDto;
 import com.example.worklog.jwt.JwtTokenUtils;
 import com.example.worklog.repository.RefreshTokenRedisRepository;
@@ -68,17 +76,19 @@ public class UserServiceImpl implements UserService {
         ) {
             if (username.length() != 1 || password.length() != 1) {
                 log.info("username: {} 로그인 실패");
-                throw new CustomException(ErrorCode.LOGIN_FAILED);
+                // TODO 로그인 실패한 이유도 표시하도록
+                throw new LoginFailureException();
             }
         }
-
+        // TODO 로그인 실패한 이유도 표시하도록
         User user = userRepository.findByUsernameWithAuthority(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
+                .orElseThrow(LoginFailureException::new);
         log.info("로그인 시도: {}", user.toString());
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             log.info("login: 비밀번호 불일치");
-            throw new CustomException(ErrorCode.LOGIN_FAILED);
+            // TODO 로그인 실패한 이유도 표시하도록
+            throw new LoginFailureException();
         }
         log.info("login: 비밀번호 확인완료");
 
@@ -137,33 +147,33 @@ public class UserServiceImpl implements UserService {
     public void checkEmail(String email) {
         Pattern emailPattern = Pattern.compile(Constants.EMAIL_REGEX);
         if (!emailPattern.matcher(email).matches()) {
-            throw new CustomException(ErrorCode.WRONG_EMAIL_FORMAT);
+            throw new EmailFormatException();
         }
         if (userRepository.existsByEmail(email)) {
-            throw new CustomException(ErrorCode.ALREADY_EXISTED_EMAIL);
+            throw new DuplicatedEmailException();
         }
     }
 
     public void checkUsername(String username) {
         Pattern usernamePattern = Pattern.compile(Constants.USERNAME_REGEX);
         if (!usernamePattern.matcher(username).matches()) {
-            throw new CustomException(ErrorCode.WRONG_USERNAME_FORMAT);
+            throw new UsernameFormatException();
         }
         if (userRepository.existsByUsername(username)) {
-            throw new CustomException(ErrorCode.ALREADY_EXISTED_USERNAME);
+            throw new DuplicatedUsernameException();
         }
     }
 
     public void checkPassword(String password) {
         Pattern passwordPattern = Pattern.compile(Constants.PASSWORD_REGEX);
         if (!passwordPattern.matcher(password).matches()) {
-            throw new CustomException(ErrorCode.WRONG_PASSWORD_FORMAT);
+            throw new PasswordFormatException();
         }
     }
 
     public void checkPasswordCheck(String password, String passwordCheck) {
         if (!password.equals(passwordCheck)) {
-            throw new CustomException(ErrorCode.UNMATCHED_PASSWORD);
+            throw new PasswordNotSameException();
         }
     }
 
@@ -176,24 +186,27 @@ public class UserServiceImpl implements UserService {
         Pattern passwordPattern = Pattern.compile(Constants.PASSWORD_REGEX);
         if (!passwordPattern.matcher(currentPassword).matches()) {
             log.info("비밀번호 패턴 유효하지 않음.");
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+            // TODO 어느 상황에서 나타난 건지 알수 있도록
+            throw new PasswordFormatException();
         }
 
         if (!newPassword.equals(newPasswordCheck)) {
             log.info("비밀번호 확인과 입력 틀림");
-            throw new CustomException(ErrorCode.UNMATCHED_PASSWORD);
+            // TODO 어느 상황에서 나타난 건지 알수 있도록
+            throw new PasswordNotSameException();
         }
 
+        // TODO 어느 상황에서 유저 못찾은건지
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(UserNotExistException::new);
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             log.info("비밀번호 불일치");
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+            throw new WrongPasswordException();
         }
         if (currentPassword.equals(newPassword)) {
             log.info("기존과 동일한 비밀번호");
-            throw new CustomException(ErrorCode.ALREADY_USED_PASSWORD);
+            throw new PasswordReuseException();
         }
         user.updatePassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
