@@ -1,35 +1,49 @@
 package com.example.worklog.exception;
 
-import com.example.worklog.dto.ResponseDto;
-import org.springframework.http.HttpStatus;
+import com.example.worklog.exception.response.CustomResponseException;
+import com.example.worklog.validation.ValidationErrorRes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static com.example.worklog.exception.ErrorCode.INTERNAL_SERVER_ERROR;
+import java.util.Optional;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     // Validation 예외 응답
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected ResponseDto handleValidationException(
+    protected ResponseEntity<ValidationErrorRes> handleValidationException(
             MethodArgumentNotValidException exception
     ) {
-        return ResponseDto.fromValidationException(exception);
+        ValidationErrorRes response = new ValidationErrorRes();
+
+        exception.getBindingResult().getFieldErrors()
+                .forEach(fieldError -> {
+                    String field = fieldError.getField();
+                    String message = fieldError.getDefaultMessage();
+                    String rejectedValue = Optional.ofNullable(fieldError.getRejectedValue())
+                            .orElse("null").toString();
+                    log.error("Received invalid input. field : {}, value: {}, message {}", field, rejectedValue, message);
+
+                    response.addError(field, message);
+                });
+
+        return ResponseEntity.badRequest().body(response);
     }
 
     // 커스텀 예외 응답
-    @ExceptionHandler(CustomException.class)
-    protected ResponseEntity handleCustomException(CustomException ex) {
-        return new ResponseEntity(ResponseDto.fromErrorCode(ex.getErrorCode()), HttpStatus.valueOf(ex.getErrorCode().getStatus()));
+    @ExceptionHandler(CustomResponseException.class)
+    protected ResponseEntity<ErrorMessageRes> handleCustomException(CustomResponseException exception) {
+        return ResponseEntity.status(exception.getHttpStatus()).body(new ErrorMessageRes(exception.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity handleServerException(Exception ex) {
-        return new ResponseEntity(ResponseDto.fromErrorCode(INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+    protected ResponseEntity<ErrorMessageRes> handleServerException(Exception exception) {
+        return ResponseEntity.internalServerError()
+                .body(new ErrorMessageRes(exception.getMessage()));
     }
 }
