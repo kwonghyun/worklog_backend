@@ -1,0 +1,13 @@
+services:
+  db:
+    container_name: mysql-worklog
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+
+  redis:
+    container_name: redis-worklog
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
