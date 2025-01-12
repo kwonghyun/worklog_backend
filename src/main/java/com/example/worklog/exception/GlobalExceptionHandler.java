@@ -1,5 +1,6 @@
 package com.example.worklog.exception;
 
+import com.example.worklog.dto.SimpleMessageRes;
 import com.example.worklog.exception.response.CustomResponseException;
 import com.example.worklog.validation.ValidationErrorRes;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,14 @@ public class GlobalExceptionHandler {
                 .forEach(fieldError -> {
                     String field = fieldError.getField();
                     String message = fieldError.getDefaultMessage();
-                    String rejectedValue = Optional.ofNullable(fieldError.getRejectedValue())
-                            .orElse("null").toString();
+                    String rejectedValue;
+
+                    if (field.toLowerCase().contains("password")) {
+                        rejectedValue = "*** masked ***";
+                    } else {
+                        rejectedValue = Optional.ofNullable(fieldError.getRejectedValue())
+                                .orElse("null").toString();
+                    }
                     log.error("Received invalid input. field : {}, value: {}, message {}", field, rejectedValue, message);
 
                     response.addError(field, message);
