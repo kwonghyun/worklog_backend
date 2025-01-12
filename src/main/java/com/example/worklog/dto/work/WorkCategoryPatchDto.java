@@ -1,7 +1,7 @@
 package com.example.worklog.dto.work;
 
 import com.example.worklog.entity.enums.Category;
-import com.example.worklog.exception.validation.EnumValueCheck;
+import com.example.worklog.validation.EnumValueCheck;
 import com.example.worklog.utils.Constants;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

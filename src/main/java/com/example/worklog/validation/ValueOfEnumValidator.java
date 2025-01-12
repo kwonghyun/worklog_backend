@@ -1,4 +1,4 @@
-package com.example.worklog.exception.validation;
+package com.example.worklog.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 
 public class ValueOfEnumValidator implements ConstraintValidator<EnumValueCheck, String> {
 
-    private static final Logger log = LoggerFactory.getLogger(EnumValueCheck.class);
+    private static final Logger log = LoggerFactory.getLogger(ValueOfEnumValidator.class);
     private EnumValueCheck enumValueCheck;
     @Override
     public void initialize(EnumValueCheck constraintAnnotation) {

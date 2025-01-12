@@ -1,4 +1,4 @@
-package com.example.worklog.exception.validation;
+package com.example.worklog.validation;
 
 import com.example.worklog.utils.Constants;
 import jakarta.validation.ConstraintValidator;

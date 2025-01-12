@@ -1,6 +1,6 @@
 package com.example.worklog.dto.work;
 
-import com.example.worklog.exception.validation.DatePattern;
+import com.example.worklog.validation.DatePattern;
 import com.example.worklog.utils.Constants;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
