@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,14 +22,6 @@ import java.util.List;
 @Configuration
 public class WebSecurityConfig {
     private final JwtValidationFilter jwtValidationFilter;
-
-    @Bean
-    public WebSecurityCustomizer configure() {
-        return (web) -> web.ignoring()
-                .requestMatchers(
-                        "/static/**", "/js/**", "/css/**"
-                        );
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,19 +52,19 @@ public class WebSecurityConfig {
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authHttp -> authHttp
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/", "/connect", "swagger-ui/**", "/v3/**"
+                        .requestMatchers(HttpMethod.GET,
+                                "/static/**", "/js/**", "/css/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/", "/connect", "/swagger-ui/**", "/v3/**"
                                 )
                         .permitAll()
-                        .requestMatchers(
-                                HttpMethod.POST,
+                        .requestMatchers(HttpMethod.POST,
                                 "/users",
                                 "/users/login"
                         )
                         .anonymous()
-                        .requestMatchers(
-                                HttpMethod.GET,
+                        .requestMatchers(HttpMethod.GET,
                                 "/users/email/check",
                                 "/users/username/check",
                                 "/users/password/check",
