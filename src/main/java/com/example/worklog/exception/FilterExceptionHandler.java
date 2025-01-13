@@ -1,5 +1,6 @@
 package com.example.worklog.exception;
 
+import com.example.worklog.dto.SimpleMessageRes;
 import com.example.worklog.exception.response.CustomResponseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +15,7 @@ public class FilterExceptionHandler {
         response.setCharacterEncoding("UTF-8");
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writeValue(response.getWriter(), exception.getMessage());
+            objectMapper.writeValue(response.getWriter(), SimpleMessageRes.from(exception.getErrorMessage()));
         } catch (Exception e) {
             log.error(e.getMessage());
         }
