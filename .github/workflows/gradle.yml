@@ -28,10 +28,10 @@ jobs:
       uses: actions/checkout@v3
       with:
         ref: main
-    - name: JDK 17 설치
+    - name: JDK 21 설치
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'corretto'
     - name: yml jwt 환경변수 설정
       uses: microsoft/variable-substitution@v1
