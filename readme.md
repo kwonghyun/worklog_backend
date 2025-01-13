@@ -2,7 +2,7 @@
 
 <img src="https://github.com/kwonghyun/worklog_backend/assets/61932809/031f1149-7c12-48d5-9522-e8d7346a596e" alt="image-20240207001441527" width="80%"/>
 
-last updated at: 2024.02.12
+last updated at: 2024.02.12 
 
 
 
