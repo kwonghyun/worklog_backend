@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @SuperBuilder
+@Table(name = "users")
 @SQLDelete(sql = "UPDATE user SET is_deleted = TRUE WHERE id = ?")
 @SQLRestriction("is_deleted = FALSE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
