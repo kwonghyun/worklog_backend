@@ -1,0 +1,43 @@
+services:
+  backend-worklog:
+    container_name: backend-worklog
+    build:
+      dockerfile: Dockerfile
+    image: backend-worklog:latest
+    ports:
+      - "${LOCAL_WAS_PORT}:8080"
+    restart: always
+    environment:
+      spring.profiles.active: local
+      LOCAL_DB_URL: ${LOCAL_DB_URL}
+      LOCAL_DB_USERNAME: ${LOCAL_DB_USERNAME}
+      LOCAL_DB_PASSWORD: ${LOCAL_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      LOCAL_REDIS_HOST: ${LOCAL_REDIS_HOST}
+      LOCAL_REDIS_PORT: ${LOCAL_REDIS_PORT}
+      LOCAL_REDIS_PASSWORD: ${LOCAL_REDIS_PASSWORD}
+    volumes:
+      - ./volumes/dashboard-api/logs:/logs
+  db:
+    container_name: postgres-worklog
+    image: postgres:latest
+    ports:
+      - "${LOCAL_DB_PORT}:5432"
+    restart: always
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_USER: ${LOCAL_DB_USERNAME}
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8
+    volumes:
+      - ./docker/volumes/postgres/data:/var/lib/postgresql/data
+  redis:
+    container_name: redis-worklog
+    image: redis:latest
+    ports:
+      - "${LOCAL_REDIS_PORT}:6379"
+    command: [ "redis-server", "--requirepass", "${LOCAL_REDIS_PASSWORD}" ]
+
+

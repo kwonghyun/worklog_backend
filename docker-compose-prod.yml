@@ -1,0 +1,42 @@
+services:
+  backend-worklog:
+    container_name: backend-worklog
+    image: backend-worklog:latest
+    ports:
+      - "${PROD_WAS_PORT}:8080"
+    restart: always
+    environment:
+      spring.profiles.active: prod
+      PROD_DB_URL: ${PROD_DB_URL}
+      PROD_DB_USERNAME: ${PROD_DB_USERNAME}
+      PROD_DB_PASSWORD: ${PROD_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      PROD_REDIS_HOST: ${PROD_REDIS_HOST}
+      PROD_REDIS_PORT: ${PROD_REDIS_PORT}
+      PROD_REDIS_PASSWORD: ${PROD_REDIS_PASSWORD}
+    volumes:
+      - ./volumes/backend/logs:/logs
+  db:
+    container_name: postgres-worklog
+    image: postgres:latest
+    ports:
+      - "${PROD_DB_PORT}:5432"
+    restart: always
+    environment:
+      TZ: Asia/Seoul
+      POSTGRES_USER: ${PROD_DB_USERNAME}
+      POSTGRES_PASSWORD: ${PROD_DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8
+    volumes:
+      - ./docker/volumes/db:/var/lib/postgresql/data
+  redis:
+    container_name: redis-worklog
+    image: redis:latest
+    ports:
+      - "${PROD_REDIS_PORT}:6379"
+    command: [ "redis-server", "--requirepass", "${PROD_REDIS_PASSWORD}" ]
+
+
+
